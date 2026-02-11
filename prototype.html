@@ -1,0 +1,2658 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>数据分析报表</title>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: #F7FAFC;
+            color: #2D3748;
+        }
+        .app-container {
+            display: flex;
+            min-height: 100vh;
+        }
+        .sidebar {
+            width: 80px;
+            background-color: #001529;
+            color: white;
+            transition: width 0.3s;
+            height: 100vh;
+            position: fixed;
+            left: 0;
+            top: 0;
+            z-index: 1000;
+        }
+        .sidebar:hover {
+            width: 200px;
+        }
+        .sidebar-logo {
+            height: 64px;
+            background-color: #41B983;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+        }
+        .sidebar-menu {
+            padding-top: 16px;
+        }
+        .menu-item {
+            height: 48px;
+            display: flex;
+            align-items: center;
+            padding: 0 16px;
+            cursor: pointer;
+            transition: all 0.3s;
+            color: rgba(255, 255, 255, 0.65);
+            white-space: nowrap;
+            overflow: hidden;
+        }
+        .menu-item:hover {
+            background-color: #00061a;
+            color: white;
+        }
+        .menu-item.active {
+            background-color: #41B983;
+            color: white;
+        }
+        .menu-icon {
+            margin-right: 10px;
+            font-size: 14px;
+            display: inline-block;
+            width: 16px;
+            text-align: center;
+        }
+        .menu-item span:not(.menu-icon) {
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        .sidebar:hover .menu-item span:not(.menu-icon) {
+            opacity: 1;
+        }
+        .main-content {
+            margin-left: 80px;
+            flex: 1;
+        }
+        .top-nav {
+            height: 64px;
+            background-color: white;
+            border-bottom: 1px solid #e5e7eb;
+            padding: 0 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .breadcrumb {
+            font-size: 14px;
+            color: #4A5568;
+        }
+        .nav-actions {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+        .search-box {
+            width: 300px;
+            height: 36px;
+            border: 1px solid #E2E8F0;
+            border-radius: 6px;
+            padding: 0 12px;
+            font-size: 14px;
+        }
+        .content-area {
+            padding: 24px;
+        }
+        .page-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: #2D3748;
+            margin-bottom: 24px;
+        }
+        .filter-container {
+            background-color: white;
+            padding: 16px;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+            margin-bottom: 24px;
+        }
+        .filter-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 16px;
+            align-items: flex-end;
+        }
+        .filter-item {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+        .filter-label {
+            font-size: 14px;
+            font-weight: 400;
+            color: #2D3748;
+        }
+        .filter-input {
+            width: 200px;
+            height: 36px;
+            border: 1px solid #E2E8F0;
+            border-radius: 6px;
+            padding: 0 12px;
+            font-size: 14px;
+        }
+        .filter-input:focus {
+            outline: none;
+            border: 2px solid #2B6CB0;
+        }
+        .filter-select {
+            position: relative;
+        }
+        .filter-select select {
+            width: 100%;
+            height: 36px;
+            border: 1px solid #E2E8F0;
+            border-radius: 6px;
+            padding: 0 32px 0 12px;
+            font-size: 14px;
+            appearance: none;
+            background-color: white;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        .filter-select select:hover {
+            border-color: #2B6CB0;
+            box-shadow: 0 0 0 2px rgba(43, 108, 176, 0.1);
+        }
+        .filter-select select:focus {
+            outline: none;
+            border-color: #2B6CB0;
+            box-shadow: 0 0 0 2px rgba(43, 108, 176, 0.2);
+        }
+        .filter-select::after {
+            content: '▼';
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 10px;
+            color: #718096;
+            pointer-events: none;
+            transition: all 0.3s ease;
+        }
+        .filter-select:hover::after {
+            color: #2B6CB0;
+        }
+        .filter-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 16px;
+        }
+        .btn {
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            border: none;
+        }
+        .btn-primary {
+            background-color: #2B6CB0;
+            color: white;
+        }
+        .btn-default {
+            background-color: white;
+            color: #2D3748;
+            border: 1px solid #E2E8F0;
+        }
+        .table-section {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+            margin-bottom: 24px;
+            padding: 16px;
+        }
+        .table-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #2D3748;
+            margin-bottom: 16px;
+        }
+        .ant-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .ant-table-thead > tr > th {
+            background-color: #EDF2F7;
+            color: #4A5568;
+            font-size: 14px;
+            font-weight: 600;
+            padding: 12px 16px;
+            text-align: left;
+            border-bottom: 2px solid #E2E8F0;
+            line-height: 1.4;
+            letter-spacing: 0.5px;
+        }
+        .ant-table-tbody > tr > td {
+            padding: 12px 16px;
+            border-bottom: 1px solid #E2E8F0;
+            color: #2D3748;
+            line-height: 1.4;
+            transition: all 0.2s ease;
+        }
+        .ant-table-tbody > tr:nth-child(even) {
+            background-color: #F7FAFC;
+        }
+        .ant-table-tbody > tr:hover {
+            background-color: #EBF8FF;
+            transform: translateY(-1px);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+        .expand-icon {
+            cursor: pointer;
+            user-select: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 20px;
+            height: 20px;
+            border-radius: 4px;
+            transition: all 0.3s ease;
+        }
+        .expand-icon:hover {
+            background-color: rgba(43, 108, 176, 0.1);
+            color: #2B6CB0;
+        }
+        .summary-row {
+            font-weight: 600;
+            background-color: #F7FAFC;
+            border-top: 2px solid #E2E8F0;
+            border-bottom: 2px solid #E2E8F0;
+        }
+        .summary-row td {
+            font-size: 14px;
+            font-weight: 600;
+        }
+        .ant-table {
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        }
+        .ant-table-thead {
+            border-radius: 8px 8px 0 0;
+            overflow: hidden;
+        }
+        .ant-pagination {
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            margin-top: 16px;
+            gap: 8px;
+        }
+        .ant-pagination-item {
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid #E2E8F0;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        .ant-pagination-item.active {
+            background-color: #2B6CB0;
+            color: white;
+            border-color: #2B6CB0;
+        }
+        .ant-pagination-item:hover:not(.active) {
+            border-color: #2B6CB0;
+        }
+        .ant-pagination-prev, .ant-pagination-next {
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid #E2E8F0;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+        .ant-pagination-prev:hover, .ant-pagination-next:hover {
+            border-color: #2B6CB0;
+        }
+        .ant-pagination-disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        .footer {
+            padding: 24px;
+            text-align: center;
+            font-size: 12px;
+            color: #718096;
+        }
+        @media (max-width: 768px) {
+            .filter-row {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .filter-input {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <!-- 左侧边栏 -->
+        <div class="sidebar">
+            <div class="sidebar-logo">OriginLinks</div>
+            <div class="sidebar-menu">
+                <div class="menu-item active">
+                    <span class="menu-icon">📊</span>
+                    <span>数据分析</span>
+                </div>
+                <div class="menu-item">
+                    <span class="menu-icon">🛒</span>
+                    <span>Amazon管理</span>
+                </div>
+                <div class="menu-item">
+                    <span class="menu-icon">💰</span>
+                    <span>财务</span>
+                </div>
+                <div class="menu-item">
+                    <span class="menu-icon">📱</span>
+                    <span>社媒管理</span>
+                </div>
+                <div class="menu-item">
+                    <span class="menu-icon">⚙️</span>
+                    <span>系统设置</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- 主内容区域 -->
+        <div class="main-content">
+            <!-- 顶部导航 -->
+            <div class="top-nav">
+                <div class="breadcrumb">首页 / 数据分析 / 报表</div>
+                <div class="nav-actions">
+                    <input type="text" class="search-box" placeholder="请输入搜索内容">
+                    <span>🔔</span>
+                    <span>⚙️</span>
+                    <div>👤</div>
+                </div>
+            </div>
+
+            <!-- 内容区域 -->
+            <div class="content-area">
+                <h1 class="page-title">数据分析报表</h1>
+
+                <!-- 筛选器 -->
+                <div class="filter-container">
+                    <div class="filter-row">
+                        <div class="filter-item">
+                            <label class="filter-label">时间范围</label>
+                            <input type="text" class="filter-input" placeholder="选择日期区间">
+                        </div>
+                        <div class="filter-item">
+                            <label class="filter-label">产品集合</label>
+                            <div class="filter-select">
+                                <select class="filter-input">
+                                    <option value="">全部</option>
+                                    <option value="collection1">SC320A</option>
+                                    <option value="collection2">SC320B</option>
+                                    <option value="collection3">甲油胶</option>
+                                    <option value="collection4">S-PRO29G台灯</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="filter-item">
+                            <label class="filter-label">产品SKU</label>
+                            <input type="text" class="filter-input" placeholder="输入SKU">
+                        </div>
+                        <div class="filter-item">
+                            <label class="filter-label">渠道</label>
+                            <div class="filter-select">
+                                <select class="filter-input">
+                                    <option value="">全部</option>
+                                    <option value="TT">TikTok</option>
+                                    <option value="INS">Instagram</option>
+                                    <option value="YOUTUBE">YouTube</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="filter-actions">
+                        <button class="btn btn-primary">筛选</button>
+                        <button class="btn btn-default">清空</button>
+                    </div>
+                </div>
+
+                <!-- 配置产品集合按钮 -->
+                <div style="margin-bottom: 16px; text-align: right;">
+                    <button id="configCollectionBtn" class="btn btn-primary">配置产品集合</button>
+                </div>
+
+                <!-- 配置产品集合弹窗 -->
+                <div id="configCollectionModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.5); z-index: 1000;">
+                    <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background-color: white; border-radius: 8px; padding: 24px; width: 80%; max-width: 800px; max-height: 80vh; overflow-y: auto;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                            <h3>配置产品集合</h3>
+                            <button id="closeModalBtn" style="background: none; border: none; font-size: 24px; cursor: pointer; color: #718096;">×</button>
+                        </div>
+                        
+                        <!-- 分组选择 -->
+                        <div style="margin-bottom: 16px;">
+                            <label style="display: block; margin-bottom: 8px;">选择分组</label>
+                            <div style="display: flex; gap: 8px;">
+                                <select id="groupSelect" style="flex: 1; height: 36px; padding: 0 12px; border: 1px solid #E2E8F0; border-radius: 6px;">
+                                    <option value="">选择现有分组</option>
+                                    <option value="ungrouped">未分组</option>
+                                </select>
+                                <button id="batchAssignBtn" class="btn btn-primary">批量移动到分组</button>
+                            </div>
+                        </div>
+                        
+                        <!-- SKU列表 -->
+                        <div style="margin-bottom: 16px;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                                <h4>SKU列表</h4>
+                                <button id="createGroupBtn" class="btn btn-default">创建分组</button>
+                            </div>
+                            <div id="skuList" style="max-height: 400px; overflow-y: auto; border: 1px solid #E2E8F0; border-radius: 6px; padding: 12px;">
+                                <!-- 树形结构将通过JavaScript动态生成 -->
+                            </div>
+                        </div>
+                        
+                        <!-- 操作按钮 -->
+                        <div style="display: flex; gap: 8px; justify-content: flex-end;">
+                            <button id="cancelBtn" class="btn btn-default">取消</button>
+                            <button id="saveBtn" class="btn btn-primary">保存</button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 创建分组弹窗 -->
+                <div id="createGroupModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.5); z-index: 1100;">
+                    <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background-color: white; border-radius: 8px; padding: 24px; width: 400px;">
+                        <h3 style="margin-bottom: 16px;">创建分组</h3>
+                        <div style="margin-bottom: 16px;">
+                            <label style="display: block; margin-bottom: 8px;">分组名称</label>
+                            <input type="text" id="newGroupName" placeholder="请输入分组名称" style="width: 100%; height: 36px; padding: 0 12px; border: 1px solid #E2E8F0; border-radius: 6px;">
+                        </div>
+                        <div style="display: flex; gap: 8px; justify-content: flex-end;">
+                            <button id="cancelCreateGroupBtn" class="btn btn-default">取消</button>
+                            <button id="confirmCreateGroupBtn" class="btn btn-primary">确认</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 产品SKU维度表格 -->
+                <div class="table-section">
+                    <h2 class="table-title">产品SKU维度</h2>
+                    <div class="ant-table-container">
+                        <table class="ant-table">
+                            <thead class="ant-table-thead">
+                                <tr class="ant-table-row">
+                                    <th class="ant-table-cell">产品集合</th>
+                                    <th class="ant-table-cell">图片</th>
+                                    <th class="ant-table-cell">SKU</th>
+                                    <th class="ant-table-cell">寄样数量</th>
+                                    <th class="ant-table-cell">渠道分布</th>
+                                    <th class="ant-table-cell">输出数量</th>
+                                    <th class="ant-table-cell">输出率</th>
+                                </tr>
+                            </thead>
+                            <tbody class="ant-table-tbody">
+                                <tr class="ant-table-row summary-row">
+                                    <td class="ant-table-cell" colspan="3">合计</td>
+                                    <td class="ant-table-cell">0</td>
+                                    <td class="ant-table-cell">-</td>
+                                    <td class="ant-table-cell">0</td>
+                                    <td class="ant-table-cell">0%</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="ant-pagination">
+                        <span class="ant-pagination-total-text">共 6 条</span>
+                        <span class="ant-pagination-prev ant-pagination-disabled">‹</span>
+                        <span class="ant-pagination-item active">1</span>
+                        <span class="ant-pagination-next ant-pagination-disabled">›</span>
+                        <span>每页显示</span>
+                        <select class="filter-select" style="width: 80px; height: 28px;">
+                            <option value="10">10条</option>
+                            <option value="20" selected>20条</option>
+                            <option value="50">50条</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- 渠道维度表格 -->
+                <div class="table-section">
+                    <h2 class="table-title">渠道维度</h2>
+                    <div class="ant-table-container">
+                        <table class="ant-table">
+                            <thead class="ant-table-thead">
+                                <tr class="ant-table-row">
+                                    <th class="ant-table-cell">渠道</th>
+                                    <th class="ant-table-cell">产品集合</th>
+                                    <th class="ant-table-cell">图片</th>
+                                    <th class="ant-table-cell">SKU</th>
+                                    <th class="ant-table-cell">寄样数量</th>
+                                    <th class="ant-table-cell">输出数量</th>
+                                    <th class="ant-table-cell">输出率</th>
+                                </tr>
+                            </thead>
+                            <tbody class="ant-table-tbody">
+                                <tr class="ant-table-row summary-row">
+                                    <td class="ant-table-cell">合计</td>
+                                    <td class="ant-table-cell">-</td>
+                                    <td class="ant-table-cell">-</td>
+                                    <td class="ant-table-cell">-</td>
+                                    <td class="ant-table-cell">0</td>
+                                    <td class="ant-table-cell">0</td>
+                                    <td class="ant-table-cell">0%</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="ant-pagination">
+                        <span class="ant-pagination-total-text">共 3 条</span>
+                        <span class="ant-pagination-prev ant-pagination-disabled">‹</span>
+                        <span class="ant-pagination-item active">1</span>
+                        <span class="ant-pagination-next ant-pagination-disabled">›</span>
+                        <span>每页显示</span>
+                        <select class="filter-select" style="width: 80px; height: 28px;">
+                            <option value="10">10条</option>
+                            <option value="20" selected>20条</option>
+                            <option value="50">50条</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- 月份维度表格 -->
+                <div class="table-section">
+                    <h2 class="table-title">月份维度</h2>
+                    <div class="ant-table-container">
+                        <table class="ant-table">
+                            <thead class="ant-table-thead">
+                                <tr class="ant-table-row">
+                                    <th class="ant-table-cell">月份</th>
+                                    <th class="ant-table-cell">渠道</th>
+                                    <th class="ant-table-cell">产品集合</th>
+                                    <th class="ant-table-cell">图片</th>
+                                    <th class="ant-table-cell">SKU</th>
+                                    <th class="ant-table-cell">寄样数量</th>
+                                    <th class="ant-table-cell">输出数量</th>
+                                    <th class="ant-table-cell">输出率</th>
+                                </tr>
+                            </thead>
+                            <tbody class="ant-table-tbody">
+                                <tr class="ant-table-row summary-row">
+                                    <td class="ant-table-cell" colspan="3">合计</td>
+                                    <td class="ant-table-cell">-</td>
+                                    <td class="ant-table-cell">-</td>
+                                    <td class="ant-table-cell">0</td>
+                                    <td class="ant-table-cell">0</td>
+                                    <td class="ant-table-cell">0%</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="ant-pagination">
+                        <span class="ant-pagination-total-text">共 6 条</span>
+                        <span class="ant-pagination-prev ant-pagination-disabled">‹</span>
+                        <span class="ant-pagination-item active">1</span>
+                        <span class="ant-pagination-next ant-pagination-disabled">›</span>
+                        <span>每页显示</span>
+                        <select class="filter-select" style="width: 80px; height: 28px;">
+                            <option value="10">10条</option>
+                            <option value="20" selected>20条</option>
+                            <option value="50">50条</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- 页脚 -->
+                <div class="footer">
+                    <p>Copyright ©2025 OriginLinks</p>
+                    <p>问题反馈发送至: herman.hel@outlook.us</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 固定的JSON数据
+        const reportData = {
+            // 分组数据
+            groups: ['ungrouped', 'SC320A', 'SC320B', '甲油胶', 'S-PRO29G台灯'],
+            
+            // 产品集合数据
+            collections: [
+                {
+                    id: 'collection1',
+                    name: 'SC320A',
+                    totalSamples: 150,
+                    channelDistribution: {
+                        TikTok: 60,
+                        Instagram: 50,
+                        YouTube: 40
+                    },
+                    totalOutput: 120,
+                    outputRate: '80%',
+                    skus: [
+                        {
+                            id: 'SKU001',
+                            name: 'MKT-05-06-001-010173',
+                            group: 'SC320A',
+                            samples: 50,
+                            channelDistribution: {
+                                TikTok: 20,
+                                Instagram: 15,
+                                YouTube: 15
+                            },
+                            output: 40,
+                            outputRate: '80%',
+                            image: 'https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=SC320A%20product%20sku%20image&image_size=square'
+                        },
+                        {
+                            id: 'SKU002',
+                            name: 'MKT-05-06-002-010174',
+                            group: 'SC320A',
+                            samples: 60,
+                            channelDistribution: {
+                                TikTok: 25,
+                                Instagram: 20,
+                                YouTube: 15
+                            },
+                            output: 48,
+                            outputRate: '80%',
+                            image: 'https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=SC320A%20product%20sku%20image%202&image_size=square'
+                        },
+                        {
+                            id: 'SKU003',
+                            name: 'MKT-05-06-003-010175',
+                            group: 'SC320A',
+                            samples: 40,
+                            channelDistribution: {
+                                TikTok: 15,
+                                Instagram: 15,
+                                YouTube: 10
+                            },
+                            output: 32,
+                            outputRate: '80%',
+                            image: 'https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=SC320A%20product%20sku%20image%203&image_size=square'
+                        }
+                    ]
+                },
+                {
+                    id: 'collection2',
+                    name: 'SC320B',
+                    totalSamples: 100,
+                    channelDistribution: {
+                        TikTok: 40,
+                        Instagram: 35,
+                        YouTube: 25
+                    },
+                    totalOutput: 85,
+                    outputRate: '85%',
+                    skus: [
+                        {
+                            id: 'SKU004',
+                            name: 'MKT-05-06-004-010176',
+                            group: 'SC320B',
+                            samples: 60,
+                            channelDistribution: {
+                                TikTok: 25,
+                                Instagram: 20,
+                                YouTube: 15
+                            },
+                            output: 51,
+                            outputRate: '85%',
+                            image: 'https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=SC320B%20product%20sku%20image&image_size=square'
+                        },
+                        {
+                            id: 'SKU005',
+                            name: 'MKT-05-06-005-010177',
+                            group: 'SC320B',
+                            samples: 40,
+                            channelDistribution: {
+                                TikTok: 15,
+                                Instagram: 15,
+                                YouTube: 10
+                            },
+                            output: 34,
+                            outputRate: '85%',
+                            image: 'https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=SC320B%20product%20sku%20image%202&image_size=square'
+                        }
+                    ]
+                },
+                {
+                    id: 'collection3',
+                    name: '甲油胶',
+                    totalSamples: 20,
+                    channelDistribution: {
+                        Instagram: 15,
+                        YouTube: 5
+                    },
+                    totalOutput: 16,
+                    outputRate: '80%',
+                    skus: [
+                        {
+                            id: 'SKU006',
+                            name: 'MKT-05-06-006-010178',
+                            group: '甲油胶',
+                            samples: 20,
+                            channelDistribution: {
+                                Instagram: 15,
+                                YouTube: 5
+                            },
+                            output: 16,
+                            outputRate: '80%',
+                            image: 'https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=nail%20polish%20gel%20product&image_size=square'
+                        }
+                    ]
+                },
+                {
+                    id: 'collection4',
+                    name: 'S-PRO29G台灯',
+                    totalSamples: 30,
+                    channelDistribution: {
+                        TikTok: 15,
+                        Instagram: 10,
+                        YouTube: 5
+                    },
+                    totalOutput: 24,
+                    outputRate: '80%',
+                    skus: [
+                        {
+                            id: 'SKU007',
+                            name: 'MKT-05-06-007-010179',
+                            group: 'S-PRO29G台灯',
+                            samples: 30,
+                            channelDistribution: {
+                                TikTok: 15,
+                                Instagram: 10,
+                                YouTube: 5
+                            },
+                            output: 24,
+                            outputRate: '80%',
+                            image: 'https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=S-PRO29G%20desk%20lamp&image_size=square'
+                        }
+                    ]
+                },
+                {
+                    id: 'collection5',
+                    name: '未分组产品',
+                    totalSamples: 100,
+                    channelDistribution: {
+                        TikTok: 40,
+                        Instagram: 30,
+                        YouTube: 30
+                    },
+                    totalOutput: 80,
+                    outputRate: '80%',
+                    skus: [
+                        {
+                            id: 'SKU008',
+                            name: 'MKT-05-06-008-010180',
+                            group: 'ungrouped',
+                            samples: 20,
+                            channelDistribution: {
+                                TikTok: 8,
+                                Instagram: 6,
+                                YouTube: 6
+                            },
+                            output: 16,
+                            outputRate: '80%',
+                            image: 'https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=ungrouped%20product%20sku%201&image_size=square'
+                        },
+                        {
+                            id: 'SKU009',
+                            name: 'MKT-05-06-009-010181',
+                            group: 'ungrouped',
+                            samples: 25,
+                            channelDistribution: {
+                                TikTok: 10,
+                                Instagram: 8,
+                                YouTube: 7
+                            },
+                            output: 20,
+                            outputRate: '80%',
+                            image: 'https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=ungrouped%20product%20sku%202&image_size=square'
+                        },
+                        {
+                            id: 'SKU010',
+                            name: 'MKT-05-06-010-010182',
+                            group: 'ungrouped',
+                            samples: 15,
+                            channelDistribution: {
+                                TikTok: 6,
+                                Instagram: 5,
+                                YouTube: 4
+                            },
+                            output: 12,
+                            outputRate: '80%',
+                            image: 'https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=ungrouped%20product%20sku%203&image_size=square'
+                        },
+                        {
+                            id: 'SKU011',
+                            name: 'MKT-05-06-011-010183',
+                            group: 'ungrouped',
+                            samples: 20,
+                            channelDistribution: {
+                                TikTok: 8,
+                                Instagram: 6,
+                                YouTube: 6
+                            },
+                            output: 16,
+                            outputRate: '80%',
+                            image: 'https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=ungrouped%20product%20sku%204&image_size=square'
+                        },
+                        {
+                            id: 'SKU012',
+                            name: 'MKT-05-06-012-010184',
+                            group: 'ungrouped',
+                            samples: 20,
+                            channelDistribution: {
+                                TikTok: 8,
+                                Instagram: 5,
+                                YouTube: 7
+                            },
+                            output: 16,
+                            outputRate: '80%',
+                            image: 'https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=ungrouped%20product%20sku%205&image_size=square'
+                        }
+                    ]
+                }
+            ],
+            
+            // 渠道数据
+            channels: [
+                {
+                    id: 'TT',
+                    name: 'TikTok',
+                    totalSamples: 140,
+                    totalOutput: 112,
+                    outputRate: '80%',
+                    collections: [
+                        {
+                            collectionId: 'collection1',
+                            collectionName: 'SC320A',
+                            samples: 60,
+                            output: 50,
+                            outputRate: '83%',
+                            skus: [
+                                {
+                                    skuId: 'SKU001',
+                                    skuName: 'MKT-05-06-001-010173',
+                                    samples: 20,
+                                    output: 16,
+                                    outputRate: '80%',
+                                    image: 'https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=SC320A%20product%20sku%20image&image_size=square'
+                                },
+                                {
+                                    skuId: 'SKU002',
+                                    skuName: 'MKT-05-06-002-010174',
+                                    samples: 25,
+                                    output: 20,
+                                    outputRate: '80%',
+                                    image: 'https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=SC320A%20product%20sku%20image%202&image_size=square'
+                                },
+                                {
+                                    skuId: 'SKU003',
+                                    skuName: 'MKT-05-06-003-010175',
+                                    samples: 15,
+                                    output: 14,
+                                    outputRate: '93%',
+                                    image: 'https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=SC320A%20product%20sku%20image%203&image_size=square'
+                                }
+                            ]
+                        },
+                        {
+                            collectionId: 'collection2',
+                            collectionName: 'SC320B',
+                            samples: 40,
+                            output: 35,
+                            outputRate: '88%',
+                            skus: [
+                                {
+                                    skuId: 'SKU004',
+                                    skuName: 'MKT-05-06-004-010176',
+                                    samples: 25,
+                                    output: 22,
+                                    outputRate: '88%',
+                                    image: 'https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=SC320B%20product%20sku%20image&image_size=square'
+                                },
+                                {
+                                    skuId: 'SKU005',
+                                    skuName: 'MKT-05-06-005-010177',
+                                    samples: 15,
+                                    output: 13,
+                                    outputRate: '87%',
+                                    image: 'https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=SC320B%20product%20sku%20image%202&image_size=square'
+                                }
+                            ]
+                        },
+                        {
+                            collectionId: 'collection4',
+                            collectionName: 'S-PRO29G台灯',
+                            samples: 15,
+                            output: 12,
+                            outputRate: '80%',
+                            skus: [
+                                {
+                                    skuId: 'SKU007',
+                                    skuName: 'MKT-05-06-007-010179',
+                                    samples: 15,
+                                    output: 12,
+                                    outputRate: '80%',
+                                    image: 'https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=S-PRO29G%20desk%20lamp&image_size=square'
+                                }
+                            ]
+                        },
+                        {
+                            collectionId: 'collection5',
+                            collectionName: '未分组产品',
+                            samples: 40,
+                            output: 32,
+                            outputRate: '80%',
+                            skus: [
+                                {
+                                    skuId: 'SKU008',
+                                    skuName: 'MKT-05-06-008-010180',
+                                    samples: 8,
+                                    output: 6,
+                                    outputRate: '80%',
+                                    image: 'https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=ungrouped%20product%20sku%201&image_size=square'
+                                },
+                                {
+                                    skuId: 'SKU009',
+                                    skuName: 'MKT-05-06-009-010181',
+                                    samples: 10,
+                                    output: 8,
+                                    outputRate: '80%',
+                                    image: 'https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=ungrouped%20product%20sku%202&image_size=square'
+                                },
+                                {
+                                    skuId: 'SKU010',
+                                    skuName: 'MKT-05-06-010-010182',
+                                    samples: 6,
+                                    output: 5,
+                                    outputRate: '83%',
+                                    image: 'https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=ungrouped%20product%20sku%203&image_size=square'
+                                },
+                                {
+                                    skuId: 'SKU011',
+                                    skuName: 'MKT-05-06-011-010183',
+                                    samples: 8,
+                                    output: 6,
+                                    outputRate: '80%',
+                                    image: 'https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=ungrouped%20product%20sku%204&image_size=square'
+                                },
+                                {
+                                    skuId: 'SKU012',
+                                    skuName: 'MKT-05-06-012-010184',
+                                    samples: 8,
+                                    output: 7,
+                                    outputRate: '88%',
+                                    image: 'https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=ungrouped%20product%20sku%205&image_size=square'
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    id: 'INS',
+                    name: 'Instagram',
+                    totalSamples: 115,
+                    totalOutput: 92,
+                    outputRate: '80%',
+                    collections: [
+                        {
+                            collectionId: 'collection1',
+                            collectionName: 'SC320A',
+                            samples: 30,
+                            output: 25,
+                            outputRate: '83%',
+                            skus: [
+                                {
+                                    skuId: 'SKU001',
+                                    skuName: 'MKT-05-06-001-010173',
+                                    samples: 10,
+                                    output: 8,
+                                    outputRate: '80%',
+                                    image: 'https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=SC320A%20product%20sku%20image&image_size=square'
+                                },
+                                {
+                                    skuId: 'SKU002',
+                                    skuName: 'MKT-05-06-002-010174',
+                                    samples: 10,
+                                    output: 8,
+                                    outputRate: '80%',
+                                    image: 'https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=SC320A%20product%20sku%20image%202&image_size=square'
+                                },
+                                {
+                                    skuId: 'SKU003',
+                                    skuName: 'MKT-05-06-003-010175',
+                                    samples: 10,
+                                    output: 9,
+                                    outputRate: '90%',
+                                    image: 'https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=SC320A%20product%20sku%20image%203&image_size=square'
+                                }
+                            ]
+                        },
+                        {
+                            collectionId: 'collection2',
+                            collectionName: 'SC320B',
+                            samples: 30,
+                            output: 25,
+                            outputRate: '83%',
+                            skus: [
+                                {
+                                    skuId: 'SKU004',
+                                    skuName: 'MKT-05-06-004-010176',
+                                    samples: 15,
+                                    output: 13,
+                                    outputRate: '87%',
+                                    image: 'https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=SC320B%20product%20sku%20image&image_size=square'
+                                },
+                                {
+                                    skuId: 'SKU005',
+                                    skuName: 'MKT-05-06-005-010177',
+                                    samples: 15,
+                                    output: 12,
+                                    outputRate: '80%',
+                                    image: 'https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=SC320B%20product%20sku%20image%202&image_size=square'
+                                }
+                            ]
+                        },
+                        {
+                            collectionId: 'collection3',
+                            collectionName: '甲油胶',
+                            samples: 25,
+                            output: 20,
+                            outputRate: '80%',
+                            skus: [
+                                {
+                                    skuId: 'SKU006',
+                                    skuName: 'MKT-05-06-006-010178',
+                                    samples: 25,
+                                    output: 20,
+                                    outputRate: '80%',
+                                    image: 'https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=nail%20polish%20gel%20product&image_size=square'
+                                }
+                            ]
+                        },
+                        {
+                            collectionId: 'collection5',
+                            collectionName: '未分组产品',
+                            samples: 30,
+                            output: 24,
+                            outputRate: '80%',
+                            skus: [
+                                {
+                                    skuId: 'SKU008',
+                                    skuName: 'MKT-05-06-008-010180',
+                                    samples: 6,
+                                    output: 5,
+                                    outputRate: '83%',
+                                    image: 'https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=ungrouped%20product%20sku%201&image_size=square'
+                                },
+                                {
+                                    skuId: 'SKU009',
+                                    skuName: 'MKT-05-06-009-010181',
+                                    samples: 8,
+                                    output: 6,
+                                    outputRate: '80%',
+                                    image: 'https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=ungrouped%20product%20sku%202&image_size=square'
+                                },
+                                {
+                                    skuId: 'SKU010',
+                                    skuName: 'MKT-05-06-010-010182',
+                                    samples: 5,
+                                    output: 4,
+                                    outputRate: '80%',
+                                    image: 'https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=ungrouped%20product%20sku%203&image_size=square'
+                                },
+                                {
+                                    skuId: 'SKU011',
+                                    skuName: 'MKT-05-06-011-010183',
+                                    samples: 6,
+                                    output: 5,
+                                    outputRate: '83%',
+                                    image: 'https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=ungrouped%20product%20sku%204&image_size=square'
+                                },
+                                {
+                                    skuId: 'SKU012',
+                                    skuName: 'MKT-05-06-012-010184',
+                                    samples: 5,
+                                    output: 4,
+                                    outputRate: '80%',
+                                    image: 'https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=ungrouped%20product%20sku%205&image_size=square'
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    id: 'YOUTUBE',
+                    name: 'YouTube',
+                    totalSamples: 95,
+                    totalOutput: 76,
+                    outputRate: '80%',
+                    collections: [
+                        {
+                            collectionId: 'collection1',
+                            collectionName: 'SC320A',
+                            samples: 20,
+                            output: 15,
+                            outputRate: '75%',
+                            skus: [
+                                {
+                                    skuId: 'SKU001',
+                                    skuName: 'MKT-05-06-001-010173',
+                                    samples: 10,
+                                    output: 7,
+                                    outputRate: '70%',
+                                    image: 'https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=SC320A%20product%20sku%20image&image_size=square'
+                                },
+                                {
+                                    skuId: 'SKU002',
+                                    skuName: 'MKT-05-06-002-010174',
+                                    samples: 10,
+                                    output: 8,
+                                    outputRate: '80%',
+                                    image: 'https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=SC320A%20product%20sku%20image%202&image_size=square'
+                                }
+                            ]
+                        },
+                        {
+                            collectionId: 'collection2',
+                            collectionName: 'SC320B',
+                            samples: 20,
+                            output: 15,
+                            outputRate: '75%',
+                            skus: [
+                                {
+                                    skuId: 'SKU004',
+                                    skuName: 'MKT-05-06-004-010176',
+                                    samples: 20,
+                                    output: 15,
+                                    outputRate: '75%',
+                                    image: 'https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=SC320B%20product%20sku%20image&image_size=square'
+                                }
+                            ]
+                        },
+                        {
+                            collectionId: 'collection3',
+                            collectionName: '甲油胶',
+                            samples: 25,
+                            output: 20,
+                            outputRate: '80%',
+                            skus: [
+                                {
+                                    skuId: 'SKU006',
+                                    skuName: 'MKT-05-06-006-010178',
+                                    samples: 25,
+                                    output: 20,
+                                    outputRate: '80%',
+                                    image: 'https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=nail%20polish%20gel%20product&image_size=square'
+                                }
+                            ]
+                        },
+                        {
+                            collectionId: 'collection5',
+                            collectionName: '未分组产品',
+                            samples: 30,
+                            output: 24,
+                            outputRate: '80%',
+                            skus: [
+                                {
+                                    skuId: 'SKU008',
+                                    skuName: 'MKT-05-06-008-010180',
+                                    samples: 6,
+                                    output: 5,
+                                    outputRate: '83%',
+                                    image: 'https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=ungrouped%20product%20sku%201&image_size=square'
+                                },
+                                {
+                                    skuId: 'SKU009',
+                                    skuName: 'MKT-05-06-009-010181',
+                                    samples: 7,
+                                    output: 6,
+                                    outputRate: '86%',
+                                    image: 'https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=ungrouped%20product%20sku%202&image_size=square'
+                                },
+                                {
+                                    skuId: 'SKU010',
+                                    skuName: 'MKT-05-06-010-010182',
+                                    samples: 4,
+                                    output: 3,
+                                    outputRate: '75%',
+                                    image: 'https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=ungrouped%20product%20sku%203&image_size=square'
+                                },
+                                {
+                                    skuId: 'SKU011',
+                                    skuName: 'MKT-05-06-011-010183',
+                                    samples: 6,
+                                    output: 5,
+                                    outputRate: '83%',
+                                    image: 'https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=ungrouped%20product%20sku%204&image_size=square'
+                                },
+                                {
+                                    skuId: 'SKU012',
+                                    skuName: 'MKT-05-06-012-010184',
+                                    samples: 7,
+                                    output: 5,
+                                    outputRate: '71%',
+                                    image: 'https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=ungrouped%20product%20sku%205&image_size=square'
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ],
+            
+            // 月份数据
+            months: [
+                {
+                    id: '2024-01',
+                    name: '2024-01',
+                    channels: [
+                        {
+                            channelId: 'TT',
+                            channelName: 'TikTok',
+                            totalSamples: 70,
+                            totalOutput: 56,
+                            outputRate: '80%',
+                            collections: [
+                                {
+                                    collectionId: 'collection1',
+                                    collectionName: 'SC320A',
+                                    samples: 30,
+                                    output: 25,
+                                    outputRate: '83%',
+                                    skus: [
+                                        {
+                                            skuId: 'SKU001',
+                                            skuName: 'MKT-05-06-001-010173',
+                                            samples: 15,
+                                            output: 12,
+                                            outputRate: '80%',
+                                            image: 'https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=SC320A%20product%20sku%20image&image_size=square'
+                                        },
+                                        {
+                                            skuId: 'SKU002',
+                                            skuName: 'MKT-05-06-002-010174',
+                                            samples: 15,
+                                            output: 13,
+                                            outputRate: '87%',
+                                            image: 'https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=SC320A%20product%20sku%20image%202&image_size=square'
+                                        }
+                                    ]
+                                },
+                                {
+                                    collectionId: 'collection2',
+                                    collectionName: 'SC320B',
+                                    samples: 20,
+                                    output: 17,
+                                    outputRate: '85%',
+                                    skus: [
+                                        {
+                                            skuId: 'SKU004',
+                                            skuName: 'MKT-05-06-004-010176',
+                                            samples: 20,
+                                            output: 17,
+                                            outputRate: '85%',
+                                            image: 'https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=SC320B%20product%20sku%20image&image_size=square'
+                                        }
+                                    ]
+                                },
+                                {
+                                    collectionId: 'collection5',
+                                    collectionName: '未分组产品',
+                                    samples: 20,
+                                    output: 16,
+                                    outputRate: '80%',
+                                    skus: [
+                                        {
+                                            skuId: 'SKU008',
+                                            skuName: 'MKT-05-06-008-010180',
+                                            samples: 4,
+                                            output: 3,
+                                            outputRate: '75%',
+                                            image: 'https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=ungrouped%20product%20sku%201&image_size=square'
+                                        },
+                                        {
+                                            skuId: 'SKU009',
+                                            skuName: 'MKT-05-06-009-010181',
+                                            samples: 5,
+                                            output: 4,
+                                            outputRate: '80%',
+                                            image: 'https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=ungrouped%20product%20sku%202&image_size=square'
+                                        },
+                                        {
+                                            skuId: 'SKU010',
+                                            skuName: 'MKT-05-06-010-010182',
+                                            samples: 3,
+                                            output: 2,
+                                            outputRate: '67%',
+                                            image: 'https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=ungrouped%20product%20sku%203&image_size=square'
+                                        },
+                                        {
+                                            skuId: 'SKU011',
+                                            skuName: 'MKT-05-06-011-010183',
+                                            samples: 4,
+                                            output: 3,
+                                            outputRate: '75%',
+                                            image: 'https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=ungrouped%20product%20sku%204&image_size=square'
+                                        },
+                                        {
+                                            skuId: 'SKU012',
+                                            skuName: 'MKT-05-06-012-010184',
+                                            samples: 4,
+                                            output: 4,
+                                            outputRate: '100%',
+                                            image: 'https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=ungrouped%20product%20sku%205&image_size=square'
+                                        }
+                                    ]
+                                }
+                            ]
+                        },
+                        {
+                            channelId: 'INS',
+                            channelName: 'Instagram',
+                            totalSamples: 55,
+                            totalOutput: 44,
+                            outputRate: '80%',
+                            collections: [
+                                {
+                                    collectionId: 'collection1',
+                                    collectionName: 'SC320A',
+                                    samples: 20,
+                                    output: 16,
+                                    outputRate: '80%',
+                                    skus: [
+                                        {
+                                            skuId: 'SKU001',
+                                            skuName: 'MKT-05-06-001-010173',
+                                            samples: 20,
+                                            output: 16,
+                                            outputRate: '80%',
+                                            image: 'https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=SC320A%20product%20sku%20image&image_size=square'
+                                        }
+                                    ]
+                                },
+                                {
+                                    collectionId: 'collection2',
+                                    collectionName: 'SC320B',
+                                    samples: 20,
+                                    output: 16,
+                                    outputRate: '80%',
+                                    skus: [
+                                        {
+                                            skuId: 'SKU004',
+                                            skuName: 'MKT-05-06-004-010176',
+                                            samples: 20,
+                                            output: 16,
+                                            outputRate: '80%',
+                                            image: 'https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=SC320B%20product%20sku%20image&image_size=square'
+                                        }
+                                    ]
+                                },
+                                {
+                                    collectionId: 'collection5',
+                                    collectionName: '未分组产品',
+                                    samples: 15,
+                                    output: 12,
+                                    outputRate: '80%',
+                                    skus: [
+                                        {
+                                            skuId: 'SKU008',
+                                            skuName: 'MKT-05-06-008-010180',
+                                            samples: 3,
+                                            output: 2,
+                                            outputRate: '67%',
+                                            image: 'https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=ungrouped%20product%20sku%201&image_size=square'
+                                        },
+                                        {
+                                            skuId: 'SKU009',
+                                            skuName: 'MKT-05-06-009-010181',
+                                            samples: 4,
+                                            output: 3,
+                                            outputRate: '75%',
+                                            image: 'https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=ungrouped%20product%20sku%202&image_size=square'
+                                        },
+                                        {
+                                            skuId: 'SKU010',
+                                            skuName: 'MKT-05-06-010-010182',
+                                            samples: 2,
+                                            output: 2,
+                                            outputRate: '100%',
+                                            image: 'https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=ungrouped%20product%20sku%203&image_size=square'
+                                        },
+                                        {
+                                            skuId: 'SKU011',
+                                            skuName: 'MKT-05-06-011-010183',
+                                            samples: 3,
+                                            output: 2,
+                                            outputRate: '67%',
+                                            image: 'https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=ungrouped%20product%20sku%204&image_size=square'
+                                        },
+                                        {
+                                            skuId: 'SKU012',
+                                            skuName: 'MKT-05-06-012-010184',
+                                            samples: 3,
+                                            output: 3,
+                                            outputRate: '100%',
+                                            image: 'https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=ungrouped%20product%20sku%205&image_size=square'
+                                        }
+                                    ]
+                                }
+                            ]
+                        },
+                        {
+                            channelId: 'YOUTUBE',
+                            channelName: 'YouTube',
+                            totalSamples: 45,
+                            totalOutput: 36,
+                            outputRate: '80%',
+                            collections: [
+                                {
+                                    collectionId: 'collection1',
+                                    collectionName: 'SC320A',
+                                    samples: 15,
+                                    output: 12,
+                                    outputRate: '80%',
+                                    skus: [
+                                        {
+                                            skuId: 'SKU001',
+                                            skuName: 'MKT-05-06-001-010173',
+                                            samples: 15,
+                                            output: 12,
+                                            outputRate: '80%',
+                                            image: 'https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=SC320A%20product%20sku%20image&image_size=square'
+                                        }
+                                    ]
+                                },
+                                {
+                                    collectionId: 'collection3',
+                                    collectionName: '甲油胶',
+                                    samples: 15,
+                                    output: 12,
+                                    outputRate: '80%',
+                                    skus: [
+                                        {
+                                            skuId: 'SKU006',
+                                            skuName: 'MKT-05-06-006-010178',
+                                            samples: 15,
+                                            output: 12,
+                                            outputRate: '80%',
+                                            image: 'https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=nail%20polish%20gel%20product&image_size=square'
+                                        }
+                                    ]
+                                },
+                                {
+                                    collectionId: 'collection5',
+                                    collectionName: '未分组产品',
+                                    samples: 15,
+                                    output: 12,
+                                    outputRate: '80%',
+                                    skus: [
+                                        {
+                                            skuId: 'SKU008',
+                                            skuName: 'MKT-05-06-008-010180',
+                                            samples: 3,
+                                            output: 2,
+                                            outputRate: '67%',
+                                            image: 'https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=ungrouped%20product%20sku%201&image_size=square'
+                                        },
+                                        {
+                                            skuId: 'SKU009',
+                                            skuName: 'MKT-05-06-009-010181',
+                                            samples: 3,
+                                            output: 3,
+                                            outputRate: '100%',
+                                            image: 'https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=ungrouped%20product%20sku%202&image_size=square'
+                                        },
+                                        {
+                                            skuId: 'SKU010',
+                                            skuName: 'MKT-05-06-010-010182',
+                                            samples: 2,
+                                            output: 2,
+                                            outputRate: '100%',
+                                            image: 'https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=ungrouped%20product%20sku%203&image_size=square'
+                                        },
+                                        {
+                                            skuId: 'SKU011',
+                                            skuName: 'MKT-05-06-011-010183',
+                                            samples: 3,
+                                            output: 2,
+                                            outputRate: '67%',
+                                            image: 'https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=ungrouped%20product%20sku%204&image_size=square'
+                                        },
+                                        {
+                                            skuId: 'SKU012',
+                                            skuName: 'MKT-05-06-012-010184',
+                                            samples: 4,
+                                            output: 3,
+                                            outputRate: '75%',
+                                            image: 'https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=ungrouped%20product%20sku%205&image_size=square'
+                                        }
+                                    ]
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    id: '2024-02',
+                    name: '2024-02',
+                    channels: [
+                        {
+                            channelId: 'TT',
+                            channelName: 'TikTok',
+                            totalSamples: 80,
+                            totalOutput: 64,
+                            outputRate: '80%',
+                            collections: [
+                                {
+                                    collectionId: 'collection1',
+                                    collectionName: 'SC320A',
+                                    samples: 35,
+                                    output: 30,
+                                    outputRate: '86%',
+                                    skus: [
+                                        {
+                                            skuId: 'SKU001',
+                                            skuName: 'MKT-05-06-001-010173',
+                                            samples: 18,
+                                            output: 15,
+                                            outputRate: '83%',
+                                            image: 'https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=SC320A%20product%20sku%20image&image_size=square'
+                                        },
+                                        {
+                                            skuId: 'SKU002',
+                                            skuName: 'MKT-05-06-002-010174',
+                                            samples: 17,
+                                            output: 15,
+                                            outputRate: '88%',
+                                            image: 'https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=SC320A%20product%20sku%20image%202&image_size=square'
+                                        }
+                                    ]
+                                },
+                                {
+                                    collectionId: 'collection2',
+                                    collectionName: 'SC320B',
+                                    samples: 25,
+                                    output: 21,
+                                    outputRate: '84%',
+                                    skus: [
+                                        {
+                                            skuId: 'SKU004',
+                                            skuName: 'MKT-05-06-004-010176',
+                                            samples: 25,
+                                            output: 21,
+                                            outputRate: '84%',
+                                            image: 'https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=SC320B%20product%20sku%20image&image_size=square'
+                                        }
+                                    ]
+                                },
+                                {
+                                    collectionId: 'collection5',
+                                    collectionName: '未分组产品',
+                                    samples: 20,
+                                    output: 16,
+                                    outputRate: '80%',
+                                    skus: [
+                                        {
+                                            skuId: 'SKU008',
+                                            skuName: 'MKT-05-06-008-010180',
+                                            samples: 4,
+                                            output: 3,
+                                            outputRate: '75%',
+                                            image: 'https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=ungrouped%20product%20sku%201&image_size=square'
+                                        },
+                                        {
+                                            skuId: 'SKU009',
+                                            skuName: 'MKT-05-06-009-010181',
+                                            samples: 5,
+                                            output: 4,
+                                            outputRate: '80%',
+                                            image: 'https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=ungrouped%20product%20sku%202&image_size=square'
+                                        },
+                                        {
+                                            skuId: 'SKU010',
+                                            skuName: 'MKT-05-06-010-010182',
+                                            samples: 3,
+                                            output: 3,
+                                            outputRate: '100%',
+                                            image: 'https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=ungrouped%20product%20sku%203&image_size=square'
+                                        },
+                                        {
+                                            skuId: 'SKU011',
+                                            skuName: 'MKT-05-06-011-010183',
+                                            samples: 4,
+                                            output: 3,
+                                            outputRate: '75%',
+                                            image: 'https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=ungrouped%20product%20sku%204&image_size=square'
+                                        },
+                                        {
+                                            skuId: 'SKU012',
+                                            skuName: 'MKT-05-06-012-010184',
+                                            samples: 4,
+                                            output: 3,
+                                            outputRate: '75%',
+                                            image: 'https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=ungrouped%20product%20sku%205&image_size=square'
+                                        }
+                                    ]
+                                }
+                            ]
+                        },
+                        {
+                            channelId: 'INS',
+                            channelName: 'Instagram',
+                            totalSamples: 60,
+                            totalOutput: 48,
+                            outputRate: '80%',
+                            collections: [
+                                {
+                                    collectionId: 'collection2',
+                                    collectionName: 'SC320B',
+                                    samples: 25,
+                                    output: 21,
+                                    outputRate: '84%',
+                                    skus: [
+                                        {
+                                            skuId: 'SKU004',
+                                            skuName: 'MKT-05-06-004-010176',
+                                            samples: 25,
+                                            output: 21,
+                                            outputRate: '84%',
+                                            image: 'https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=SC320B%20product%20sku%20image&image_size=square'
+                                        }
+                                    ]
+                                },
+                                {
+                                    collectionId: 'collection3',
+                                    collectionName: '甲油胶',
+                                    samples: 20,
+                                    output: 17,
+                                    outputRate: '85%',
+                                    skus: [
+                                        {
+                                            skuId: 'SKU006',
+                                            skuName: 'MKT-05-06-006-010178',
+                                            samples: 20,
+                                            output: 17,
+                                            outputRate: '85%',
+                                            image: 'https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=nail%20polish%20gel%20product&image_size=square'
+                                        }
+                                    ]
+                                },
+                                {
+                                    collectionId: 'collection5',
+                                    collectionName: '未分组产品',
+                                    samples: 15,
+                                    output: 12,
+                                    outputRate: '80%',
+                                    skus: [
+                                        {
+                                            skuId: 'SKU008',
+                                            skuName: 'MKT-05-06-008-010180',
+                                            samples: 3,
+                                            output: 2,
+                                            outputRate: '67%',
+                                            image: 'https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=ungrouped%20product%20sku%201&image_size=square'
+                                        },
+                                        {
+                                            skuId: 'SKU009',
+                                            skuName: 'MKT-05-06-009-010181',
+                                            samples: 4,
+                                            output: 3,
+                                            outputRate: '75%',
+                                            image: 'https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=ungrouped%20product%20sku%202&image_size=square'
+                                        },
+                                        {
+                                            skuId: 'SKU010',
+                                            skuName: 'MKT-05-06-010-010182',
+                                            samples: 2,
+                                            output: 2,
+                                            outputRate: '100%',
+                                            image: 'https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=ungrouped%20product%20sku%203&image_size=square'
+                                        },
+                                        {
+                                            skuId: 'SKU011',
+                                            skuName: 'MKT-05-06-011-010183',
+                                            samples: 3,
+                                            output: 2,
+                                            outputRate: '67%',
+                                            image: 'https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=ungrouped%20product%20sku%204&image_size=square'
+                                        },
+                                        {
+                                            skuId: 'SKU012',
+                                            skuName: 'MKT-05-06-012-010184',
+                                            samples: 3,
+                                            output: 3,
+                                            outputRate: '100%',
+                                            image: 'https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=ungrouped%20product%20sku%205&image_size=square'
+                                        }
+                                    ]
+                                }
+                            ]
+                        },
+                        {
+                            channelId: 'YOUTUBE',
+                            channelName: 'YouTube',
+                            totalSamples: 50,
+                            totalOutput: 40,
+                            outputRate: '80%',
+                            collections: [
+                                {
+                                    collectionId: 'collection2',
+                                    collectionName: 'SC320B',
+                                    samples: 15,
+                                    output: 12,
+                                    outputRate: '80%',
+                                    skus: [
+                                        {
+                                            skuId: 'SKU004',
+                                            skuName: 'MKT-05-06-004-010176',
+                                            samples: 15,
+                                            output: 12,
+                                            outputRate: '80%',
+                                            image: 'https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=SC320B%20product%20sku%20image&image_size=square'
+                                        }
+                                    ]
+                                },
+                                {
+                                    collectionId: 'collection4',
+                                    collectionName: 'S-PRO29G台灯',
+                                    samples: 20,
+                                    output: 16,
+                                    outputRate: '80%',
+                                    skus: [
+                                        {
+                                            skuId: 'SKU007',
+                                            skuName: 'MKT-05-06-007-010179',
+                                            samples: 20,
+                                            output: 16,
+                                            outputRate: '80%',
+                                            image: 'https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=S-PRO29G%20desk%20lamp&image_size=square'
+                                        }
+                                    ]
+                                },
+                                {
+                                    collectionId: 'collection5',
+                                    collectionName: '未分组产品',
+                                    samples: 15,
+                                    output: 12,
+                                    outputRate: '80%',
+                                    skus: [
+                                        {
+                                            skuId: 'SKU008',
+                                            skuName: 'MKT-05-06-008-010180',
+                                            samples: 3,
+                                            output: 2,
+                                            outputRate: '67%',
+                                            image: 'https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=ungrouped%20product%20sku%201&image_size=square'
+                                        },
+                                        {
+                                            skuId: 'SKU009',
+                                            skuName: 'MKT-05-06-009-010181',
+                                            samples: 4,
+                                            output: 3,
+                                            outputRate: '75%',
+                                            image: 'https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=ungrouped%20product%20sku%202&image_size=square'
+                                        },
+                                        {
+                                            skuId: 'SKU010',
+                                            skuName: 'MKT-05-06-010-010182',
+                                            samples: 2,
+                                            output: 2,
+                                            outputRate: '100%',
+                                            image: 'https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=ungrouped%20product%20sku%203&image_size=square'
+                                        },
+                                        {
+                                            skuId: 'SKU011',
+                                            skuName: 'MKT-05-06-011-010183',
+                                            samples: 3,
+                                            output: 2,
+                                            outputRate: '67%',
+                                            image: 'https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=ungrouped%20product%20sku%204&image_size=square'
+                                        },
+                                        {
+                                            skuId: 'SKU012',
+                                            skuName: 'MKT-05-06-012-010184',
+                                            samples: 3,
+                                            output: 3,
+                                            outputRate: '100%',
+                                            image: 'https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=ungrouped%20product%20sku%205&image_size=square'
+                                        }
+                                    ]
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ]
+        };
+
+        // 获取行的缩进级别（考虑所有td元素）
+        function getRowIndent(row) {
+            const tds = row.querySelectorAll('td');
+            let maxIndent = 0;
+            tds.forEach(td => {
+                const indent = parseInt(td.style.paddingLeft) || 0;
+                if (indent > maxIndent) {
+                    maxIndent = indent;
+                }
+            });
+            return maxIndent;
+        }
+
+        // 填充产品SKU维度表格
+        function populateSkuTable() {
+            const tableSections = document.querySelectorAll('.table-section');
+            if (tableSections.length < 1) return;
+            
+            const tbody = tableSections[0].querySelector('.ant-table-tbody');
+            if (!tbody) return;
+            
+            // 清空现有内容（保留合计行）
+            const summaryRow = tbody.querySelector('.summary-row');
+            tbody.innerHTML = '';
+            if (summaryRow) {
+                tbody.appendChild(summaryRow);
+            }
+            
+            // 计算总计
+            let totalSamples = 0;
+            let totalOutput = 0;
+            
+            // 添加产品集合行
+            reportData.collections.forEach((collection, index) => {
+                totalSamples += collection.totalSamples;
+                totalOutput += collection.totalOutput;
+                
+                // 创建产品集合行
+                const collectionRow = document.createElement('tr');
+                collectionRow.className = 'ant-table-row ant-table-row-level-0';
+                collectionRow.setAttribute('data-row-key', index + 1);
+                
+                // 构建渠道分布字符串
+                let channelDistribution = '';
+                for (const [channel, count] of Object.entries(collection.channelDistribution)) {
+                    channelDistribution += `${channel}: ${count}<br>`;
+                }
+                channelDistribution = channelDistribution.trim();
+                
+                collectionRow.innerHTML = `
+                    <td class="ant-table-cell"><span class="ant-table-row-expand-icon ant-table-row-expand-icon-collapsed expand-icon">▶</span> ${collection.name}</td>
+                    <td class="ant-table-cell"></td>
+                    <td class="ant-table-cell">包含${collection.skus.length}种SKU</td>
+                    <td class="ant-table-cell">${collection.totalSamples}</td>
+                    <td class="ant-table-cell">${channelDistribution}</td>
+                    <td class="ant-table-cell">${collection.totalOutput}</td>
+                    <td class="ant-table-cell">${collection.outputRate}</td>
+                `;
+                
+                tbody.insertBefore(collectionRow, summaryRow);
+                
+                // 添加SKU行
+                collection.skus.forEach(sku => {
+                    const skuRow = document.createElement('tr');
+                    skuRow.className = 'ant-table-row ant-table-row-level-1';
+                    skuRow.style.display = 'none';
+                    
+                    // 构建SKU渠道分布字符串
+                    let skuChannelDistribution = '';
+                    for (const [channel, count] of Object.entries(sku.channelDistribution)) {
+                        skuChannelDistribution += `${channel}: ${count}<br>`;
+                    }
+                    skuChannelDistribution = skuChannelDistribution.trim();
+                    
+                    skuRow.innerHTML = `
+                        <td class="ant-table-cell" style="padding-left: 32px;"></td>
+                        <td class="ant-table-cell"><img src="${sku.image}" style="width: 40px; height: 40px; object-fit: cover; border-radius: 4px;"></td>
+                        <td class="ant-table-cell">${sku.name}</td>
+                        <td class="ant-table-cell">${sku.samples}</td>
+                        <td class="ant-table-cell">${skuChannelDistribution}</td>
+                        <td class="ant-table-cell">${sku.output}</td>
+                        <td class="ant-table-cell">${sku.outputRate}</td>
+                    `;
+                    
+                    tbody.insertBefore(skuRow, summaryRow);
+                });
+            });
+            
+            // 更新合计行
+            if (summaryRow) {
+                const avgOutputRate = ((totalOutput / totalSamples) * 100).toFixed(0) + '%';
+                summaryRow.innerHTML = `
+                    <td class="ant-table-cell" colspan="3">合计</td>
+                    <td class="ant-table-cell">${totalSamples}</td>
+                    <td class="ant-table-cell">-</td>
+                    <td class="ant-table-cell">${totalOutput}</td>
+                    <td class="ant-table-cell">${avgOutputRate}</td>
+                `;
+            }
+        }
+
+        // 填充渠道维度表格
+        function populateChannelTable() {
+            const tableSections = document.querySelectorAll('.table-section');
+            if (tableSections.length < 2) return;
+            
+            const tbody = tableSections[1].querySelector('.ant-table-tbody');
+            if (!tbody) return;
+            
+            // 清空现有内容（保留合计行）
+            const summaryRow = tbody.querySelector('.summary-row');
+            tbody.innerHTML = '';
+            if (summaryRow) {
+                tbody.appendChild(summaryRow);
+            }
+            
+            // 计算总计
+            let totalSamples = 0;
+            let totalOutput = 0;
+            
+            // 添加渠道行
+            reportData.channels.forEach(channel => {
+                totalSamples += channel.totalSamples;
+                totalOutput += channel.totalOutput;
+                
+                // 创建渠道行
+                const channelRow = document.createElement('tr');
+                channelRow.className = 'ant-table-row ant-table-row-level-0';
+                channelRow.setAttribute('data-row-key', channel.id);
+                
+                channelRow.innerHTML = `
+                    <td class="ant-table-cell"><span class="ant-table-row-expand-icon ant-table-row-expand-icon-collapsed expand-icon">▶</span> ${channel.name}</td>
+                    <td class="ant-table-cell">包含${channel.collections.length}种产品集合</td>
+                    <td class="ant-table-cell"></td>
+                    <td class="ant-table-cell">-</td>
+                    <td class="ant-table-cell">${channel.totalSamples}</td>
+                    <td class="ant-table-cell">${channel.totalOutput}</td>
+                    <td class="ant-table-cell">${channel.outputRate}</td>
+                `;
+                
+                tbody.insertBefore(channelRow, summaryRow);
+                
+                // 添加产品集合行
+                channel.collections.forEach(collection => {
+                    const collectionRow = document.createElement('tr');
+                    collectionRow.className = 'ant-table-row ant-table-row-level-1';
+                    collectionRow.style.display = 'none';
+                    
+                    collectionRow.innerHTML = `
+                        <td class="ant-table-cell" style="padding-left: 32px;"></td>
+                        <td class="ant-table-cell"><span class="ant-table-row-expand-icon ant-table-row-expand-icon-collapsed expand-icon">▶</span> ${collection.collectionName}</td>
+                        <td class="ant-table-cell"></td>
+                        <td class="ant-table-cell">包含${collection.skus.length}种SKU</td>
+                        <td class="ant-table-cell">${collection.samples}</td>
+                        <td class="ant-table-cell">${collection.output}</td>
+                        <td class="ant-table-cell">${collection.outputRate}</td>
+                    `;
+                    
+                    tbody.insertBefore(collectionRow, summaryRow);
+                    
+                    // 添加SKU行
+                    collection.skus.forEach(sku => {
+                        const skuRow = document.createElement('tr');
+                        skuRow.className = 'ant-table-row ant-table-row-level-2';
+                        skuRow.style.display = 'none';
+                        
+                        skuRow.innerHTML = `
+                            <td class="ant-table-cell" style="padding-left: 64px;"></td>
+                            <td class="ant-table-cell"></td>
+                            <td class="ant-table-cell"><img src="${sku.image}" style="width: 40px; height: 40px; object-fit: cover; border-radius: 4px;"></td>
+                            <td class="ant-table-cell">${sku.skuName}</td>
+                            <td class="ant-table-cell">${sku.samples}</td>
+                            <td class="ant-table-cell">${sku.output}</td>
+                            <td class="ant-table-cell">${sku.outputRate}</td>
+                        `;
+                        
+                        tbody.insertBefore(skuRow, summaryRow);
+                    });
+                });
+            });
+            
+            // 更新合计行
+            if (summaryRow) {
+                const avgOutputRate = ((totalOutput / totalSamples) * 100).toFixed(0) + '%';
+                summaryRow.innerHTML = `
+                    <td class="ant-table-cell">合计</td>
+                    <td class="ant-table-cell">-</td>
+                    <td class="ant-table-cell">-</td>
+                    <td class="ant-table-cell">-</td>
+                    <td class="ant-table-cell">${totalSamples}</td>
+                    <td class="ant-table-cell">${totalOutput}</td>
+                    <td class="ant-table-cell">${avgOutputRate}</td>
+                `;
+            }
+        }
+
+        // 填充月份维度表格
+        function populateMonthTable() {
+            const tableSections = document.querySelectorAll('.table-section');
+            if (tableSections.length < 3) return;
+            
+            const tbody = tableSections[2].querySelector('.ant-table-tbody');
+            if (!tbody) return;
+            
+            // 清空现有内容（保留合计行）
+            const summaryRow = tbody.querySelector('.summary-row');
+            tbody.innerHTML = '';
+            if (summaryRow) {
+                tbody.appendChild(summaryRow);
+            }
+            
+            // 计算总计
+            let totalSamples = 0;
+            let totalOutput = 0;
+            
+            // 添加月份行
+            reportData.months.forEach(month => {
+                month.channels.forEach(channel => {
+                    totalSamples += channel.totalSamples;
+                    totalOutput += channel.totalOutput;
+                    
+                    // 创建月份-渠道行
+                    const monthChannelRow = document.createElement('tr');
+                    monthChannelRow.className = 'ant-table-row ant-table-row-level-0';
+                    monthChannelRow.setAttribute('data-row-key', `${month.id}-${channel.channelId}`);
+                    
+                    monthChannelRow.innerHTML = `
+                        <td class="ant-table-cell">${month.name}</td>
+                        <td class="ant-table-cell">${channel.channelName}</td>
+                        <td class="ant-table-cell"><span class="ant-table-row-expand-icon ant-table-row-expand-icon-collapsed expand-icon">▶</span> 包含${channel.collections.length}种产品集合</td>
+                        <td class="ant-table-cell"></td>
+                        <td class="ant-table-cell">-</td>
+                        <td class="ant-table-cell">${channel.totalSamples}</td>
+                        <td class="ant-table-cell">${channel.totalOutput}</td>
+                        <td class="ant-table-cell">${channel.outputRate}</td>
+                    `;
+                    
+                    tbody.insertBefore(monthChannelRow, summaryRow);
+                    
+                    // 添加产品集合行
+                    channel.collections.forEach(collection => {
+                        const collectionRow = document.createElement('tr');
+                        collectionRow.className = 'ant-table-row ant-table-row-level-1';
+                        collectionRow.style.display = 'none';
+                        
+                        collectionRow.innerHTML = `
+                            <td class="ant-table-cell"></td>
+                            <td class="ant-table-cell"></td>
+                            <td class="ant-table-cell" style="padding-left: 32px;"><span class="ant-table-row-expand-icon ant-table-row-expand-icon-collapsed expand-icon">▶</span> ${collection.collectionName}</td>
+                            <td class="ant-table-cell"></td>
+                            <td class="ant-table-cell">包含${collection.skus.length}种SKU</td>
+                            <td class="ant-table-cell">${collection.samples}</td>
+                            <td class="ant-table-cell">${collection.output}</td>
+                            <td class="ant-table-cell">${collection.outputRate}</td>
+                        `;
+                        
+                        tbody.insertBefore(collectionRow, summaryRow);
+                        
+                        // 添加SKU行
+                        collection.skus.forEach(sku => {
+                            const skuRow = document.createElement('tr');
+                            skuRow.className = 'ant-table-row ant-table-row-level-2';
+                            skuRow.style.display = 'none';
+                            
+                            skuRow.innerHTML = `
+                                <td class="ant-table-cell"></td>
+                                <td class="ant-table-cell"></td>
+                                <td class="ant-table-cell" style="padding-left: 64px;"></td>
+                                <td class="ant-table-cell"><img src="${sku.image}" style="width: 40px; height: 40px; object-fit: cover; border-radius: 4px;"></td>
+                                <td class="ant-table-cell">${sku.skuName}</td>
+                                <td class="ant-table-cell">${sku.samples}</td>
+                                <td class="ant-table-cell">${sku.output}</td>
+                                <td class="ant-table-cell">${sku.outputRate}</td>
+                            `;
+                            
+                            tbody.insertBefore(skuRow, summaryRow);
+                        });
+                    });
+                });
+            });
+            
+            // 更新合计行
+            if (summaryRow) {
+                const avgOutputRate = ((totalOutput / totalSamples) * 100).toFixed(0) + '%';
+                summaryRow.innerHTML = `
+                    <td class="ant-table-cell" colspan="3">合计</td>
+                    <td class="ant-table-cell">-</td>
+                    <td class="ant-table-cell">-</td>
+                    <td class="ant-table-cell">${totalSamples}</td>
+                    <td class="ant-table-cell">${totalOutput}</td>
+                    <td class="ant-table-cell">${avgOutputRate}</td>
+                `;
+            }
+        }
+
+        // 展开/收起功能
+        function initExpandableRows() {
+            document.querySelectorAll('.expand-icon').forEach(icon => {
+                icon.addEventListener('click', function() {
+                    const row = this.closest('tr');
+                    const directChildRows = [];
+                    let nextRow = row.nextElementSibling;
+                    
+                    // 获取当前行的缩进级别
+                    const currentIndent = getRowIndent(row);
+                    
+                    // 查找直接子行：缩进级别为 currentIndent + 32 的行
+                    const directChildIndent = currentIndent + 32;
+                    
+                    // 改进逻辑：查找所有后续行，直到遇到同级别的可展开行或合计行
+                    while (nextRow && !nextRow.classList.contains('summary-row')) {
+                        // 获取下一行的缩进级别
+                        const nextIndent = getRowIndent(nextRow);
+                        
+                        // 检查下一行是否是可展开行
+                        const hasExpandIcon = nextRow.querySelector('.expand-icon');
+                        
+                        // 如果是可展开行，并且缩进级别小于或等于当前行，说明是同级或更高级别的行
+                        if (hasExpandIcon && nextIndent <= currentIndent) {
+                            break;
+                        }
+                        
+                        // 只添加直接子行（缩进级别等于 currentIndent + 32）
+                        if (nextIndent === directChildIndent) {
+                            directChildRows.push(nextRow);
+                        }
+                        
+                        nextRow = nextRow.nextElementSibling;
+                    }
+                    
+                    // 切换展开/收起状态
+                    if (this.textContent === '▶') {
+                        this.textContent = '▼';
+                        directChildRows.forEach(r => {
+                            r.style.display = 'table-row';
+                            
+                            // 确保孙行保持隐藏状态
+                            let grandChildRow = r.nextElementSibling;
+                            while (grandChildRow && !grandChildRow.classList.contains('summary-row')) {
+                                const grandChildIndent = getRowIndent(grandChildRow);
+                                if (grandChildIndent > directChildIndent) {
+                                    grandChildRow.style.display = 'none';
+                                    // 确保孙行的展开图标状态正确
+                                    const grandChildExpandIcon = grandChildRow.querySelector('.expand-icon');
+                                    if (grandChildExpandIcon) {
+                                        grandChildExpandIcon.textContent = '▶';
+                                    }
+                                } else if (grandChildRow.querySelector('.expand-icon')) {
+                                    break;
+                                }
+                                grandChildRow = grandChildRow.nextElementSibling;
+                            }
+                        });
+                    } else {
+                        this.textContent = '▶';
+                        
+                        // 收起直接子行及其所有后代行
+                        let rowToHide = row.nextElementSibling;
+                        while (rowToHide && !rowToHide.classList.contains('summary-row')) {
+                            const hideRowIndent = getRowIndent(rowToHide);
+                            if (hideRowIndent <= currentIndent) {
+                                break;
+                            }
+                            rowToHide.style.display = 'none';
+                            // 确保收起行的展开图标状态正确
+                            const hideRowExpandIcon = rowToHide.querySelector('.expand-icon');
+                            if (hideRowExpandIcon) {
+                                hideRowExpandIcon.textContent = '▶';
+                            }
+                            rowToHide = rowToHide.nextElementSibling;
+                        }
+                    }
+                });
+            });
+        }
+
+        // 筛选器交互
+        function initFilterInteractions() {
+            document.querySelectorAll('.btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    if (this.textContent === '筛选') {
+                        alert('筛选条件已应用');
+                    } else if (this.textContent === '清空') {
+                        document.querySelectorAll('.filter-input').forEach(input => {
+                            input.value = '';
+                        });
+                        alert('筛选条件已清空');
+                    }
+                });
+            });
+        }
+
+        // 分页交互
+        function initPaginationInteractions() {
+            document.querySelectorAll('.ant-pagination-item').forEach(item => {
+                item.addEventListener('click', function() {
+                    document.querySelectorAll('.ant-pagination-item').forEach(i => i.classList.remove('active'));
+                    this.classList.add('active');
+                    alert('切换到第' + this.textContent + '页');
+                });
+            });
+        }
+
+        // SKU分组数据
+        let skuGroups = {
+            'ungrouped': []
+        };
+
+        // 初始化SKU分组数据
+        function initSkuGroups() {
+            // 初始化分组
+            if (reportData.groups) {
+                reportData.groups.forEach(group => {
+                    skuGroups[group] = [];
+                });
+            } else {
+                skuGroups['ungrouped'] = [];
+            }
+            
+            // 从JSON中读取SKU的分组信息
+            reportData.collections.forEach(collection => {
+                collection.skus.forEach(sku => {
+                    const group = sku.group || 'ungrouped';
+                    if (!skuGroups[group]) {
+                        skuGroups[group] = [];
+                    }
+                    skuGroups[group].push(sku.id);
+                });
+            });
+        }
+        
+        // 初始化分组选择下拉框
+        function initGroupSelect() {
+            const groupSelect = document.getElementById('groupSelect');
+            if (!groupSelect) return;
+            
+            // 清空现有选项
+            groupSelect.innerHTML = '';
+            
+            // 添加默认选项
+            const defaultOption = document.createElement('option');
+            defaultOption.value = '';
+            defaultOption.textContent = '选择现有分组';
+            groupSelect.appendChild(defaultOption);
+            
+            // 从JSON中读取分组信息并添加到下拉框
+            if (reportData.groups) {
+                reportData.groups.forEach(group => {
+                    const option = document.createElement('option');
+                    option.value = group;
+                    option.textContent = group === 'ungrouped' ? '未分组' : group;
+                    groupSelect.appendChild(option);
+                });
+            } else {
+                const option = document.createElement('option');
+                option.value = 'ungrouped';
+                option.textContent = '未分组';
+                groupSelect.appendChild(option);
+            }
+        }
+
+        // 生成SKU列表（树形结构）
+        function generateSkuList() {
+            const skuListContainer = document.getElementById('skuList');
+            if (!skuListContainer) return;
+            
+            skuListContainer.innerHTML = '';
+            
+            // 按分组组织SKU
+            const groupedSkus = {};
+            
+            // 初始化所有分组
+            Object.keys(skuGroups).forEach(group => {
+                groupedSkus[group] = [];
+            });
+            
+            // 将SKU分配到对应分组
+            reportData.collections.forEach(collection => {
+                collection.skus.forEach(sku => {
+                    let found = false;
+                    for (const group in skuGroups) {
+                        if (skuGroups[group].includes(sku.id)) {
+                            groupedSkus[group].push({...sku, collectionName: collection.name});
+                            found = true;
+                            break;
+                        }
+                    }
+                    if (!found) {
+                        // 如果SKU不在任何分组中，添加到未分组
+                        if (!groupedSkus['ungrouped']) {
+                            groupedSkus['ungrouped'] = [];
+                        }
+                        groupedSkus['ungrouped'].push({...sku, collectionName: collection.name});
+                    }
+                });
+            });
+            
+            // 生成分组和SKU的树形结构
+            Object.keys(groupedSkus).forEach(group => {
+                const skusInGroup = groupedSkus[group];
+                
+                // 创建分组容器
+                const groupContainer = document.createElement('div');
+                groupContainer.style.marginBottom = '8px';
+                
+                // 创建分组标题（可展开/收缩）
+                const groupHeader = document.createElement('div');
+                groupHeader.style.display = 'flex';
+                groupHeader.style.alignItems = 'center';
+                groupHeader.style.gap = '8px';
+                groupHeader.style.padding = '8px';
+                groupHeader.style.backgroundColor = '#EBF8FF';
+                groupHeader.style.borderRadius = '6px';
+                groupHeader.style.fontWeight = '500';
+                
+                // 分组复选框
+                const groupCheckbox = document.createElement('input');
+                groupCheckbox.type = 'checkbox';
+                groupCheckbox.style.marginRight = '4px';
+                
+                // 展开/收缩图标
+                const expandIcon = document.createElement('span');
+                expandIcon.textContent = '▼';
+                expandIcon.style.userSelect = 'none';
+                expandIcon.style.fontSize = '12px';
+                expandIcon.style.cursor = 'pointer';
+                
+                // 分组名称
+                const groupName = document.createElement('span');
+                groupName.textContent = group === 'ungrouped' ? '未分组' : group;
+                
+                // 分组SKU数量
+                const skuCount = document.createElement('span');
+                skuCount.textContent = `(${skusInGroup.length}个SKU)`;
+                skuCount.style.fontSize = '12px';
+                skuCount.style.color = '#718096';
+                skuCount.style.marginLeft = '4px';
+                
+                // 添加到分组标题
+                groupHeader.appendChild(groupCheckbox);
+                groupHeader.appendChild(expandIcon);
+                groupHeader.appendChild(groupName);
+                groupHeader.appendChild(skuCount);
+                
+                // 添加分组复选框的点击事件
+                groupCheckbox.addEventListener('click', function(e) {
+                    e.stopPropagation(); // 阻止事件冒泡，避免触发分组标题的点击事件
+                    const isChecked = this.checked;
+                    
+                    // 选中或取消选中该分组下的所有SKU
+                    skusInGroup.forEach(sku => {
+                        const skuCheckbox = document.getElementById(`sku-${sku.id}`);
+                        if (skuCheckbox) {
+                            skuCheckbox.checked = isChecked;
+                        }
+                    });
+                });
+                
+                // 创建SKU列表容器
+                const skuItemsContainer = document.createElement('div');
+                skuItemsContainer.style.marginLeft = '20px';
+                skuItemsContainer.style.display = 'block';
+                skuItemsContainer.style.gap = '5px';
+                skuItemsContainer.style.display = 'flex';
+                skuItemsContainer.style.flexDirection = 'column';
+                
+                // 生成该分组下的SKU项
+                skusInGroup.forEach(sku => {
+                    const skuItem = document.createElement('div');
+                    skuItem.style.display = 'flex';
+                    skuItem.style.alignItems = 'center';
+                    skuItem.style.gap = '8px';
+                    skuItem.style.padding = '6px';
+                    skuItem.style.border = '1px solid #E2E8F0';
+                    skuItem.style.borderRadius = '4px';
+                    skuItem.style.backgroundColor = '#F7FAFC';
+                    skuItem.style.marginBottom = '5px'; // 增加SKU之间的间距
+                    
+                    const label = document.createElement('label');
+                    label.htmlFor = `sku-${sku.id}`;
+                    label.style.display = 'flex';
+                    label.style.alignItems = 'center';
+                    label.style.gap = '8px';
+                    label.style.fontSize = '14px';
+                    label.style.marginBottom = '2px'; // 增加SKU列表文字的下边距
+                    
+                    const checkbox = document.createElement('input');
+                    checkbox.type = 'checkbox';
+                    checkbox.value = sku.id;
+                    checkbox.id = `sku-${sku.id}`;
+                    
+                    // 添加图片
+                    const skuImage = document.createElement('img');
+                    skuImage.src = sku.image;
+                    skuImage.style.width = '32px';
+                    skuImage.style.height = '32px';
+                    skuImage.style.objectFit = 'cover';
+                    skuImage.style.borderRadius = '4px';
+                    
+                    const skuName = document.createElement('span');
+                    skuName.textContent = sku.name;
+                    skuName.style.fontWeight = '500';
+                    
+                    label.appendChild(skuImage);
+                    label.appendChild(skuName);
+                    
+                    skuItem.appendChild(checkbox);
+                    skuItem.appendChild(label);
+                    
+                    skuItemsContainer.appendChild(skuItem);
+                });
+                
+                // 添加展开/收缩功能
+                expandIcon.addEventListener('click', function() {
+                    if (skuItemsContainer.style.display === 'none') {
+                        skuItemsContainer.style.display = 'flex';
+                        expandIcon.textContent = '▼';
+                    } else {
+                        skuItemsContainer.style.display = 'none';
+                        expandIcon.textContent = '▶';
+                    }
+                });
+                
+                // 添加到分组容器
+                groupContainer.appendChild(groupHeader);
+                groupContainer.appendChild(skuItemsContainer);
+                
+                // 添加到SKU列表容器
+                skuListContainer.appendChild(groupContainer);
+            });
+        }
+
+        // 显示配置产品集合弹窗
+        function showConfigCollectionModal() {
+            const modal = document.getElementById('configCollectionModal');
+            if (modal) {
+                modal.style.display = 'block';
+                generateSkuList();
+            }
+        }
+
+        // 隐藏配置产品集合弹窗
+        function hideConfigCollectionModal() {
+            const modal = document.getElementById('configCollectionModal');
+            if (modal) {
+                modal.style.display = 'none';
+            }
+        }
+
+        // 创建新分组
+        function createNewGroup() {
+            const newGroupName = document.getElementById('newGroupName').value.trim();
+            if (!newGroupName) {
+                alert('请输入新分组名称');
+                return;
+            }
+            
+            if (!skuGroups[newGroupName]) {
+                skuGroups[newGroupName] = [];
+                
+                // 更新分组选择下拉框
+                const groupSelect = document.getElementById('groupSelect');
+                if (groupSelect) {
+                    const option = document.createElement('option');
+                    option.value = newGroupName;
+                    option.textContent = newGroupName;
+                    groupSelect.appendChild(option);
+                    groupSelect.value = newGroupName;
+                }
+                
+                document.getElementById('newGroupName').value = '';
+                alert(`分组 "${newGroupName}" 创建成功`);
+            } else {
+                alert('分组名称已存在');
+            }
+        }
+
+        // 批量分配SKU到分组
+        function batchAssignSkusToGroup() {
+            const selectedGroup = document.getElementById('groupSelect').value;
+            if (!selectedGroup) {
+                alert('请选择一个分组');
+                return;
+            }
+            
+            const selectedSkus = [];
+            document.querySelectorAll('#skuList input[type="checkbox"]:checked').forEach(checkbox => {
+                selectedSkus.push(checkbox.value);
+            });
+            
+            if (selectedSkus.length === 0) {
+                alert('请至少选择一个SKU');
+                return;
+            }
+            
+            // 从原分组中移除SKU
+            Object.keys(skuGroups).forEach(group => {
+                skuGroups[group] = skuGroups[group].filter(skuId => !selectedSkus.includes(skuId));
+            });
+            
+            // 添加SKU到新分组
+            selectedSkus.forEach(skuId => {
+                if (!skuGroups[selectedGroup]) {
+                    skuGroups[selectedGroup] = [];
+                }
+                skuGroups[selectedGroup].push(skuId);
+            });
+            
+            // 重新生成SKU列表，以反映最新的分组情况
+            generateSkuList();
+            
+            alert(`成功将 ${selectedSkus.length} 个SKU分配到分组 "${selectedGroup}"`);
+        }
+
+        // 保存配置
+        function saveConfig() {
+            // 这里可以添加保存配置的逻辑
+            alert('配置已保存');
+            hideConfigCollectionModal();
+        }
+
+        // 显示创建分组弹窗
+        function showCreateGroupModal() {
+            const modal = document.getElementById('createGroupModal');
+            if (modal) {
+                modal.style.display = 'block';
+            }
+        }
+        
+        // 隐藏创建分组弹窗
+        function hideCreateGroupModal() {
+            const modal = document.getElementById('createGroupModal');
+            if (modal) {
+                modal.style.display = 'none';
+            }
+        }
+        
+        // 初始化配置产品集合功能
+        function initConfigCollection() {
+            const configBtn = document.getElementById('configCollectionBtn');
+            const modal = document.getElementById('configCollectionModal');
+            const closeModalBtn = document.getElementById('closeModalBtn');
+            const cancelBtn = document.getElementById('cancelBtn');
+            const saveBtn = document.getElementById('saveBtn');
+            const createGroupBtn = document.getElementById('createGroupBtn');
+            const cancelCreateGroupBtn = document.getElementById('cancelCreateGroupBtn');
+            const confirmCreateGroupBtn = document.getElementById('confirmCreateGroupBtn');
+            const batchAssignBtn = document.getElementById('batchAssignBtn');
+            
+            if (configBtn) {
+                configBtn.addEventListener('click', function() {
+                    showConfigCollectionModal();
+                    initGroupSelect();
+                });
+            }
+            
+            if (closeModalBtn) {
+                closeModalBtn.addEventListener('click', hideConfigCollectionModal);
+            }
+            
+            if (cancelBtn) {
+                cancelBtn.addEventListener('click', hideConfigCollectionModal);
+            }
+            
+            if (saveBtn) {
+                saveBtn.addEventListener('click', saveConfig);
+            }
+            
+            if (createGroupBtn) {
+                createGroupBtn.addEventListener('click', showCreateGroupModal);
+            }
+            
+            if (cancelCreateGroupBtn) {
+                cancelCreateGroupBtn.addEventListener('click', hideCreateGroupModal);
+            }
+            
+            if (confirmCreateGroupBtn) {
+                confirmCreateGroupBtn.addEventListener('click', function() {
+                    createNewGroup();
+                    hideCreateGroupModal();
+                });
+            }
+            
+            if (batchAssignBtn) {
+                batchAssignBtn.addEventListener('click', batchAssignSkusToGroup);
+            }
+            
+            // 初始化SKU分组
+            initSkuGroups();
+        }
+
+        // 初始化页面
+        function initPage() {
+            populateSkuTable();
+            populateChannelTable();
+            populateMonthTable();
+            initExpandableRows();
+            initFilterInteractions();
+            initPaginationInteractions();
+            initConfigCollection();
+        }
+
+        // 页面加载完成后初始化
+        window.addEventListener('DOMContentLoaded', initPage);
+    </script>
+</body>
+</html>
