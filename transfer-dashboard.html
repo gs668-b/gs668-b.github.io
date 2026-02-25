@@ -1,0 +1,1623 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>市场部综合备货看板</title>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: #F7FAFC;
+            color: #2D3748;
+        }
+        .app-container {
+            display: flex;
+            min-height: 100vh;
+        }
+        .sidebar {
+            width: 80px;
+            background-color: #001529;
+            color: white;
+            transition: width 0.3s;
+            height: 100vh;
+            position: fixed;
+            left: 0;
+            top: 0;
+            z-index: 1000;
+        }
+        .sidebar:hover {
+            width: 200px;
+        }
+        .sidebar-logo {
+            height: 64px;
+            background-color: #41B983;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+        }
+        .sidebar-menu {
+            padding-top: 16px;
+        }
+        .menu-item {
+            height: 48px;
+            display: flex;
+            align-items: center;
+            padding: 0 16px;
+            cursor: pointer;
+            transition: all 0.3s;
+            color: rgba(255, 255, 255, 0.65);
+            white-space: nowrap;
+            overflow: hidden;
+        }
+        .menu-item:hover {
+            background-color: #00061a;
+            color: white;
+        }
+        .menu-item.active {
+            background-color: #41B983;
+            color: white;
+        }
+        .menu-icon {
+            margin-right: 10px;
+            font-size: 14px;
+            display: inline-block;
+            width: 16px;
+            text-align: center;
+        }
+        .menu-item span:not(.menu-icon) {
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        .sidebar:hover .menu-item span:not(.menu-icon) {
+            opacity: 1;
+        }
+        .main-content {
+            margin-left: 80px;
+            flex: 1;
+            width: calc(100% - 80px);
+            overflow: hidden;
+        }
+        .top-nav {
+            height: 64px;
+            background-color: white;
+            border-bottom: 1px solid #e5e7eb;
+            padding: 0 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .breadcrumb {
+            font-size: 14px;
+            color: #4A5568;
+        }
+        .nav-actions {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+        .search-box {
+            width: 300px;
+            height: 36px;
+            border: 1px solid #E2E8F0;
+            border-radius: 6px;
+            padding: 0 12px;
+            font-size: 14px;
+        }
+        .content-area {
+            padding: 24px;
+        }
+        .page-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: #2D3748;
+            margin-bottom: 24px;
+        }
+        .tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 24px;
+            border-bottom: 1px solid #E2E8F0;
+            padding-bottom: 8px;
+        }
+        .tab {
+            padding: 8px 16px;
+            border-radius: 6px 6px 0 0;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+        .tab.active {
+            background-color: white;
+            color: #2B6CB0;
+            border: 1px solid #E2E8F0;
+            border-bottom: 1px solid white;
+        }
+        .tab:not(.active) {
+            color: #718096;
+        }
+        .filter-container {
+            background-color: white;
+            padding: 16px;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+            margin-bottom: 24px;
+            width: 100%;
+            overflow: hidden;
+        }
+        .content-area {
+            width: 100%;
+            overflow: hidden;
+        }
+        .filter-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 16px;
+            align-items: flex-start;
+            max-width: 100%;
+        }
+        .filter-item {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+        .filter-label {
+            font-size: 14px;
+            font-weight: 400;
+            color: #2D3748;
+        }
+        .filter-input {
+            width: 200px;
+            height: 36px;
+            border: 1px solid #E2E8F0;
+            border-radius: 6px;
+            padding: 0 12px;
+            font-size: 14px;
+        }
+        .filter-input:focus {
+            outline: none;
+            border: 2px solid #2B6CB0;
+        }
+        .filter-select {
+            position: relative;
+        }
+        .filter-select select {
+            width: 100%;
+            height: 36px;
+            border: 1px solid #E2E8F0;
+            border-radius: 6px;
+            padding: 0 32px 0 12px;
+            font-size: 14px;
+            appearance: none;
+            background-color: white;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        .filter-select select:hover {
+            border-color: #2B6CB0;
+            box-shadow: 0 0 0 2px rgba(43, 108, 176, 0.1);
+        }
+        .filter-select select:focus {
+            outline: none;
+            border-color: #2B6CB0;
+            box-shadow: 0 0 0 2px rgba(43, 108, 176, 0.2);
+        }
+        .filter-select::after {
+            content: '▼';
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 10px;
+            color: #718096;
+            pointer-events: none;
+            transition: all 0.3s ease;
+        }
+        .filter-select:hover::after {
+            color: #2B6CB0;
+        }
+        .filter-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 16px;
+        }
+        .btn {
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            border: none;
+        }
+        .btn-primary {
+            background-color: #2B6CB0;
+            color: white;
+        }
+        .btn-default {
+            background-color: white;
+            color: #2D3748;
+            border: 1px solid #E2E8F0;
+        }
+        .table-section {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+            margin-bottom: 24px;
+            padding: 16px;
+        }
+        .table-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #2D3748;
+            margin-bottom: 16px;
+        }
+        .table-section {
+            width: 100%;
+            overflow: hidden;
+        }
+        .table-scroll-container {
+            width: 100%;
+            max-height: 600px;
+            overflow: auto;
+            border: 1px solid #E2E8F0;
+            border-radius: 8px;
+        }
+        .ant-table-container {
+            width: 100%;
+        }
+        .ant-table {
+            width: 100%;
+            min-width: 1200px;
+        }
+        .ant-table-thead > tr {
+            height: 60px;
+        }
+        .ant-table-thead > tr > th {
+            background-color: #EDF2F7;
+            color: #4A5568;
+            font-size: 14px;
+            font-weight: 600;
+            padding: 8px 12px;
+            text-align: left;
+            border-bottom: 2px solid #E2E8F0;
+            line-height: 1.4;
+            letter-spacing: 0.5px;
+            white-space: normal;
+            min-width: 150px;
+            max-width: 250px;
+            height: 60px;
+        }
+        .ant-table-tbody > tr > td {
+            padding: 12px 16px;
+            border-bottom: 1px solid #E2E8F0;
+            color: #2D3748;
+            line-height: 1.4;
+            transition: all 0.2s ease;
+        }
+        .ant-table-tbody > tr:nth-child(even) {
+            background-color: #F7FAFC;
+        }
+        .ant-table-tbody > tr:hover {
+            background-color: #EBF8FF;
+            transform: translateY(-1px);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+        .summary-row {
+            font-weight: 600;
+            background-color: #F7FAFC;
+            border-top: 2px solid #E2E8F0;
+            border-bottom: 2px solid #E2E8F0;
+        }
+        .summary-row td {
+            font-size: 14px;
+            font-weight: 600;
+        }
+        .ant-table {
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        }
+        .ant-table-thead {
+            border-radius: 8px 8px 0 0;
+            overflow: hidden;
+        }
+        .ant-pagination {
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            margin-top: 16px;
+            gap: 8px;
+        }
+        .ant-pagination-item {
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid #E2E8F0;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        .ant-pagination-item.active {
+            background-color: #2B6CB0;
+            color: white;
+            border-color: #2B6CB0;
+        }
+        .ant-pagination-item:hover:not(.active) {
+            border-color: #2B6CB0;
+        }
+        .ant-pagination-prev, .ant-pagination-next {
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid #E2E8F0;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+        .ant-pagination-prev:hover, .ant-pagination-next:hover {
+            border-color: #2B6CB0;
+        }
+        .ant-pagination-disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        .footer {
+            padding: 24px;
+            text-align: center;
+            font-size: 12px;
+            color: #718096;
+        }
+        @media (max-width: 768px) {
+            .filter-row {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .filter-input {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <!-- 左侧边栏 -->
+        <div class="sidebar">
+            <div class="sidebar-logo">OriginLinks</div>
+            <div class="sidebar-menu">
+                <div class="menu-item active">
+                    <span class="menu-icon">📊</span>
+                    <span>数据分析</span>
+                </div>
+                <div class="menu-item">
+                    <span class="menu-icon">🛒</span>
+                    <span>Amazon管理</span>
+                </div>
+                <div class="menu-item">
+                    <span class="menu-icon">💰</span>
+                    <span>财务</span>
+                </div>
+                <div class="menu-item">
+                    <span class="menu-icon">📱</span>
+                    <span>社媒管理</span>
+                </div>
+                <div class="menu-item">
+                    <span class="menu-icon">⚙️</span>
+                    <span>系统设置</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- 主内容区域 -->
+        <div class="main-content">
+            <!-- 顶部导航 -->
+            <div class="top-nav">
+                <div class="breadcrumb">首页 / 数据分析 / 市场部综合备货看板</div>
+                <div class="nav-actions">
+                    <input type="text" class="search-box" placeholder="请输入搜索内容">
+                    <span>🔔</span>
+                    <span>⚙️</span>
+                    <div>👤</div>
+                </div>
+            </div>
+
+            <!-- 内容区域 -->
+            <div class="content-area">
+                <h1 class="page-title">市场部综合备货看板</h1>
+
+                <!-- Tab切换 -->
+                <div class="tabs">
+                    <div class="tab active" data-tab="main">主看板</div>
+                    <div class="tab" data-tab="transfer">转仓看板</div>
+                </div>
+
+                <!-- 主看板内容 -->
+                <div id="main" class="tab-content" style="display: block;">
+                    <!-- 筛选器 -->
+                    <div class="filter-container">
+                        <div class="filter-row" style="flex-wrap: wrap;">
+                            <div class="filter-item">
+                                <label class="filter-label">产品名</label>
+                                <input type="text" class="filter-input" placeholder="输入产品名">
+                            </div>
+                            <div class="filter-item">
+                                <label class="filter-label">MKT-SKU</label>
+                                <input type="text" class="filter-input" placeholder="输入MKT-SKU">
+                            </div>
+                            <div class="filter-item">
+                                <label class="filter-label">渠道</label>
+                                <div style="display: flex; flex-direction: column; gap: 4px;">
+                                    <div style="display: flex; align-items: center; gap: 8px;">
+                                        <input type="checkbox" id="channel-shopify" value="shopify" checked>
+                                        <label for="channel-shopify">Shopify</label>
+                                    </div>
+                                    <div style="display: flex; align-items: center; gap: 8px;">
+                                        <input type="checkbox" id="channel-shein" value="shein" checked>
+                                        <label for="channel-shein">SHEIN</label>
+                                    </div>
+                                    <div style="display: flex; align-items: center; gap: 8px;">
+                                        <input type="checkbox" id="channel-tiktok" value="tiktok" checked>
+                                        <label for="channel-tiktok">TikTok</label>
+                                    </div>
+                                    <div style="display: flex; align-items: center; gap: 8px;">
+                                        <input type="checkbox" id="channel-target" value="target" checked>
+                                        <label for="channel-target">Target</label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="filter-item">
+                                <label class="filter-label">FBT库存健康度</label>
+                                <div class="filter-select">
+                                    <select class="filter-input">
+                                        <option value="">全部</option>
+                                        <option value="healthy">健康</option>
+                                        <option value="dangerous">危险</option>
+                                        <option value="warning">预警</option>
+                                        <option value="slow">滞销</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="filter-item">
+                                <label class="filter-label">是否需要转仓</label>
+                                <div class="filter-select">
+                                    <select class="filter-input">
+                                        <option value="">全部</option>
+                                        <option value="yes">是</option>
+                                        <option value="no">否</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="filter-item">
+                                <label class="filter-label">转仓系数</label>
+                                <div class="filter-select">
+                                    <select class="filter-input">
+                                        <option value="0.8">0.8</option>
+                                        <option value="0.9">0.9</option>
+                                        <option value="1.0" selected>1.0</option>
+                                        <option value="1.1">1.1</option>
+                                        <option value="1.2">1.2</option>
+                                        <option value="1.3">1.3</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="filter-item">
+                                <label class="filter-label">是否需要备货</label>
+                                <div class="filter-select">
+                                    <select class="filter-input">
+                                        <option value="">全部</option>
+                                        <option value="yes">是</option>
+                                        <option value="no">否</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="filter-row" style="margin-top: 16px;">
+                            <div class="filter-item">
+                                <label class="filter-label">备货系数-Shopify</label>
+                                <div class="filter-select">
+                                    <select class="filter-input">
+                                        <option value="0.8">0.8</option>
+                                        <option value="0.9">0.9</option>
+                                        <option value="1.0" selected>1.0</option>
+                                        <option value="1.1">1.1</option>
+                                        <option value="1.2">1.2</option>
+                                        <option value="1.3">1.3</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="filter-item">
+                                <label class="filter-label">备货系数-SHEIN</label>
+                                <div class="filter-select">
+                                    <select class="filter-input">
+                                        <option value="0.8">0.8</option>
+                                        <option value="0.9">0.9</option>
+                                        <option value="1.0" selected>1.0</option>
+                                        <option value="1.1">1.1</option>
+                                        <option value="1.2">1.2</option>
+                                        <option value="1.3">1.3</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="filter-item">
+                                <label class="filter-label">备货系数-TikTok</label>
+                                <div class="filter-select">
+                                    <select class="filter-input">
+                                        <option value="0.8">0.8</option>
+                                        <option value="0.9">0.9</option>
+                                        <option value="1.0" selected>1.0</option>
+                                        <option value="1.1">1.1</option>
+                                        <option value="1.2">1.2</option>
+                                        <option value="1.3">1.3</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="filter-item">
+                                <label class="filter-label">备货系数-Target</label>
+                                <div class="filter-select">
+                                    <select class="filter-input">
+                                        <option value="0.8">0.8</option>
+                                        <option value="0.9">0.9</option>
+                                        <option value="1.0" selected>1.0</option>
+                                        <option value="1.1">1.1</option>
+                                        <option value="1.2">1.2</option>
+                                        <option value="1.3">1.3</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="filter-actions">
+                            <button class="btn btn-primary">筛选</button>
+                            <button class="btn btn-default">清空</button>
+                        </div>
+                    </div>
+
+                    <!-- 表格 -->
+                    <div class="table-section">
+                        <h2 class="table-title">主看板数据</h2>
+                        <div class="table-scroll-container">
+                            <div class="ant-table-container">
+                                <table class="ant-table">
+                                <thead class="ant-table-thead">
+                                    <tr class="ant-table-row">
+                                        <th class="ant-table-cell">MKT-SKU</th>
+                                        <th class="ant-table-cell">对应新sku</th>
+                                        <th class="ant-table-cell">图片</th>
+                                        <th class="ant-table-cell">产品名</th>
+                                        <th class="ant-table-cell col-channel-shopify" id="th-sales-website">网站销量</th>
+                                        <th class="ant-table-cell col-channel-tiktok" id="th-sales-tiktok">TikTok销量</th>
+                                        <th class="ant-table-cell col-channel-shein" id="th-sales-shein">SHEIN销量</th>
+                                        <th class="ant-table-cell col-channel-target" id="th-sales-target">Target销量</th>
+                                        <th class="ant-table-cell col-channel-shopify" id="th-inventory-davidWebsite">David-网站即时库存</th>
+                                        <th class="ant-table-cell col-channel-tiktok" id="th-inventory-davidTiktok">David-TikTok即时库存</th>
+                                        <th class="ant-table-cell col-channel-shein" id="th-inventory-davidShein">David-SHEIN即时库存</th>
+                                        <th class="ant-table-cell col-channel-target" id="th-inventory-davidTarget">David-Target即时库存</th>
+                                        <th class="ant-table-cell" id="th-inventory-fba">FBA即时库存</th>
+                                        <th class="ant-table-cell col-channel-tiktok" id="th-inventory-fbt">FBT即时库存</th>
+                                        <th class="ant-table-cell col-channel-tiktok" id="th-fbt-health">FBT库存健康度</th>
+                                        <th class="ant-table-cell">是否需要转仓</th>
+                                        <th class="ant-table-cell">建议转仓数量-按销量</th>
+                                        <th class="ant-table-cell">建议转仓数量-按出库量</th>
+                                        <th class="ant-table-cell">建议转仓数量-按出库量（按箱规）</th>
+                                        <th class="ant-table-cell">市场部不含税预留数量（45天）</th>
+                                        <th class="ant-table-cell">箱规</th>
+                                        <th class="ant-table-cell">市场部含税在途周期数量</th>
+                                        <th class="ant-table-cell">不含税在途周期数量（含新旧sku）</th>
+                                        <th class="ant-table-cell">市场部-含税仓库存</th>
+                                        <th class="ant-table-cell">市场部-不含税仓库存（含新旧sku库存）</th>
+                                        <th class="ant-table-cell">David近60天出库量</th>
+                                        <th class="ant-table-cell col-channel-tiktok" id="th-outbound-fbt">FBT近60天出库量</th>
+                                        <th class="ant-table-cell">市场部近60天国内发货量</th>
+                                        <th class="ant-table-cell">预估消耗量</th>
+                                        <th class="ant-table-cell">下个周期需求量</th>
+                                        <th class="ant-table-cell">需求数量</th>
+                                        <th class="ant-table-cell">是否需要备货</th>
+                                        <th class="ant-table-cell">建议备货数量</th>
+                                        <th class="ant-table-cell">建议备货数量（按箱规）</th>
+                                        <th class="ant-table-cell">市场部FBA剩余库存</th>
+                                        <th class="ant-table-cell">市场部近60天FBA发货量</th>
+                                        <th class="ant-table-cell">官网转仓数量</th>
+                                        <th class="ant-table-cell">东莞仓-不含税在库</th>
+                                        <th class="ant-table-cell">东莞仓-不含税在库（对应新sku）</th>
+                                        <th class="ant-table-cell">东莞仓-含税在库</th>
+                                        <th class="ant-table-cell">不良品库存</th>
+                                        <th class="ant-table-cell">erp起订量</th>
+                                        <th class="ant-table-cell">市场部销量</th>
+                                        <th class="ant-table-cell">亚马逊销量</th>
+                                        <th class="ant-table-cell">产品品类</th>
+                                        <th class="ant-table-cell">标签</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="ant-table-tbody" id="mainTableBody">
+                                </tbody>
+                            </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 转仓看板内容 -->
+                <div id="transfer" class="tab-content" style="display: none;">
+                    <!-- 筛选器 -->
+                    <div class="filter-container">
+                        <div class="filter-row">
+                            <div class="filter-item">
+                                <label class="filter-label">产品名</label>
+                                <input type="text" class="filter-input" placeholder="输入产品名">
+                            </div>
+                            <div class="filter-item">
+                                <label class="filter-label">MKT-SKU</label>
+                                <input type="text" class="filter-input" placeholder="输入MKT-SKU">
+                            </div>
+                            <div class="filter-item">
+                                <label class="filter-label">目的地仓库</label>
+                                <div class="filter-select">
+                                    <select class="filter-input">
+                                        <option value="">全部</option>
+                                        <option value="warehouse1">仓库A</option>
+                                        <option value="warehouse2">仓库B</option>
+                                        <option value="warehouse3">仓库C</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="filter-item">
+                                <label class="filter-label">货运类型</label>
+                                <div class="filter-select">
+                                    <select class="filter-input">
+                                        <option value="">全部</option>
+                                        <option value="air">空运</option>
+                                        <option value="sea">海运</option>
+                                        <option value="rail">铁运</option>
+                                        <option value="road">陆运</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="filter-item" style="display: flex; align-items: center; gap: 8px;">
+                                <label class="filter-label">出库时间</label>
+                                <div style="display: flex; align-items: center; gap: 8px;">
+                                    <input type="date" class="filter-input" placeholder="起始日期" id="startDate">
+                                    <span>~</span>
+                                    <input type="date" class="filter-input" placeholder="终止日期" id="endDate">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="filter-actions">
+                            <button class="btn btn-primary">筛选</button>
+                            <button class="btn btn-default">清空</button>
+                        </div>
+                    </div>
+
+                    <!-- 表格 -->
+                    <div class="table-section">
+                        <h2 class="table-title">转仓明细</h2>
+                        <div class="table-scroll-container">
+                            <div class="ant-table-container">
+                                <table class="ant-table">
+                                <thead class="ant-table-thead">
+                                    <tr class="ant-table-row">
+                                        <th class="ant-table-cell">转仓单号</th>
+                                        <th class="ant-table-cell">转出仓库</th>
+                                        <th class="ant-table-cell">转入仓库</th>
+                                        <th class="ant-table-cell">商品</th>
+                                        <th class="ant-table-cell">数量</th>
+                                        <th class="ant-table-cell">状态</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="ant-table-tbody">
+                                    <tr class="ant-table-row">
+                                        <td class="ant-table-cell">TRF001</td>
+                                        <td class="ant-table-cell">仓库A</td>
+                                        <td class="ant-table-cell">仓库B</td>
+                                        <td class="ant-table-cell">商品A</td>
+                                        <td class="ant-table-cell">100</td>
+                                        <td class="ant-table-cell">已完成</td>
+                                    </tr>
+                                    <tr class="ant-table-row">
+                                        <td class="ant-table-cell">TRF002</td>
+                                        <td class="ant-table-cell">仓库B</td>
+                                        <td class="ant-table-cell">仓库C</td>
+                                        <td class="ant-table-cell">商品B</td>
+                                        <td class="ant-table-cell">50</td>
+                                        <td class="ant-table-cell">进行中</td>
+                                    </tr>
+                                    <tr class="ant-table-row">
+                                        <td class="ant-table-cell">TRF003</td>
+                                        <td class="ant-table-cell">仓库A</td>
+                                        <td class="ant-table-cell">仓库C</td>
+                                        <td class="ant-table-cell">商品C</td>
+                                        <td class="ant-table-cell">80</td>
+                                        <td class="ant-table-cell">已完成</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 固定的JSON数据
+        const transferData = {
+            // 主看板数据
+            mainDashboard: {
+                products: [
+                    {
+                        id: 1,
+                        mktSku: 'SKU-A',
+                        newSku: 'SKU-A-NEW',
+                        productName: '美甲灯产品A',
+                        image: 'https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=nail%20lamp%20product&image_size=square',
+                        sales: {
+                            website: { days7: 0, days30: 0, days45: 0 },
+                            tiktok: { days7: 0, days30: 0, days45: 0 },
+                            shein: { days7: 0, days30: 0, days45: 0 },
+                            target: { days7: 0, days30: 0, days45: 0 }
+                        },
+                        inventory: {
+                            davidWebsite: { current: 0, inTransit: 50, needTransfer: '否' },
+                            davidTiktok: { current: 0, inTransit: 30, needTransfer: '否' },
+                            davidShein: { current: 0, inTransit: 20, needTransfer: '否' },
+                            davidTarget: { current: 0, inTransit: 40, needTransfer: '是' },
+                            fba: { current: 0, inTransit: 60, needTransfer: '是' },
+                            fbt: { current: 0, inTransit: 45, needTransfer: '是' }
+                        },
+                        fbtHealth: '🔴 危险',
+                        needTransfer: '是',
+                        transferSuggestion: {
+                            bySales: { website: 76, tiktok: 0, shein: 0, target: 0 },
+                            byOutbound: { 'David-网站': 76, 'David-TikTok': 0, 'David-SHEIN': 0, 'David-Target': 0, 'FBT': 0 },
+                            byOutboundBox: { 'David-网站': 100, 'David-TikTok': 0, 'David-SHEIN': 0, 'David-Target': 0, 'FBT': 0 }
+                        },
+                        reserved45Days: 50,
+                        boxRule: 20,
+                        inTransitTax: {
+                            '20-30天': 30,
+                            '30-45天': 25,
+                            '45天以上': 15
+                        },
+                        inTransitNoTax: {
+                            '20-30天': 28,
+                            '30-45天': 23,
+                            '45天以上': 13
+                        },
+                        warehouseStock: {
+                            tax: { 'David-网站': 'H', 'David-TikTok': 'J', 'David-SHEIN': 'K', 'David-Target': 'L' },
+                            noTax: 'M',
+                            noTaxWithNewSku: 'P',
+                            taxCurrent: 0,
+                            taxInTransit: 20,
+                            noTaxCurrent: 0,
+                            noTaxInTransit: 20
+                        },
+                        outbound60Days: {
+                            domesticWebsite: 150,
+                            davidWebsite: 180,
+                            davidTiktok: 90,
+                            davidShein: 120,
+                            davidTarget: 80,
+                            fbt: 200
+                        },
+                        estimatedConsumption: 450,
+                        nextPeriodDemand: 180,
+                        demandQuantity: {
+                            websiteNoTax: 2,
+                            davidTax: 4,
+                            fbtTax: 5
+                        },
+                        needRestock: {
+                            noTax: '是',
+                            tax: '否'
+                        },
+                        restockSuggestion: {
+                            noTax: 280,
+                            tax: 300,
+                            noTaxWithNewSku: 280,
+                            taxWithNewSku: 300
+                        },
+                        fbaStock: {
+                            remaining: 120,
+                            outbound60Days: 200,
+                            totalDemand: 320
+                        },
+                        websiteTransferQty: 50,
+                        dgWarehouse: {
+                            noTax: 350,
+                            noTaxNewSku: 320,
+                            tax: 380,
+                            defectiveNoTax: 200,
+                            defectiveTax: 314
+                        },
+                        erpMinOrder: 100,
+                        marketSales: {
+                            days7: 0,
+                            days15: 0,
+                            days30: 0,
+                            days45: 0
+                        },
+                        amazonSales: {
+                            days7: 0,
+                            days15: 0,
+                            days30: 0,
+                            days45: 0
+                        },
+                        category: '美甲用品',
+                        tag: '滞销'
+                    },
+                    {
+                        id: 2,
+                        mktSku: 'SKU-B',
+                        newSku: 'SKU-B-NEW',
+                        productName: '美甲灯产品B',
+                        image: 'https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=nail%20lamp%20product%202&image_size=square',
+                        sales: {
+                            website: { days7: 5, days30: 15, days45: 25 },
+                            tiktok: { days7: 3, days30: 10, days45: 18 },
+                            shein: { days7: 2, days30: 8, days45: 12 },
+                            target: { days7: 1, days30: 5, days45: 8 }
+                        },
+                        inventory: {
+                            davidWebsite: { current: 200, inTransit: 80, needTransfer: '否' },
+                            davidTiktok: { current: 150, inTransit: 60, needTransfer: '否' },
+                            davidShein: { current: 100, inTransit: 40, needTransfer: '否' },
+                            davidTarget: { current: 80, inTransit: 30, needTransfer: '否' },
+                            fba: { current: 300, inTransit: 120, needTransfer: '否' },
+                            fbt: { current: 180, inTransit: 90, needTransfer: '否' }
+                        },
+                        fbtHealth: '🟢 健康',
+                        needTransfer: '否',
+                        transferSuggestion: {
+                            bySales: { website: 0, tiktok: 0, shein: 0, target: 0 },
+                            byOutbound: { 'David-网站': 0, 'David-TikTok': 0, 'David-SHEIN': 0, 'David-Target': 0, 'FBT': 0 },
+                            byOutboundBox: { 'David-网站': 0, 'David-TikTok': 0, 'David-SHEIN': 0, 'David-Target': 0, 'FBT': 0 }
+                        },
+                        reserved45Days: 80,
+                        boxRule: 15,
+                        inTransitTax: {
+                            '20-30天': 50,
+                            '30-45天': 40,
+                            '45天以上': 30
+                        },
+                        inTransitNoTax: {
+                            '20-30天': 45,
+                            '30-45天': 35,
+                            '45天以上': 25
+                        },
+                        warehouseStock: {
+                            tax: { 'David-网站': 'A', 'David-TikTok': 'B', 'David-SHEIN': 'C', 'David-Target': 'D' },
+                            noTax: 'E',
+                            noTaxWithNewSku: 'F',
+                            taxCurrent: 280,
+                            taxInTransit: 120,
+                            noTaxCurrent: 250,
+                            noTaxInTransit: 100
+                        },
+                        outbound60Days: {
+                            domesticWebsite: 200,
+                            davidWebsite: 250,
+                            davidTiktok: 150,
+                            davidShein: 100,
+                            davidTarget: 80,
+                            fbt: 300
+                        },
+                        estimatedConsumption: 600,
+                        nextPeriodDemand: 250,
+                        demandQuantity: {
+                            websiteNoTax: 8,
+                            davidTax: 12,
+                            fbtTax: 15
+                        },
+                        needRestock: {
+                            noTax: '是',
+                            tax: '是'
+                        },
+                        restockSuggestion: {
+                            noTax: 400,
+                            tax: 450,
+                            noTaxWithNewSku: 400,
+                            taxWithNewSku: 450
+                        },
+                        fbaStock: {
+                            remaining: 180,
+                            outbound60Days: 300,
+                            totalDemand: 480
+                        },
+                        websiteTransferQty: 0,
+                        dgWarehouse: {
+                            noTax: 500,
+                            noTaxNewSku: 450,
+                            tax: 550,
+                            defectiveNoTax: 180,
+                            defectiveTax: 280
+                        },
+                        erpMinOrder: 80,
+                        marketSales: {
+                            days7: 5,
+                            days15: 10,
+                            days30: 20,
+                            days45: 35
+                        },
+                        amazonSales: {
+                            days7: 3,
+                            days15: 8,
+                            days30: 15,
+                            days45: 25
+                        },
+                        category: '美甲用品',
+                        tag: '热销'
+                    },
+                    {
+                        id: 3,
+                        mktSku: 'SKU-C',
+                        newSku: 'SKU-C-NEW',
+                        productName: '美甲灯产品C',
+                        image: 'https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=nail%20lamp%20product%203&image_size=square',
+                        sales: {
+                            website: { days7: 2, days30: 8, days45: 15 },
+                            tiktok: { days7: 1, days30: 5, days45: 10 },
+                            shein: { days7: 1, days30: 4, days45: 8 },
+                            target: { days7: 0, days30: 3, days45: 5 }
+                        },
+                        inventory: {
+                            davidWebsite: { current: 120, inTransit: 50, needTransfer: '否' },
+                            davidTiktok: { current: 80, inTransit: 35, needTransfer: '否' },
+                            davidShein: { current: 60, inTransit: 25, needTransfer: '否' },
+                            davidTarget: { current: 40, inTransit: 20, needTransfer: '否' },
+                            fba: { current: 150, inTransit: 70, needTransfer: '否' },
+                            fbt: { current: 90, inTransit: 45, needTransfer: '是' }
+                        },
+                        fbtHealth: '🟡 预警',
+                        needTransfer: '是',
+                        transferSuggestion: {
+                            bySales: { website: 30, tiktok: 15, shein: 10, target: 5 },
+                            byOutbound: { 'David-网站': 40, 'David-TikTok': 20, 'David-SHEIN': 15, 'David-Target': 10, 'FBT': 30 },
+                            byOutboundBox: { 'David-网站': 40, 'David-TikTok': 20, 'David-SHEIN': 20, 'David-Target': 10, 'FBT': 30 }
+                        },
+                        reserved45Days: 60,
+                        boxRule: 12,
+                        inTransitTax: {
+                            '20-30天': 35,
+                            '30-45天': 28,
+                            '45天以上': 20
+                        },
+                        inTransitNoTax: {
+                            '20-30天': 30,
+                            '30-45天': 23,
+                            '45天以上': 15
+                        },
+                        warehouseStock: {
+                            tax: { 'David-网站': 'G', 'David-TikTok': 'H', 'David-SHEIN': 'I', 'David-Target': 'J' },
+                            noTax: 'K',
+                            noTaxWithNewSku: 'L',
+                            taxCurrent: 180,
+                            taxInTransit: 80,
+                            noTaxCurrent: 150,
+                            noTaxInTransit: 65
+                        },
+                        outbound60Days: {
+                            domesticWebsite: 120,
+                            davidWebsite: 150,
+                            davidTiktok: 80,
+                            davidShein: 60,
+                            davidTarget: 40,
+                            fbt: 160
+                        },
+                        estimatedConsumption: 350,
+                        nextPeriodDemand: 150,
+                        demandQuantity: {
+                            websiteNoTax: 5,
+                            davidTax: 8,
+                            fbtTax: 10
+                        },
+                        needRestock: {
+                            noTax: '是',
+                            tax: '是'
+                        },
+                        restockSuggestion: {
+                            noTax: 220,
+                            tax: 250,
+                            noTaxWithNewSku: 220,
+                            taxWithNewSku: 250
+                        },
+                        fbaStock: {
+                            remaining: 90,
+                            outbound60Days: 160,
+                            totalDemand: 250
+                        },
+                        websiteTransferQty: 30,
+                        dgWarehouse: {
+                            noTax: 280,
+                            noTaxNewSku: 250,
+                            tax: 320,
+                            defectiveNoTax: 120,
+                            defectiveTax: 180
+                        },
+                        erpMinOrder: 60,
+                        marketSales: {
+                            days7: 2,
+                            days15: 5,
+                            days30: 10,
+                            days45: 18
+                        },
+                        amazonSales: {
+                            days7: 1,
+                            days15: 3,
+                            days30: 8,
+                            days45: 15
+                        },
+                        category: '美甲用品',
+                        tag: '常规'
+                    },
+                    {
+                        id: 4,
+                        mktSku: 'SKU-D',
+                        newSku: 'SKU-D-NEW',
+                        productName: '美甲灯产品D',
+                        image: 'https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=nail%20lamp%20product%204&image_size=square',
+                        sales: {
+                            website: { days7: 8, days30: 25, days45: 40 },
+                            tiktok: { days7: 5, days30: 18, days45: 30 },
+                            shein: { days7: 3, days30: 12, days45: 20 },
+                            target: { days7: 2, days30: 8, days45: 15 }
+                        },
+                        inventory: {
+                            davidWebsite: { current: 350, inTransit: 150, needTransfer: '否' },
+                            davidTiktok: { current: 280, inTransit: 120, needTransfer: '否' },
+                            davidShein: { current: 200, inTransit: 80, needTransfer: '否' },
+                            davidTarget: { current: 150, inTransit: 60, needTransfer: '否' },
+                            fba: { current: 450, inTransit: 180, needTransfer: '否' },
+                            fbt: { current: 300, inTransit: 150, needTransfer: '否' }
+                        },
+                        fbtHealth: '🟢 健康',
+                        needTransfer: '否',
+                        transferSuggestion: {
+                            bySales: { website: 0, tiktok: 0, shein: 0, target: 0 },
+                            byOutbound: { 'David-网站': 0, 'David-TikTok': 0, 'David-SHEIN': 0, 'David-Target': 0, 'FBT': 0 },
+                            byOutboundBox: { 'David-网站': 0, 'David-TikTok': 0, 'David-SHEIN': 0, 'David-Target': 0, 'FBT': 0 }
+                        },
+                        reserved45Days: 120,
+                        boxRule: 25,
+                        inTransitTax: {
+                            '20-30天': 80,
+                            '30-45天': 60,
+                            '45天以上': 45
+                        },
+                        inTransitNoTax: {
+                            '20-30天': 70,
+                            '30-45天': 50,
+                            '45天以上': 35
+                        },
+                        warehouseStock: {
+                            tax: { 'David-网站': 'N', 'David-TikTok': 'O', 'David-SHEIN': 'P', 'David-Target': 'Q' },
+                            noTax: 'R',
+                            noTaxWithNewSku: 'S',
+                            taxCurrent: 450,
+                            taxInTransit: 200,
+                            noTaxCurrent: 380,
+                            noTaxInTransit: 160
+                        },
+                        outbound60Days: {
+                            domesticWebsite: 300,
+                            davidWebsite: 380,
+                            davidTiktok: 220,
+                            davidShein: 180,
+                            davidTarget: 120,
+                            fbt: 420
+                        },
+                        estimatedConsumption: 800,
+                        nextPeriodDemand: 350,
+                        demandQuantity: {
+                            websiteNoTax: 15,
+                            davidTax: 20,
+                            fbtTax: 25
+                        },
+                        needRestock: {
+                            noTax: '是',
+                            tax: '是'
+                        },
+                        restockSuggestion: {
+                            noTax: 600,
+                            tax: 680,
+                            noTaxWithNewSku: 600,
+                            taxWithNewSku: 680
+                        },
+                        fbaStock: {
+                            remaining: 280,
+                            outbound60Days: 420,
+                            totalDemand: 700
+                        },
+                        websiteTransferQty: 0,
+                        dgWarehouse: {
+                            noTax: 650,
+                            noTaxNewSku: 600,
+                            tax: 720,
+                            defectiveNoTax: 250,
+                            defectiveTax: 380
+                        },
+                        erpMinOrder: 120,
+                        marketSales: {
+                            days7: 10,
+                            days15: 25,
+                            days30: 50,
+                            days45: 80
+                        },
+                        amazonSales: {
+                            days7: 8,
+                            days15: 18,
+                            days30: 35,
+                            days45: 55
+                        },
+                        category: '美甲用品',
+                        tag: '爆款'
+                    },
+                    {
+                        id: 5,
+                        mktSku: 'SKU-E',
+                        newSku: 'SKU-E-NEW',
+                        productName: '美甲灯产品E',
+                        image: 'https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=nail%20lamp%20product%205&image_size=square',
+                        sales: {
+                            website: { days7: 0, days30: 0, days45: 0 },
+                            tiktok: { days7: 0, days30: 0, days45: 0 },
+                            shein: { days7: 0, days30: 0, days45: 0 },
+                            target: { days7: 0, days30: 0, days45: 0 }
+                        },
+                        inventory: {
+                            davidWebsite: { current: 50, inTransit: 25, needTransfer: '是' },
+                            davidTiktok: { current: 30, inTransit: 15, needTransfer: '是' },
+                            davidShein: { current: 20, inTransit: 10, needTransfer: '是' },
+                            davidTarget: { current: 10, inTransit: 5, needTransfer: '是' },
+                            fba: { current: 80, inTransit: 40, needTransfer: '是' },
+                            fbt: { current: 45, inTransit: 20, needTransfer: '是' }
+                        },
+                        fbtHealth: '🔴 危险',
+                        needTransfer: '是',
+                        transferSuggestion: {
+                            bySales: { website: 50, tiktok: 30, shein: 20, target: 10 },
+                            byOutbound: { 'David-网站': 60, 'David-TikTok': 40, 'David-SHEIN': 30, 'David-Target': 20, 'FBT': 50 },
+                            byOutboundBox: { 'David-网站': 60, 'David-TikTok': 40, 'David-SHEIN': 20, 'David-Target': 20, 'FBT': 50 }
+                        },
+                        reserved45Days: 30,
+                        boxRule: 10,
+                        inTransitTax: {
+                            '20-30天': 15,
+                            '30-45天': 10,
+                            '45天以上': 5
+                        },
+                        inTransitNoTax: {
+                            '20-30天': 12,
+                            '30-45天': 8,
+                            '45天以上': 3
+                        },
+                        warehouseStock: {
+                            tax: { 'David-网站': 'T', 'David-TikTok': 'U', 'David-SHEIN': 'V', 'David-Target': 'W' },
+                            noTax: 'X',
+                            noTaxWithNewSku: 'Y',
+                            taxCurrent: 80,
+                            taxInTransit: 35,
+                            noTaxCurrent: 60,
+                            noTaxInTransit: 25
+                        },
+                        outbound60Days: {
+                            domesticWebsite: 50,
+                            davidWebsite: 60,
+                            davidTiktok: 30,
+                            davidShein: 20,
+                            davidTarget: 10,
+                            fbt: 80
+                        },
+                        estimatedConsumption: 150,
+                        nextPeriodDemand: 60,
+                        demandQuantity: {
+                            websiteNoTax: 2,
+                            davidTax: 3,
+                            fbtTax: 4
+                        },
+                        needRestock: {
+                            noTax: '是',
+                            tax: '是'
+                        },
+                        restockSuggestion: {
+                            noTax: 120,
+                            tax: 140,
+                            noTaxWithNewSku: 120,
+                            taxWithNewSku: 140
+                        },
+                        fbaStock: {
+                            remaining: 40,
+                            outbound60Days: 80,
+                            totalDemand: 120
+                        },
+                        websiteTransferQty: 80,
+                        dgWarehouse: {
+                            noTax: 150,
+                            noTaxNewSku: 130,
+                            tax: 180,
+                            defectiveNoTax: 80,
+                            defectiveTax: 120
+                        },
+                        erpMinOrder: 50,
+                        marketSales: {
+                            days7: 0,
+                            days15: 0,
+                            days30: 0,
+                            days45: 0
+                        },
+                        amazonSales: {
+                            days7: 0,
+                            days15: 0,
+                            days30: 0,
+                            days45: 0
+                        },
+                        category: '美甲用品',
+                        tag: '待处理'
+                    }
+                ]
+            },
+            
+            // 转仓看板数据
+            transferDashboard: {
+                transfers: [
+                    {
+                        id: 'TRF001',
+                        fromWarehouse: '仓库A',
+                        toWarehouse: '仓库B',
+                        product: '商品A',
+                        quantity: 100,
+                        status: '已完成',
+                        date: '2026-02-20'
+                    },
+                    {
+                        id: 'TRF002',
+                        fromWarehouse: '仓库B',
+                        toWarehouse: '仓库C',
+                        product: '商品B',
+                        quantity: 50,
+                        status: '进行中',
+                        date: '2026-02-21'
+                    },
+                    {
+                        id: 'TRF003',
+                        fromWarehouse: '仓库A',
+                        toWarehouse: '仓库C',
+                        product: '商品C',
+                        quantity: 80,
+                        status: '已完成',
+                        date: '2026-02-22'
+                    },
+                    {
+                        id: 'TRF004',
+                        fromWarehouse: '仓库C',
+                        toWarehouse: '仓库A',
+                        product: '商品D',
+                        quantity: 120,
+                        status: '待处理',
+                        date: '2026-02-23'
+                    }
+                ]
+            }
+        };
+
+        // 渲染主看板表格数据
+        function renderMainTable() {
+            const tbody = document.getElementById('mainTableBody');
+            if (!tbody) return;
+
+            const products = transferData.mainDashboard.products;
+            let html = '';
+
+            products.forEach(product => {
+                // 构建销量HTML
+                const salesWebsite = `7天：${product.sales.website.days7}<br>30天：${product.sales.website.days30}<br>45天：${product.sales.website.days45}`;
+                const salesTiktok = `7天：${product.sales.tiktok.days7}<br>30天：${product.sales.tiktok.days30}<br>45天：${product.sales.tiktok.days45}`;
+                const salesShein = `7天：${product.sales.shein.days7}<br>30天：${product.sales.shein.days30}<br>45天：${product.sales.shein.days45}`;
+                const salesTarget = `7天：${product.sales.target.days7}<br>30天：${product.sales.target.days30}<br>45天：${product.sales.target.days45}`;
+
+                // 构建即时库存HTML
+                const inventoryDavidWebsite = `${product.inventory.davidWebsite.current} (${product.inventory.davidWebsite.inTransit})`;
+                const inventoryDavidTiktok = `${product.inventory.davidTiktok.current} (${product.inventory.davidTiktok.inTransit})`;
+                const inventoryDavidShein = `${product.inventory.davidShein.current} (${product.inventory.davidShein.inTransit})`;
+                const inventoryDavidTarget = `${product.inventory.davidTarget.current} (${product.inventory.davidTarget.inTransit})`;
+                const inventoryFba = product.inventory.fba.current;
+                const inventoryFbt = `${product.inventory.fbt.current} (${product.inventory.fbt.inTransit})`;
+
+                // 构建是否需要转仓HTML
+                const needTransferHtml = `<span class="need-transfer-content"></span>`;
+                const transferBySales = `<span class="transfer-by-sales-content"></span>`;
+                const transferByOutbound = `<span class="transfer-by-outbound-content"></span>`;
+                const transferByOutboundBox = `<span class="transfer-by-outbound-box-content"></span>`;
+
+                // 构建在途周期数量HTML
+                const inTransitTax = `20-30天: ${product.inTransitTax['20-30天']}<br>30-45天: ${product.inTransitTax['30-45天']}<br>45天以上: ${product.inTransitTax['45天以上']}`;
+                const inTransitNoTax = `20-30天: ${product.inTransitNoTax['20-30天']}<br>30-45天: ${product.inTransitNoTax['30-45天']}<br>45天以上: ${product.inTransitNoTax['45天以上']}`;
+
+                // 构建仓库存HTML
+                const warehouseStockTax = `${product.warehouseStock.taxCurrent} (${product.warehouseStock.taxInTransit})`;
+                const warehouseStockNoTax = `${product.warehouseStock.noTaxCurrent} (${product.warehouseStock.noTaxInTransit})`;
+                const outbound60Days = `<span class="outbound-60-days-content"></span>`;
+
+                // 构建预估消耗量HTML
+                const estimatedConsumption = `<span class="estimated-consumption-content"></span>`;
+
+                // 构建下个周期需求量HTML
+                const nextPeriodDemand = `<span class="next-period-demand-content"></span>`;
+
+                // 构建需求数量HTML
+                const demandQuantityHtml = `<span class="demand-quantity-content"></span>`;
+
+                // 构建是否需要备货HTML
+                const needRestockHtml = `不含税备货：${product.needRestock.noTax}<br>含税备货：${product.needRestock.tax}`;
+
+                // 构建建议备货数量HTML
+                const restockSuggestionHtml = `不含税备货：${product.restockSuggestion.noTax}<br>含税备货：${product.restockSuggestion.tax}`;
+
+                // 构建东莞仓HTML
+                const dgWarehouseNoTax = `不含税：${product.dgWarehouse.noTax}<br>含税：${product.dgWarehouse.tax}`;
+
+                // 构建不良品库存HTML
+                const defectiveStockHtml = `不含税：${product.dgWarehouse.defectiveNoTax}<br>含税：${product.dgWarehouse.defectiveTax}`;
+
+                // 构建市场部销量HTML
+                const marketSalesHtml = `7天：${product.marketSales.days7}<br>15天：${product.marketSales.days15}<br>30天：${product.marketSales.days30}<br>45天：${product.marketSales.days45}`;
+
+                // 构建亚马逊销量HTML
+                const amazonSalesHtml = `7天：${product.amazonSales.days7}<br>15天：${product.amazonSales.days15}<br>30天：${product.amazonSales.days30}<br>45天：${product.amazonSales.days45}`;
+
+                html += `<tr class="ant-table-row">
+                    <td class="ant-table-cell">${product.mktSku}</td>
+                    <td class="ant-table-cell">${product.newSku}</td>
+                    <td class="ant-table-cell"><img src="${product.image}" width="50" height="50"></td>
+                    <td class="ant-table-cell">${product.productName}</td>
+                    <td class="ant-table-cell col-channel-shopify" data-col="sales-website">${salesWebsite}</td>
+                    <td class="ant-table-cell col-channel-tiktok" data-col="sales-tiktok">${salesTiktok}</td>
+                    <td class="ant-table-cell col-channel-shein" data-col="sales-shein">${salesShein}</td>
+                    <td class="ant-table-cell col-channel-target" data-col="sales-target">${salesTarget}</td>
+                    <td class="ant-table-cell col-channel-shopify" data-col="inventory-davidWebsite">${inventoryDavidWebsite}</td>
+                    <td class="ant-table-cell col-channel-tiktok" data-col="inventory-davidTiktok">${inventoryDavidTiktok}</td>
+                    <td class="ant-table-cell col-channel-shein" data-col="inventory-davidShein">${inventoryDavidShein}</td>
+                    <td class="ant-table-cell col-channel-target" data-col="inventory-davidTarget">${inventoryDavidTarget}</td>
+                    <td class="ant-table-cell" data-col="inventory-fba">${inventoryFba}</td>
+                    <td class="ant-table-cell col-channel-tiktok" data-col="inventory-fbt">${inventoryFbt}</td>
+                    <td class="ant-table-cell col-channel-tiktok" data-col="fbt-health">${product.fbtHealth}</td>
+                    <td class="ant-table-cell">${needTransferHtml}</td>
+                    <td class="ant-table-cell">${transferBySales}</td>
+                    <td class="ant-table-cell">${transferByOutbound}</td>
+                    <td class="ant-table-cell">${transferByOutboundBox}</td>
+                    <td class="ant-table-cell">${product.reserved45Days}</td>
+                    <td class="ant-table-cell">${product.boxRule}</td>
+                    <td class="ant-table-cell">${inTransitTax}</td>
+                    <td class="ant-table-cell">${inTransitNoTax}</td>
+                    <td class="ant-table-cell">${warehouseStockTax}</td>
+                    <td class="ant-table-cell">${warehouseStockNoTax}</td>
+                    <td class="ant-table-cell">${outbound60Days}</td>
+                    <td class="ant-table-cell col-channel-tiktok" data-col="outbound-fbt">${product.outbound60Days.fbt}</td>
+                    <td class="ant-table-cell">${product.outbound60Days.domesticWebsite}</td>
+                    <td class="ant-table-cell">${estimatedConsumption}</td>
+                    <td class="ant-table-cell">${nextPeriodDemand}</td>
+                    <td class="ant-table-cell">${demandQuantityHtml}</td>
+                    <td class="ant-table-cell">${needRestockHtml}</td>
+                    <td class="ant-table-cell">${restockSuggestionHtml}</td>
+                    <td class="ant-table-cell">${product.restockSuggestion.noTaxWithNewSku}</td>
+                    <td class="ant-table-cell">${product.fbaStock.remaining}</td>
+                    <td class="ant-table-cell">${product.fbaStock.outbound60Days}</td>
+                    <td class="ant-table-cell">${product.websiteTransferQty}</td>
+                    <td class="ant-table-cell">${product.dgWarehouse.noTax}</td>
+                    <td class="ant-table-cell">${product.dgWarehouse.noTaxNewSku}</td>
+                    <td class="ant-table-cell">${product.dgWarehouse.tax}</td>
+                    <td class="ant-table-cell">${defectiveStockHtml}</td>
+                    <td class="ant-table-cell">${product.erpMinOrder}</td>
+                    <td class="ant-table-cell">${marketSalesHtml}</td>
+                    <td class="ant-table-cell">${amazonSalesHtml}</td>
+                    <td class="ant-table-cell">${product.category}</td>
+                    <td class="ant-table-cell">${product.tag}</td>
+                </tr>`;
+            });
+
+            tbody.innerHTML = html;
+        }
+
+        // 设置默认时间范围为近45天
+        function setDefaultDateRange() {
+            const endDate = new Date();
+            const startDate = new Date();
+            startDate.setDate(startDate.getDate() - 45);
+
+            // 格式化日期为YYYY-MM-DD
+            const formatDate = (date) => {
+                return date.toISOString().split('T')[0];
+            };
+
+            // 设置起始日期和终止日期
+            if (document.getElementById('startDate')) {
+                document.getElementById('startDate').value = formatDate(startDate);
+            }
+            if (document.getElementById('endDate')) {
+                document.getElementById('endDate').value = formatDate(endDate);
+            }
+        }
+
+        // Tab切换功能
+        document.addEventListener('DOMContentLoaded', function() {
+            // 设置默认时间范围
+            setDefaultDateRange();
+            // 渲染主看板表格数据
+            renderMainTable();
+            // 初始化列显示状态
+            updateColumnVisibility();
+            updateCellContents();
+
+            // 渠道checkbox事件监听
+            const channelCheckboxes = document.querySelectorAll('#channel-shopify, #channel-shein, #channel-tiktok, #channel-target');
+            channelCheckboxes.forEach(checkbox => {
+                checkbox.addEventListener('change', function() {
+                    updateColumnVisibility();
+                    updateCellContents();
+                });
+            });
+
+            // 更新单元格内容
+            function updateCellContents() {
+                const selectedChannels = [];
+                if (document.getElementById('channel-shopify').checked) selectedChannels.push('shopify');
+                if (document.getElementById('channel-shein').checked) selectedChannels.push('shein');
+                if (document.getElementById('channel-tiktok').checked) selectedChannels.push('tiktok');
+                if (document.getElementById('channel-target').checked) selectedChannels.push('target');
+
+                const products = transferData.mainDashboard.products;
+                products.forEach((product, index) => {
+                    // 更新是否需要转仓
+                    const needTransferEl = document.querySelectorAll('.need-transfer-content')[index];
+                    if (needTransferEl) {
+                        let html = '';
+                        if (selectedChannels.includes('shopify')) html += `David-网站:${product.inventory.davidWebsite.needTransfer}<br>`;
+                        if (selectedChannels.includes('tiktok')) html += `David-TikTok:${product.inventory.davidTiktok.needTransfer}<br>FBT:${product.inventory.fbt.needTransfer}<br>`;
+                        if (selectedChannels.includes('shein')) html += `David-SHEIN:${product.inventory.davidShein.needTransfer}<br>`;
+                        if (selectedChannels.includes('target')) html += `David-Target:${product.inventory.davidTarget.needTransfer}`;
+                        needTransferEl.innerHTML = html;
+                    }
+
+                    // 更新建议转仓数量-按销量
+                    const transferBySalesEl = document.querySelectorAll('.transfer-by-sales-content')[index];
+                    if (transferBySalesEl) {
+                        let html = '';
+                        if (selectedChannels.includes('shopify')) html += `网站：${product.transferSuggestion.bySales.website}<br>`;
+                        if (selectedChannels.includes('tiktok')) html += `TikTok：${product.transferSuggestion.bySales.tiktok}<br>`;
+                        if (selectedChannels.includes('shein')) html += `SHEIN：${product.transferSuggestion.bySales.shein}<br>`;
+                        if (selectedChannels.includes('target')) html += `Target：${product.transferSuggestion.bySales.target}`;
+                        transferBySalesEl.innerHTML = html;
+                    }
+
+                    // 更新建议转仓数量-按出库量
+                    const transferByOutboundEl = document.querySelectorAll('.transfer-by-outbound-content')[index];
+                    if (transferByOutboundEl) {
+                        let html = '';
+                        if (selectedChannels.includes('shopify')) html += `David-网站：${product.transferSuggestion.byOutbound['David-网站']}<br>`;
+                        if (selectedChannels.includes('tiktok')) html += `David-TikTok：${product.transferSuggestion.byOutbound['David-TikTok']}<br>FBT: ${product.transferSuggestion.byOutbound['FBT']}<br>`;
+                        if (selectedChannels.includes('shein')) html += `David-SHEIN：${product.transferSuggestion.byOutbound['David-SHEIN']}<br>`;
+                        if (selectedChannels.includes('target')) html += `David-Target：${product.transferSuggestion.byOutbound['David-Target']}`;
+                        transferByOutboundEl.innerHTML = html;
+                    }
+
+                    // 更新建议转仓数量-按出库量（按箱规）
+                    const transferByOutboundBoxEl = document.querySelectorAll('.transfer-by-outbound-box-content')[index];
+                    if (transferByOutboundBoxEl) {
+                        let html = '';
+                        if (selectedChannels.includes('shopify')) html += `David-网站：${product.transferSuggestion.byOutboundBox['David-网站']}<br>`;
+                        if (selectedChannels.includes('tiktok')) html += `David-TikTok：${product.transferSuggestion.byOutboundBox['David-TikTok']}<br>FBT: ${product.transferSuggestion.byOutboundBox['FBT']}<br>`;
+                        if (selectedChannels.includes('shein')) html += `David-SHEIN：${product.transferSuggestion.byOutboundBox['David-SHEIN']}<br>`;
+                        if (selectedChannels.includes('target')) html += `David-Target：${product.transferSuggestion.byOutboundBox['David-Target']}`;
+                        transferByOutboundBoxEl.innerHTML = html;
+                    }
+
+                    // 更新David近60天出库量
+                    const outbound60DaysEl = document.querySelectorAll('.outbound-60-days-content')[index];
+                    if (outbound60DaysEl) {
+                        let html = '';
+                        if (selectedChannels.includes('shopify')) html += `David-网站：${product.outbound60Days.davidWebsite}<br>`;
+                        if (selectedChannels.includes('tiktok')) html += `David-TikTok：${product.outbound60Days.davidTiktok}<br>`;
+                        if (selectedChannels.includes('shein')) html += `David-SHEIN：${product.outbound60Days.davidShein}<br>`;
+                        if (selectedChannels.includes('target')) html += `David-Target：${product.outbound60Days.davidTarget}`;
+                        outbound60DaysEl.innerHTML = html;
+                    }
+
+                    // 更新预估消耗量
+                    const estimatedConsumptionEl = document.querySelectorAll('.estimated-consumption-content')[index];
+                    if (estimatedConsumptionEl) {
+                        let html = '';
+                        if (selectedChannels.includes('shopify')) html += `国内-网站：${product.outbound60Days.domesticWebsite}<br>David-网站：${product.outbound60Days.davidWebsite}<br>`;
+                        if (selectedChannels.includes('tiktok')) html += `David-TikTok：${product.outbound60Days.davidTiktok}<br>FBT: ${product.outbound60Days.fbt}<br>`;
+                        if (selectedChannels.includes('shein')) html += `David-SHEIN：${product.outbound60Days.davidShein}<br>`;
+                        if (selectedChannels.includes('target')) html += `David-Target：${product.outbound60Days.davidTarget}`;
+                        estimatedConsumptionEl.innerHTML = html;
+                    }
+
+                    // 更新下个周期需求量
+                    const nextPeriodDemandEl = document.querySelectorAll('.next-period-demand-content')[index];
+                    if (nextPeriodDemandEl) {
+                        let html = '';
+                        if (selectedChannels.includes('shopify')) html += `国内-网站：${product.outbound60Days.domesticWebsite}<br>David-网站：${product.outbound60Days.davidWebsite}<br>`;
+                        if (selectedChannels.includes('tiktok')) html += `David-TikTok：${product.outbound60Days.davidTiktok}<br>FBT: ${product.outbound60Days.fbt}<br>`;
+                        if (selectedChannels.includes('shein')) html += `David-SHEIN：${product.outbound60Days.davidShein}<br>`;
+                        if (selectedChannels.includes('target')) html += `David-Target：${product.outbound60Days.davidTarget}`;
+                        nextPeriodDemandEl.innerHTML = html;
+                    }
+
+                    // 更新需求数量
+                    const demandQuantityEl = document.querySelectorAll('.demand-quantity-content')[index];
+                    if (demandQuantityEl) {
+                        let html = '';
+                        if (selectedChannels.includes('shopify')) html += `网站不含税需求：${product.demandQuantity.websiteNoTax}<br>David含税需求：${product.demandQuantity.davidTax}<br>`;
+                        if (selectedChannels.includes('tiktok')) html += `FBT含税需求：${product.demandQuantity.fbtTax}`;
+                        demandQuantityEl.innerHTML = html;
+                    }
+                });
+            }
+
+            // 更新列显示/隐藏
+            function updateColumnVisibility() {
+                const selectedChannels = [];
+                if (document.getElementById('channel-shopify').checked) selectedChannels.push('shopify');
+                if (document.getElementById('channel-shein').checked) selectedChannels.push('shein');
+                if (document.getElementById('channel-tiktok').checked) selectedChannels.push('tiktok');
+                if (document.getElementById('channel-target').checked) selectedChannels.push('target');
+
+                const channelClasses = ['col-channel-shopify', 'col-channel-shein', 'col-channel-tiktok', 'col-channel-target'];
+
+                channelClasses.forEach(channelClass => {
+                    const channel = channelClass.replace('col-channel-', '');
+                    const shouldShow = selectedChannels.includes(channel);
+
+                    const elements = document.querySelectorAll('.' + channelClass);
+                    elements.forEach(el => {
+                        el.style.display = shouldShow ? '' : 'none';
+                    });
+                });
+
+                // 更新行内数据的显示/隐藏
+                const rowClasses = ['row-shopify', 'row-shein', 'row-tiktok', 'row-target'];
+                rowClasses.forEach(rowClass => {
+                    const channel = rowClass.replace('row-', '');
+                    const shouldShow = selectedChannels.includes(channel);
+
+                    const rowElements = document.querySelectorAll('.' + rowClass);
+                    rowElements.forEach(el => {
+                        el.style.display = shouldShow ? '' : 'none';
+                    });
+                });
+            }
+
+            const tabs = document.querySelectorAll('.tab');
+            const tabContents = document.querySelectorAll('.tab-content');
+
+            tabs.forEach(tab => {
+                tab.addEventListener('click', function() {
+                    // 移除所有tab的active状态
+                    tabs.forEach(t => t.classList.remove('active'));
+                    // 添加当前tab的active状态
+                    this.classList.add('active');
+
+                    // 隐藏所有内容
+                    const tabContents = document.querySelectorAll('.tab-content');
+                    tabContents.forEach(content => {
+                        content.style.display = 'none';
+                    });
+
+                    // 显示对应内容
+                    const tabId = this.getAttribute('data-tab');
+                    document.getElementById(tabId).style.display = 'block';
+                });
+            });
+        });
+    </script>
+</body>
+</html>
