@@ -575,8 +575,8 @@
                             </div>
                         </div>
                         <div class="filter-actions">
-                            <button class="btn btn-primary">筛选</button>
-                            <button class="btn btn-default">清空</button>
+                            <button class="btn btn-primary" id="transferFilterBtn">筛选</button>
+                            <button class="btn btn-default" id="transferClearBtn">清空</button>
                         </div>
                     </div>
 
@@ -592,17 +592,17 @@
                                         <th class="ant-table-cell">对应新sku</th>
                                         <th class="ant-table-cell">图片</th>
                                         <th class="ant-table-cell">产品名</th>
-                                        <th class="ant-table-cell col-channel-shopify" id="th-sales-website">网站销量</th>
-                                        <th class="ant-table-cell col-channel-tiktok" id="th-sales-tiktok">TikTok销量</th>
-                                        <th class="ant-table-cell col-channel-shein" id="th-sales-shein">SHEIN销量</th>
-                                        <th class="ant-table-cell col-channel-target" id="th-sales-target">Target销量</th>
-                                        <th class="ant-table-cell col-channel-shopify" id="th-inventory-davidWebsite">David-网站即时库存</th>
-                                        <th class="ant-table-cell col-channel-tiktok" id="th-inventory-davidTiktok">David-TikTok即时库存</th>
-                                        <th class="ant-table-cell col-channel-shein" id="th-inventory-davidShein">David-SHEIN即时库存</th>
-                                        <th class="ant-table-cell col-channel-target" id="th-inventory-davidTarget">David-Target即时库存</th>
-                                        <th class="ant-table-cell" id="th-inventory-fba">FBA即时库存</th>
-                                        <th class="ant-table-cell col-channel-tiktok" id="th-inventory-fbt">FBT即时库存</th>
-                                        <th class="ant-table-cell col-channel-tiktok" id="th-fbt-health">FBT库存健康度</th>
+                                        <th class="ant-table-cell">网站销量</th>
+                                        <th class="ant-table-cell">TikTok销量</th>
+                                        <th class="ant-table-cell">SHEIN销量</th>
+                                        <th class="ant-table-cell">Target销量</th>
+                                        <th class="ant-table-cell">David-网站即时库存</th>
+                                        <th class="ant-table-cell">David-TikTok即时库存</th>
+                                        <th class="ant-table-cell">David-SHEIN即时库存</th>
+                                        <th class="ant-table-cell">David-Target即时库存</th>
+                                        <th class="ant-table-cell">FBA即时库存</th>
+                                        <th class="ant-table-cell">FBT即时库存</th>
+                                        <th class="ant-table-cell">FBT库存健康度</th>
                                         <th class="ant-table-cell">是否需要转仓</th>
                                         <th class="ant-table-cell">建议转仓数量-按销量</th>
                                         <th class="ant-table-cell">建议转仓数量-按出库量</th>
@@ -614,17 +614,17 @@
                                         <th class="ant-table-cell">市场部-含税仓库存</th>
                                         <th class="ant-table-cell">市场部-不含税仓库存（含新旧sku库存）</th>
                                         <th class="ant-table-cell">David近60天出库量</th>
-                                        <th class="ant-table-cell col-channel-tiktok" id="th-outbound-fbt">FBT近60天出库量</th>
-                                        <th class="ant-table-cell">市场部近60天国内发货量</th>
-                                        <th class="ant-table-cell">预估消耗量</th>
-                                        <th class="ant-table-cell">下个周期需求量</th>
-                                        <th class="ant-table-cell">需求数量</th>
+                                        <th class="ant-table-cell col-channel-tiktok">FBT近60天出库量</th>
+                                        <th class="ant-table-cell col-channel-shopify">市场部近60天国内发货量</th>
+                                        <th class="ant-table-cell">预估消耗量（75天）</th>
+                                        <th class="ant-table-cell">下个周期需求量（90天）</th>
+                                        <th class="ant-table-cell">需求数量（季度）</th>
                                         <th class="ant-table-cell">是否需要备货</th>
-                                        <th class="ant-table-cell">建议备货数量</th>
+                                        <th class="ant-table-cell">建议备货数量（季度）</th>
                                         <th class="ant-table-cell">建议备货数量（按箱规）</th>
                                         <th class="ant-table-cell">市场部FBA剩余库存</th>
                                         <th class="ant-table-cell">市场部近60天FBA发货量</th>
-                                        <th class="ant-table-cell">官网转仓数量</th>
+                                        <th class="ant-table-cell">官网转仓数量（季度）</th>
                                         <th class="ant-table-cell">东莞仓-不含税在库</th>
                                         <th class="ant-table-cell">东莞仓-不含税在库（对应新sku）</th>
                                         <th class="ant-table-cell">东莞仓-含税在库</th>
@@ -680,6 +680,16 @@
                                     </select>
                                 </div>
                             </div>
+                            <div class="filter-item">
+                                <label class="filter-label">已入库数量</label>
+                                <div class="filter-select">
+                                    <select class="filter-input" id="transferOutboundQty">
+                                        <option value="all">全部</option>
+                                        <option value="zero">为0</option>
+                                        <option value="notZero">不为0</option>
+                                    </select>
+                                </div>
+                            </div>
                             <div class="filter-item" style="display: flex; align-items: center; gap: 8px;">
                                 <label class="filter-label">出库时间</label>
                                 <div style="display: flex; align-items: center; gap: 8px;">
@@ -690,8 +700,8 @@
                             </div>
                         </div>
                         <div class="filter-actions">
-                            <button class="btn btn-primary">筛选</button>
-                            <button class="btn btn-default">清空</button>
+                            <button class="btn btn-primary" id="transferFilterBtn2">筛选</button>
+                            <button class="btn btn-default" id="transferClearBtn2">清空</button>
                         </div>
                     </div>
 
@@ -703,39 +713,22 @@
                                 <table class="ant-table">
                                 <thead class="ant-table-thead">
                                     <tr class="ant-table-row">
-                                        <th class="ant-table-cell">转仓单号</th>
-                                        <th class="ant-table-cell">转出仓库</th>
-                                        <th class="ant-table-cell">转入仓库</th>
-                                        <th class="ant-table-cell">商品</th>
-                                        <th class="ant-table-cell">数量</th>
-                                        <th class="ant-table-cell">状态</th>
+                                        <th class="ant-table-cell">MKT-SKU</th>
+                                        <th class="ant-table-cell">图片</th>
+                                        <th class="ant-table-cell">产品名</th>
+                                        <th class="ant-table-cell">产品数量</th>
+                                        <th class="ant-table-cell">已入库数量</th>
+                                        <th class="ant-table-cell">目的地仓库</th>
+                                        <th class="ant-table-cell">出库时间</th>
+                                        <th class="ant-table-cell">货运类型</th>
+                                        <th class="ant-table-cell">物流跟踪号</th>
+                                        <th class="ant-table-cell">尾程单号</th>
+                                        <th class="ant-table-cell">预计投递时间</th>
+                                        <th class="ant-table-cell">运单编号</th>
+                                        <th class="ant-table-cell">FBT订单入库状态</th>
                                     </tr>
                                 </thead>
-                                <tbody class="ant-table-tbody">
-                                    <tr class="ant-table-row">
-                                        <td class="ant-table-cell">TRF001</td>
-                                        <td class="ant-table-cell">仓库A</td>
-                                        <td class="ant-table-cell">仓库B</td>
-                                        <td class="ant-table-cell">商品A</td>
-                                        <td class="ant-table-cell">100</td>
-                                        <td class="ant-table-cell">已完成</td>
-                                    </tr>
-                                    <tr class="ant-table-row">
-                                        <td class="ant-table-cell">TRF002</td>
-                                        <td class="ant-table-cell">仓库B</td>
-                                        <td class="ant-table-cell">仓库C</td>
-                                        <td class="ant-table-cell">商品B</td>
-                                        <td class="ant-table-cell">50</td>
-                                        <td class="ant-table-cell">进行中</td>
-                                    </tr>
-                                    <tr class="ant-table-row">
-                                        <td class="ant-table-cell">TRF003</td>
-                                        <td class="ant-table-cell">仓库A</td>
-                                        <td class="ant-table-cell">仓库C</td>
-                                        <td class="ant-table-cell">商品C</td>
-                                        <td class="ant-table-cell">80</td>
-                                        <td class="ant-table-cell">已完成</td>
-                                    </tr>
+                                <tbody class="ant-table-tbody" id="transferTableBody">
                                 </tbody>
                             </table>
                             </div>
@@ -1269,40 +1262,79 @@
             transferDashboard: {
                 transfers: [
                     {
-                        id: 'TRF001',
-                        fromWarehouse: '仓库A',
-                        toWarehouse: '仓库B',
-                        product: '商品A',
+                        mktSku: 'SKU-001',
+                        image: 'https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=product%20image%20transfer1&image_size=square',
+                        productName: '美甲灯产品A',
                         quantity: 100,
-                        status: '已完成',
-                        date: '2026-02-20'
+                        inboundQty: 80,
+                        destinationWarehouse: 'David-网站',
+                        outboundDate: '2026-02-15',
+                        shippingType: '空运',
+                        trackingNumber: 'CN123456789',
+                        lastMileNumber: 'LM001',
+                        estimatedDelivery: '2026-02-25',
+                        waybillNumber: 'WB001',
+                        fbtStatus: '已入库'
                     },
                     {
-                        id: 'TRF002',
-                        fromWarehouse: '仓库B',
-                        toWarehouse: '仓库C',
-                        product: '商品B',
+                        mktSku: 'SKU-002',
+                        image: 'https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=product%20image%20transfer2&image_size=square',
+                        productName: '美甲灯产品B',
                         quantity: 50,
-                        status: '进行中',
-                        date: '2026-02-21'
+                        inboundQty: 0,
+                        destinationWarehouse: 'David-TikTok',
+                        outboundDate: '2026-02-18',
+                        shippingType: '海运',
+                        trackingNumber: 'CN123456790',
+                        lastMileNumber: 'LM002',
+                        estimatedDelivery: '2026-03-05',
+                        waybillNumber: 'WB002',
+                        fbtStatus: '待入库'
                     },
                     {
-                        id: 'TRF003',
-                        fromWarehouse: '仓库A',
-                        toWarehouse: '仓库C',
-                        product: '商品C',
+                        mktSku: 'SKU-003',
+                        image: 'https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=product%20image%20transfer3&image_size=square',
+                        productName: '美甲灯产品C',
                         quantity: 80,
-                        status: '已完成',
-                        date: '2026-02-22'
+                        inboundQty: 75,
+                        destinationWarehouse: 'David-SHEIN',
+                        outboundDate: '2026-02-20',
+                        shippingType: '铁运',
+                        trackingNumber: 'CN123456791',
+                        lastMileNumber: 'LM003',
+                        estimatedDelivery: '2026-03-01',
+                        waybillNumber: 'WB003',
+                        fbtStatus: '已入库'
                     },
                     {
-                        id: 'TRF004',
-                        fromWarehouse: '仓库C',
-                        toWarehouse: '仓库A',
-                        product: '商品D',
+                        mktSku: 'SKU-004',
+                        image: 'https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=product%20image%20transfer4&image_size=square',
+                        productName: '美甲灯产品D',
                         quantity: 120,
-                        status: '待处理',
-                        date: '2026-02-23'
+                        inboundQty: 0,
+                        destinationWarehouse: 'David-Target',
+                        outboundDate: '2026-02-22',
+                        shippingType: '陆运',
+                        trackingNumber: 'CN123456792',
+                        lastMileNumber: 'LM004',
+                        estimatedDelivery: '2026-02-28',
+                        waybillNumber: 'WB004',
+                        fbtStatus: '待入库'
+                    },
+                    {
+                        mktSku: 'SKU-005',
+                        image: 'https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=product%20image%20transfer5&image_size=square',
+                        productName: '美甲灯产品E',
+                        quantity: 60,
+                        inboundQty: 55,
+                        destinationWarehouse: 'FBT',
+                        outboundDate: '2026-02-23',
+                        shippingType: '空运',
+                        trackingNumber: 'CN123456793',
+                        lastMileNumber: 'LM005',
+                        estimatedDelivery: '2026-02-26',
+                        waybillNumber: 'WB005',
+                        fbtStatus: '已入库'
                     }
                 ]
             }
@@ -1347,13 +1379,13 @@
                 const outbound60Days = `<span class="outbound-60-days-content"></span>`;
 
                 // 构建预估消耗量HTML
-                const estimatedConsumption = `<span class="estimated-consumption-content"></span>`;
+                const estimatedConsumption = `国内-网站：${product.outbound60Days.domesticWebsite}<br>David-网站：${product.outbound60Days.davidWebsite}<br>David-TikTok：${product.outbound60Days.davidTiktok}<br>David-SHEIN：${product.outbound60Days.davidShein}<br>David-Target：${product.outbound60Days.davidTarget}<br>FBT: ${product.outbound60Days.fbt}`;
 
                 // 构建下个周期需求量HTML
-                const nextPeriodDemand = `<span class="next-period-demand-content"></span>`;
+                const nextPeriodDemand = `国内-网站：${product.outbound60Days.domesticWebsite}<br>David-网站：${product.outbound60Days.davidWebsite}<br>David-TikTok：${product.outbound60Days.davidTiktok}<br>David-SHEIN：${product.outbound60Days.davidShein}<br>David-Target：${product.outbound60Days.davidTarget}<br>FBT: ${product.outbound60Days.fbt}`;
 
                 // 构建需求数量HTML
-                const demandQuantityHtml = `<span class="demand-quantity-content"></span>`;
+                const demandQuantityHtml = `网站不含税需求：${product.demandQuantity.websiteNoTax}<br>David含税需求：${product.demandQuantity.davidTax}<br>FBT含税需求：${product.demandQuantity.fbtTax}`;
 
                 // 构建是否需要备货HTML
                 const needRestockHtml = `不含税备货：${product.needRestock.noTax}<br>含税备货：${product.needRestock.tax}`;
@@ -1378,17 +1410,17 @@
                     <td class="ant-table-cell">${product.newSku}</td>
                     <td class="ant-table-cell"><img src="${product.image}" width="50" height="50"></td>
                     <td class="ant-table-cell">${product.productName}</td>
-                    <td class="ant-table-cell col-channel-shopify" data-col="sales-website">${salesWebsite}</td>
-                    <td class="ant-table-cell col-channel-tiktok" data-col="sales-tiktok">${salesTiktok}</td>
-                    <td class="ant-table-cell col-channel-shein" data-col="sales-shein">${salesShein}</td>
-                    <td class="ant-table-cell col-channel-target" data-col="sales-target">${salesTarget}</td>
-                    <td class="ant-table-cell col-channel-shopify" data-col="inventory-davidWebsite">${inventoryDavidWebsite}</td>
-                    <td class="ant-table-cell col-channel-tiktok" data-col="inventory-davidTiktok">${inventoryDavidTiktok}</td>
-                    <td class="ant-table-cell col-channel-shein" data-col="inventory-davidShein">${inventoryDavidShein}</td>
-                    <td class="ant-table-cell col-channel-target" data-col="inventory-davidTarget">${inventoryDavidTarget}</td>
-                    <td class="ant-table-cell" data-col="inventory-fba">${inventoryFba}</td>
-                    <td class="ant-table-cell col-channel-tiktok" data-col="inventory-fbt">${inventoryFbt}</td>
-                    <td class="ant-table-cell col-channel-tiktok" data-col="fbt-health">${product.fbtHealth}</td>
+                    <td class="ant-table-cell">${salesWebsite}</td>
+                    <td class="ant-table-cell">${salesTiktok}</td>
+                    <td class="ant-table-cell">${salesShein}</td>
+                    <td class="ant-table-cell">${salesTarget}</td>
+                    <td class="ant-table-cell">${inventoryDavidWebsite}</td>
+                    <td class="ant-table-cell">${inventoryDavidTiktok}</td>
+                    <td class="ant-table-cell">${inventoryDavidShein}</td>
+                    <td class="ant-table-cell">${inventoryDavidTarget}</td>
+                    <td class="ant-table-cell">${inventoryFba}</td>
+                    <td class="ant-table-cell">${inventoryFbt}</td>
+                    <td class="ant-table-cell">${product.fbtHealth}</td>
                     <td class="ant-table-cell">${needTransferHtml}</td>
                     <td class="ant-table-cell">${transferBySales}</td>
                     <td class="ant-table-cell">${transferByOutbound}</td>
@@ -1400,8 +1432,8 @@
                     <td class="ant-table-cell">${warehouseStockTax}</td>
                     <td class="ant-table-cell">${warehouseStockNoTax}</td>
                     <td class="ant-table-cell">${outbound60Days}</td>
-                    <td class="ant-table-cell col-channel-tiktok" data-col="outbound-fbt">${product.outbound60Days.fbt}</td>
-                    <td class="ant-table-cell">${product.outbound60Days.domesticWebsite}</td>
+                    <td class="ant-table-cell col-channel-tiktok">${product.outbound60Days.fbt}</td>
+                    <td class="ant-table-cell col-channel-shopify">${product.outbound60Days.domesticWebsite}</td>
                     <td class="ant-table-cell">${estimatedConsumption}</td>
                     <td class="ant-table-cell">${nextPeriodDemand}</td>
                     <td class="ant-table-cell">${demandQuantityHtml}</td>
@@ -1446,15 +1478,92 @@
             }
         }
 
+        // 渲染转仓看板表格数据
+        function renderTransferTable() {
+            const tbody = document.getElementById('transferTableBody');
+            if (!tbody) return;
+
+            const transfers = transferData.transferDashboard.transfers;
+            let html = '';
+
+            transfers.forEach(transfer => {
+                html += `<tr class="ant-table-row">
+                    <td class="ant-table-cell">${transfer.mktSku}</td>
+                    <td class="ant-table-cell"><img src="${transfer.image}" width="50" height="50"></td>
+                    <td class="ant-table-cell">${transfer.productName}</td>
+                    <td class="ant-table-cell">${transfer.quantity}</td>
+                    <td class="ant-table-cell">${transfer.inboundQty}</td>
+                    <td class="ant-table-cell">${transfer.destinationWarehouse}</td>
+                    <td class="ant-table-cell">${transfer.outboundDate}</td>
+                    <td class="ant-table-cell">${transfer.shippingType}</td>
+                    <td class="ant-table-cell">${transfer.trackingNumber}</td>
+                    <td class="ant-table-cell">${transfer.lastMileNumber}</td>
+                    <td class="ant-table-cell">${transfer.estimatedDelivery}</td>
+                    <td class="ant-table-cell">${transfer.waybillNumber}</td>
+                    <td class="ant-table-cell">${transfer.fbtStatus}</td>
+                </tr>`;
+            });
+
+            tbody.innerHTML = html;
+        }
+
+        // 转仓看板筛选功能
+        function filterTransferTable() {
+            const tbody = document.getElementById('transferTableBody');
+            if (!tbody) return;
+
+            const outboundQtyFilter = document.getElementById('transferOutboundQty').value;
+            const transfers = transferData.transferDashboard.transfers;
+
+            let filteredData = transfers;
+
+            // 根据已入库数量筛选
+            if (outboundQtyFilter === 'zero') {
+                filteredData = filteredData.filter(t => t.inboundQty === 0);
+            } else if (outboundQtyFilter === 'notZero') {
+                filteredData = filteredData.filter(t => t.inboundQty !== 0);
+            }
+
+            let html = '';
+            filteredData.forEach(transfer => {
+                html += `<tr class="ant-table-row">
+                    <td class="ant-table-cell">${transfer.mktSku}</td>
+                    <td class="ant-table-cell"><img src="${transfer.image}" width="50" height="50"></td>
+                    <td class="ant-table-cell">${transfer.productName}</td>
+                    <td class="ant-table-cell">${transfer.quantity}</td>
+                    <td class="ant-table-cell">${transfer.inboundQty}</td>
+                    <td class="ant-table-cell">${transfer.destinationWarehouse}</td>
+                    <td class="ant-table-cell">${transfer.outboundDate}</td>
+                    <td class="ant-table-cell">${transfer.shippingType}</td>
+                    <td class="ant-table-cell">${transfer.trackingNumber}</td>
+                    <td class="ant-table-cell">${transfer.lastMileNumber}</td>
+                    <td class="ant-table-cell">${transfer.estimatedDelivery}</td>
+                    <td class="ant-table-cell">${transfer.waybillNumber}</td>
+                    <td class="ant-table-cell">${transfer.fbtStatus}</td>
+                </tr>`;
+            });
+
+            tbody.innerHTML = html;
+        }
+
         // Tab切换功能
         document.addEventListener('DOMContentLoaded', function() {
             // 设置默认时间范围
             setDefaultDateRange();
             // 渲染主看板表格数据
             renderMainTable();
+            // 渲染转仓看板表格数据
+            renderTransferTable();
             // 初始化列显示状态
             updateColumnVisibility();
             updateCellContents();
+
+            // 转仓看板筛选按钮事件
+            document.getElementById('transferFilterBtn2').addEventListener('click', filterTransferTable);
+            document.getElementById('transferClearBtn2').addEventListener('click', function() {
+                document.getElementById('transferOutboundQty').value = 'all';
+                renderTransferTable();
+            });
 
             // 渠道checkbox事件监听
             const channelCheckboxes = document.querySelectorAll('#channel-shopify, #channel-shein, #channel-tiktok, #channel-target');
@@ -1528,37 +1637,6 @@
                         if (selectedChannels.includes('shein')) html += `David-SHEIN：${product.outbound60Days.davidShein}<br>`;
                         if (selectedChannels.includes('target')) html += `David-Target：${product.outbound60Days.davidTarget}`;
                         outbound60DaysEl.innerHTML = html;
-                    }
-
-                    // 更新预估消耗量
-                    const estimatedConsumptionEl = document.querySelectorAll('.estimated-consumption-content')[index];
-                    if (estimatedConsumptionEl) {
-                        let html = '';
-                        if (selectedChannels.includes('shopify')) html += `国内-网站：${product.outbound60Days.domesticWebsite}<br>David-网站：${product.outbound60Days.davidWebsite}<br>`;
-                        if (selectedChannels.includes('tiktok')) html += `David-TikTok：${product.outbound60Days.davidTiktok}<br>FBT: ${product.outbound60Days.fbt}<br>`;
-                        if (selectedChannels.includes('shein')) html += `David-SHEIN：${product.outbound60Days.davidShein}<br>`;
-                        if (selectedChannels.includes('target')) html += `David-Target：${product.outbound60Days.davidTarget}`;
-                        estimatedConsumptionEl.innerHTML = html;
-                    }
-
-                    // 更新下个周期需求量
-                    const nextPeriodDemandEl = document.querySelectorAll('.next-period-demand-content')[index];
-                    if (nextPeriodDemandEl) {
-                        let html = '';
-                        if (selectedChannels.includes('shopify')) html += `国内-网站：${product.outbound60Days.domesticWebsite}<br>David-网站：${product.outbound60Days.davidWebsite}<br>`;
-                        if (selectedChannels.includes('tiktok')) html += `David-TikTok：${product.outbound60Days.davidTiktok}<br>FBT: ${product.outbound60Days.fbt}<br>`;
-                        if (selectedChannels.includes('shein')) html += `David-SHEIN：${product.outbound60Days.davidShein}<br>`;
-                        if (selectedChannels.includes('target')) html += `David-Target：${product.outbound60Days.davidTarget}`;
-                        nextPeriodDemandEl.innerHTML = html;
-                    }
-
-                    // 更新需求数量
-                    const demandQuantityEl = document.querySelectorAll('.demand-quantity-content')[index];
-                    if (demandQuantityEl) {
-                        let html = '';
-                        if (selectedChannels.includes('shopify')) html += `网站不含税需求：${product.demandQuantity.websiteNoTax}<br>David含税需求：${product.demandQuantity.davidTax}<br>`;
-                        if (selectedChannels.includes('tiktok')) html += `FBT含税需求：${product.demandQuantity.fbtTax}`;
-                        demandQuantityEl.innerHTML = html;
                     }
                 });
             }
