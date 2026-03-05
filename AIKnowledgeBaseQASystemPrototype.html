@@ -854,10 +854,12 @@
                         <div style="margin-top: 8px;">
                             <p style="font-size: 12px; color: var(--text-secondary); margin-bottom: 12px;">💡 您可以这样问我：</p>
                             <div class="quick-questions">
-                                <div class="quick-question" onclick="askQuestion('我还有多少天年假？')">我还有多少天年假？</div>
-                                <div class="quick-question" onclick="askQuestion('请年假需要提前几天？')">请年假需要提前几天？</div>
-                                <div class="quick-question" onclick="askQuestion('我们部门几点下班？')">我们部门几点下班？</div>
-                                <div class="quick-question" onclick="askQuestion('加班是怎么计算的？')">加班是怎么计算的？</div>
+                                <div class="quick-question" onclick="askQuestion('年假什么时候过期？')">年假什么时候过期？</div>
+                                <div class="quick-question" onclick="askQuestion('调休假有效期是多久？')">调休假有效期是多久？</div>
+                                <div class="quick-question" onclick="askQuestion('加班怎么结算？')">加班怎么结算？</div>
+                                <div class="quick-question" onclick="askQuestion('加班时长怎么算？')">加班时长怎么算？</div>
+                                <div class="quick-question" onclick="askQuestion('怎么领取交通补贴？')">怎么领取交通补贴？</div>
+                                <div class="quick-question" onclick="askQuestion('可以补卡吗？')">可以补卡吗？</div>
                             </div>
                         </div>
                     </div>
@@ -1065,6 +1067,41 @@
 • 法定节假日：时薪 × 3
 
 您本月暂无加班记录。`,
+            '年假有效期': `根据《员工考勤管理制度》第4.1条：
+
+当年年假有效期至**次年4月30日**，逾期未休完的可折算为工资。
+
+例如：2024年的年假须在2025年4月30日前休完，逾期未休将自动作废或折算。`,
+            '调休假有效期': `根据《员工考勤管理制度》第4.3条：
+
+调休假有效期为**一年**。
+
+例如：今年6月1日加班产生的调休假，须在**次年6月1日前**休完，逾期未休的可折算为工资。`,
+            '加班结算': `根据《薪酬管理制度》第4.3条：
+
+• **法定节假日加班**：以工资形式结算（3倍工资）
+• **周末加班**：以调休形式结算
+
+工作日加班默认优先安排调休，无法调休的按1.5倍工资结算。`,
+            '加班时长': `根据《员工考勤管理制度》第5.2条：
+
+在申请加班的时间段内，以**实际打卡时间**核算加班时长。
+
+例如：申请加班时段为14:00-18:00，实际打卡14:05-18:02，则加班时长为4小时02分。`,
+            '交通补贴': `根据《薪酬管理制度》第6.1条：
+
+领取交通补贴需**同时满足**以下条件：
+
+1. 已提交交通补贴申请
+2. 打卡时间与申请时段相符
+
+每月随工资发放，具体金额根据职级和通勤距离确定。`,
+            '补卡': `根据《员工考勤管理制度》第2.4条：
+
+• 每月有**两次补卡机会**（仅限忘记打卡或设备故障等非主观原因）
+• 若迟到时间超过**20分钟**（以规定上班时间为基准），则不允许补卡
+
+补卡需在当天或次日上班前通过系统提交申请。`,
             'default': `感谢您的提问。根据查询到的信息：
 
 您咨询的问题我已了解。由于规章制度内容较多，请允许我为您整理更详细的说明。如需了解具体条款，建议您查阅《员工考勤管理制度》或《薪酬管理制度》原文。
@@ -1148,10 +1185,12 @@
                     <div style="margin-top: 8px;">
                         <p style="font-size: 12px; color: var(--text-secondary); margin-bottom: 12px;">💡 您可以这样问我：</p>
                         <div class="quick-questions">
-                            <div class="quick-question" onclick="askQuestion('我还有多少天年假？')">我还有多少天年假？</div>
-                            <div class="quick-question" onclick="askQuestion('请年假需要提前几天？')">请年假需要提前几天？</div>
-                            <div class="quick-question" onclick="askQuestion('我们部门几点下班？')">我们部门几点下班？</div>
-                            <div class="quick-question" onclick="askQuestion('加班是怎么计算的？')">加班是怎么计算的？</div>
+                            <div class="quick-question" onclick="askQuestion('年假什么时候过期？')">年假什么时候过期？</div>
+                            <div class="quick-question" onclick="askQuestion('调休假有效期是多久？')">调休假有效期是多久？</div>
+                            <div class="quick-question" onclick="askQuestion('加班怎么结算？')">加班怎么结算？</div>
+                            <div class="quick-question" onclick="askQuestion('加班时长怎么算？')">加班时长怎么算？</div>
+                            <div class="quick-question" onclick="askQuestion('怎么领取交通补贴？')">怎么领取交通补贴？</div>
+                            <div class="quick-question" onclick="askQuestion('可以补卡吗？')">可以补卡吗？</div>
                         </div>
                     </div>
                 `;
@@ -1238,7 +1277,19 @@
             let response = aiResponses.default;
             const lowerMessage = message.toLowerCase();
             
-            if (lowerMessage.includes('年假')) {
+            if (lowerMessage.includes('年假有效期') || lowerMessage.includes('年假什么时候过期') || lowerMessage.includes('年假过期')) {
+                response = aiResponses['年假有效期'];
+            } else if (lowerMessage.includes('调休假有效期') || lowerMessage.includes('调休假') && (lowerMessage.includes('多久') || lowerMessage.includes('有效'))) {
+                response = aiResponses['调休假有效期'];
+            } else if (lowerMessage.includes('加班结算') || lowerMessage.includes('加班怎么结算')) {
+                response = aiResponses['加班结算'];
+            } else if (lowerMessage.includes('加班时长') || lowerMessage.includes('加班怎么算') || lowerMessage.includes('加班时长怎么算')) {
+                response = aiResponses['加班时长'];
+            } else if (lowerMessage.includes('交通补贴') || lowerMessage.includes('领取交通') || lowerMessage.includes('交通补贴怎么领')) {
+                response = aiResponses['交通补贴'];
+            } else if (lowerMessage.includes('补卡') || lowerMessage.includes('可以补卡')) {
+                response = aiResponses['补卡'];
+            } else if (lowerMessage.includes('年假')) {
                 response = aiResponses['年假'];
             } else if (lowerMessage.includes('请假')) {
                 response = aiResponses['请假'];
