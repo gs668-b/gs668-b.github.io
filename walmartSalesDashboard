@@ -1,0 +1,991 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Walmart线下数据看板</title>
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+    <style>
+        :root {
+            --primary-color: #41B983;
+            --secondary-color: #38A169;
+            --warning-color: #ED8936;
+            --error-color: #E53E3E;
+            --bg-color: #F7FAFC;
+            --border-color: #E2E8F0;
+            --text-primary: #2D3748;
+            --text-secondary: #718096;
+            --card-bg: #FFFFFF;
+            --sidebar-bg: #001529;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, sans-serif;
+            background: var(--bg-color);
+            color: var(--text-primary);
+            line-height: 1.6;
+            font-size: 14px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 24px;
+        }
+
+        .page-title {
+            font-size: 24px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 24px;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+            padding: 24px;
+            margin-bottom: 24px;
+        }
+
+        .card-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .card-title-left {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .import-btn-wrapper {
+            margin-left: auto;
+        }
+
+        .import-section {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+
+        .file-input-wrapper {
+            position: relative;
+        }
+
+        .file-input-wrapper input[type="file"] {
+            display: none;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: #2B6CB0;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #2c5282;
+        }
+
+        .btn-secondary {
+            background: var(--card-bg);
+            color: #2B6CB0;
+            border: 1px solid #2B6CB0;
+        }
+
+        .btn-secondary:hover {
+            background: var(--bg-color);
+        }
+
+        .btn-success {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: var(--secondary-color);
+        }
+
+        .btn-info {
+            background: transparent;
+            color: #2B6CB0;
+            padding: 6px 12px;
+            font-size: 12px;
+            border: 1px solid #2B6CB0;
+            border-radius: 4px;
+        }
+
+        .btn-info:hover {
+            background: #EDF2F7;
+        }
+
+        .file-name {
+            color: var(--text-secondary);
+            font-size: 14px;
+        }
+
+        .filter-section {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+            padding: 16px;
+            background: var(--bg-color);
+            border-radius: 6px;
+        }
+
+        .filter-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .filter-group label {
+            font-size: 14px;
+            color: var(--text-primary);
+            font-weight: 400;
+        }
+
+        .filter-group input {
+            padding: 6px 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            font-size: 14px;
+            height: 36px;
+        }
+
+        .filter-group input:focus {
+            outline: none;
+            border-color: #2B6CB0;
+            box-shadow: 0 0 0 2px rgba(43, 108, 176, 0.1);
+        }
+
+        .chart-container {
+            width: 100%;
+            height: 350px;
+        }
+
+        .stats-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 10px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .stat-card.orange {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        }
+
+        .stat-card.green {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        }
+
+        .stat-card.yellow {
+            background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+        }
+
+        .stat-value {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        .table-container {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+        }
+
+        thead {
+            background: #EDF2F7;
+        }
+
+        th {
+            padding: 12px 16px;
+            text-align: left;
+            font-weight: 600;
+            color: #4A5568;
+            font-size: 14px;
+            border-bottom: 2px solid var(--border-color);
+        }
+
+        td {
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--border-color);
+            color: var(--text-primary);
+        }
+
+        tbody tr:nth-child(even) {
+            background: var(--bg-color);
+        }
+
+        tbody tr:hover {
+            background: #EBF8FF;
+        }
+
+        .rank {
+            font-weight: 600;
+            color: var(--primary-color);
+            text-align: center;
+        }
+
+        .rank-1 {
+            color: #D69E2E;
+        }
+
+        .rank-2 {
+            color: #A0AEC0;
+        }
+
+        .rank-3 {
+            color: #CD7F32;
+        }
+
+        .amount {
+            text-align: right;
+            font-family: 'Courier New', monospace;
+        }
+
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal {
+            background: var(--card-bg);
+            border-radius: 8px;
+            width: 90%;
+            max-width: 900px;
+            max-height: 90vh;
+            overflow: hidden;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+        }
+
+        .modal-header {
+            background: var(--primary-color);
+            color: white;
+            padding: 16px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-header h3 {
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+            padding: 0;
+            line-height: 1;
+        }
+
+        .modal-body {
+            padding: 30px;
+            max-height: 70vh;
+            overflow-y: auto;
+        }
+
+        .modal-footer {
+            padding: 20px 30px;
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            justify-content: center;
+            gap: 16px;
+        }
+
+        .modal-chart {
+            width: 100%;
+            height: 400px;
+        }
+
+        .import-success {
+            display: none;
+            background: #C6F6D5;
+            color: #22543D;
+            padding: 12px 15px;
+            border-radius: 6px;
+            margin-top: 12px;
+            border: 1px solid #9AE6B4;
+        }
+
+        .import-success.show {
+            display: block;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: var(--text-secondary);
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 16px;
+            }
+
+            .page-title {
+                font-size: 20px;
+            }
+
+            .filter-section {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .stats-cards {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="page-title">🛒 Walmart线下数据看板</h1>
+        
+        <div class="card">
+            <div class="card-title">
+                <span class="card-title-left">📊 店铺销售数据</span>
+                <div class="import-btn-wrapper">
+                    <button class="btn btn-primary" onclick="openImportModal()">📥 导入数据</button>
+                </div>
+            </div>
+            <div class="filter-section">
+                <div class="filter-group">
+                    <label>开始日期：</label>
+                    <input type="date" id="startDate1">
+                </div>
+                <div class="filter-group">
+                    <label>结束日期：</label>
+                    <input type="date" id="endDate1">
+                </div>
+                <button class="btn btn-primary" onclick="queryData(1)">🔎 查询</button>
+            </div>
+            <div class="stats-cards" id="statsCards">
+                <div class="stat-card">
+                    <div class="stat-value" id="totalSalesAmount">$0</div>
+                    <div class="stat-label">总销售额</div>
+                </div>
+                <div class="stat-card orange">
+                    <div class="stat-value" id="totalQuantity">0</div>
+                    <div class="stat-label">总销量</div>
+                </div>
+                <div class="stat-card green">
+                    <div class="stat-value" id="avgDailySales">$0</div>
+                    <div class="stat-label">日均销售额</div>
+                </div>
+            </div>
+            <div id="salesTrendChart" class="chart-container"></div>
+        </div>
+        
+        <div class="card">
+            <div class="card-title">🏆 热销产品榜单</div>
+            <div class="filter-section">
+                <div class="filter-group">
+                    <label>开始日期：</label>
+                    <input type="date" id="startDate2">
+                </div>
+                <div class="filter-group">
+                    <label>结束日期：</label>
+                    <input type="date" id="endDate2">
+                </div>
+                <button class="btn btn-primary" onclick="queryData(2)">🔎 查询</button>
+            </div>
+            <div class="table-container">
+                <table id="productTable">
+                    <thead>
+                        <tr>
+                            <th style="text-align: center; width: 80px;">排名</th>
+                            <th>商品编号</th>
+                            <th style="text-align: right;">总销量</th>
+                            <th style="text-align: right;">总销售额</th>
+                            <th style="text-align: center; width: 160px;">操作</th>
+                        </tr>
+                    </thead>
+                    <tbody id="productTableBody">
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    
+    <div class="modal-overlay" id="importModalOverlay">
+        <div class="modal">
+            <div class="modal-header">
+                <h3>📥 导入数据</h3>
+                <button class="modal-close" onclick="closeImportModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <input type="file" id="fileInput" accept=".xlsx,.xls" style="display: none;" onchange="handleFileSelect(event)">
+                <p id="selectedFileName" style="margin-bottom: 16px; color: var(--text-secondary);">未选择文件</p>
+                <button class="btn btn-primary" onclick="document.getElementById('fileInput').click()">📂 选择Excel文件</button>
+                <div class="import-success" id="importSuccess" style="margin-top: 16px;">
+                    ✅ 数据导入成功！共导入 <span id="importCount">0</span> 条记录
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeImportModal()">取消</button>
+                <button class="btn btn-success" id="confirmImportBtn" onclick="confirmImport()">确认导入</button>
+            </div>
+        </div>
+    </div>
+    
+    <div class="modal-overlay" id="productDetailModalOverlay">
+        <div class="modal" style="max-width: 900px;">
+            <div class="modal-header">
+                <h3 id="productModalTitle">产品详细数据</h3>
+                <button class="modal-close" onclick="closeProductDetailModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div id="productDetailChart" class="modal-chart"></div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // ==================== 模拟JSON数据（来自实际Excel数据） ====================
+        const mockData = {
+            salesRecords: [
+                { sale_date: "2026-01-19", product_code: "678994713", product_id: "17180907118", category: "NAILCARE", quantity: 1, sales_amount: 19.98 },
+                { sale_date: "2026-01-20", product_code: "678994713", product_id: "17180907118", category: "NAILCARE", quantity: 1, sales_amount: 19.98 },
+                { sale_date: "2026-01-21", product_code: "678994713", product_id: "17180907118", category: "NAILCARE", quantity: 2, sales_amount: 39.96 },
+                { sale_date: "2026-01-23", product_code: "678994713", product_id: "17180907118", category: "NAILCARE", quantity: 1, sales_amount: 19.98 },
+                { sale_date: "2026-01-24", product_code: "678994713", product_id: "17180907118", category: "NAILCARE", quantity: 2, sales_amount: 39.96 },
+                { sale_date: "2026-01-25", product_code: "678994713", product_id: "17180907118", category: "NAILCARE", quantity: 2, sales_amount: 39.96 },
+                { sale_date: "2026-01-26", product_code: "678994713", product_id: "17180907118", category: "NAILCARE", quantity: 1, sales_amount: 19.98 },
+                { sale_date: "2026-01-26", product_code: "679067591", product_id: "17195806375", category: "NAILCARE", quantity: 1, sales_amount: 29.98 },
+                { sale_date: "2026-01-27", product_code: "678994713", product_id: "17180907118", category: "NAILCARE", quantity: 4, sales_amount: 79.92 },
+                { sale_date: "2026-01-27", product_code: "679067591", product_id: "17195806375", category: "NAILCARE", quantity: 1, sales_amount: 29.98 },
+                { sale_date: "2026-01-28", product_code: "679067591", product_id: "17195806375", category: "NAILCARE", quantity: 1, sales_amount: 29.98 },
+                { sale_date: "2026-01-28", product_code: "678994713", product_id: "17180907118", category: "NAILCARE", quantity: 6, sales_amount: 119.88 },
+                { sale_date: "2026-01-29", product_code: "679067591", product_id: "17195806375", category: "NAILCARE", quantity: 6, sales_amount: 179.88 },
+                { sale_date: "2026-01-29", product_code: "678994713", product_id: "17180907118", category: "NAILCARE", quantity: 11, sales_amount: 219.78 },
+                { sale_date: "2026-01-30", product_code: "679067591", product_id: "17195806375", category: "NAILCARE", quantity: 7, sales_amount: 209.86 },
+                { sale_date: "2026-01-30", product_code: "678994713", product_id: "17180907118", category: "NAILCARE", quantity: 33, sales_amount: 659.34 },
+                { sale_date: "2026-01-31", product_code: "678994713", product_id: "17180907118", category: "NAILCARE", quantity: 38, sales_amount: 759.24 },
+                { sale_date: "2026-01-31", product_code: "679067591", product_id: "17195806375", category: "NAILCARE", quantity: 5, sales_amount: 149.9 },
+                { sale_date: "2026-02-01", product_code: "678994713", product_id: "17180907118", category: "NAILCARE", quantity: 38, sales_amount: 759.24 },
+                { sale_date: "2026-02-01", product_code: "679067591", product_id: "17195806375", category: "NAILCARE", quantity: 23, sales_amount: 689.54 },
+                { sale_date: "2026-02-02", product_code: "678994713", product_id: "17180907118", category: "NAILCARE", quantity: 33, sales_amount: 659.34 },
+                { sale_date: "2026-02-02", product_code: "679067591", product_id: "17195806375", category: "NAILCARE", quantity: 18, sales_amount: 539.64 },
+                { sale_date: "2026-02-03", product_code: "678994713", product_id: "17180907118", category: "NAILCARE", quantity: 70, sales_amount: 1398.6 },
+                { sale_date: "2026-02-03", product_code: "679067591", product_id: "17195806375", category: "NAILCARE", quantity: 23, sales_amount: 689.54 },
+                { sale_date: "2026-02-04", product_code: "678994713", product_id: "17180907118", category: "NAILCARE", quantity: 55, sales_amount: 1098.9 },
+                { sale_date: "2026-02-04", product_code: "679067591", product_id: "17195806375", category: "NAILCARE", quantity: 25, sales_amount: 749.5 },
+                { sale_date: "2026-02-05", product_code: "679067591", product_id: "17195806375", category: "NAILCARE", quantity: 45, sales_amount: 1349.1 },
+                { sale_date: "2026-02-05", product_code: "678994713", product_id: "17180907118", category: "NAILCARE", quantity: 90, sales_amount: 1798.2 },
+                { sale_date: "2026-02-06", product_code: "679067591", product_id: "17195806375", category: "NAILCARE", quantity: 62, sales_amount: 1858.76 },
+                { sale_date: "2026-02-06", product_code: "678994713", product_id: "17180907118", category: "NAILCARE", quantity: 157, sales_amount: 3136.86 },
+                { sale_date: "2026-02-07", product_code: "678994713", product_id: "17180907118", category: "NAILCARE", quantity: 233, sales_amount: 4657.34 },
+                { sale_date: "2026-02-07", product_code: "679067591", product_id: "17195806375", category: "NAILCARE", quantity: 83, sales_amount: 2488.34 },
+                { sale_date: "2026-02-08", product_code: "678994713", product_id: "17180907118", category: "NAILCARE", quantity: 236, sales_amount: 4715.28 },
+                { sale_date: "2026-02-08", product_code: "679067591", product_id: "17195806375", category: "NAILCARE", quantity: 97, sales_amount: 2893.75 },
+                { sale_date: "2026-02-09", product_code: "679067591", product_id: "17195806375", category: "NAILCARE", quantity: 78, sales_amount: 2319.46 },
+                { sale_date: "2026-02-09", product_code: "678994713", product_id: "17180907118", category: "NAILCARE", quantity: 178, sales_amount: 3558.44 },
+                { sale_date: "2026-02-10", product_code: "679067591", product_id: "17195806375", category: "NAILCARE", quantity: 91, sales_amount: 2728.18 },
+                { sale_date: "2026-02-10", product_code: "678994713", product_id: "17180907118", category: "NAILCARE", quantity: 233, sales_amount: 4646.6 },
+                { sale_date: "2026-02-11", product_code: "678994713", product_id: "17180907118", category: "NAILCARE", quantity: 287, sales_amount: 5742.34 },
+                { sale_date: "2026-02-11", product_code: "679067591", product_id: "17195806375", category: "NAILCARE", quantity: 111, sales_amount: 3327.78 },
+                { sale_date: "2026-02-12", product_code: "679067591", product_id: "17195806375", category: "NAILCARE", quantity: 124, sales_amount: 3696.39 },
+                { sale_date: "2026-02-12", product_code: "678994713", product_id: "17180907118", category: "NAILCARE", quantity: 310, sales_amount: 6195.8 },
+                { sale_date: "2026-02-13", product_code: "679067591", product_id: "17195806375", category: "NAILCARE", quantity: 167, sales_amount: 5006.66 },
+                { sale_date: "2026-02-13", product_code: "678994713", product_id: "17180907118", category: "NAILCARE", quantity: 357, sales_amount: 7140.86 },
+                { sale_date: "2026-02-14", product_code: "678994713", product_id: "17180907118", category: "NAILCARE", quantity: 372, sales_amount: 7428.81 },
+                { sale_date: "2026-02-14", product_code: "679067591", product_id: "17195806375", category: "NAILCARE", quantity: 188, sales_amount: 5620.81 },
+                { sale_date: "2026-02-15", product_code: "679067591", product_id: "17195806375", category: "NAILCARE", quantity: 153, sales_amount: 4570.96 },
+                { sale_date: "2026-02-15", product_code: "678994713", product_id: "17180907118", category: "NAILCARE", quantity: 326, sales_amount: 6490.53 },
+                { sale_date: "2026-02-16", product_code: "679067591", product_id: "17195806375", category: "NAILCARE", quantity: 146, sales_amount: 4403.07 },
+                { sale_date: "2026-02-16", product_code: "678994713", product_id: "17180907118", category: "NAILCARE", quantity: 313, sales_amount: 6230.38 },
+                { sale_date: "2026-02-17", product_code: "679067591", product_id: "17195806375", category: "NAILCARE", quantity: 139, sales_amount: 4144.61 },
+                { sale_date: "2026-02-17", product_code: "678994713", product_id: "17180907118", category: "NAILCARE", quantity: 228, sales_amount: 4545.46 },
+                { sale_date: "2026-02-18", product_code: "678994713", product_id: "17180907118", category: "NAILCARE", quantity: 290, sales_amount: 5793.21 },
+                { sale_date: "2026-02-18", product_code: "679067591", product_id: "17195806375", category: "NAILCARE", quantity: 156, sales_amount: 4684.38 },
+                { sale_date: "2026-02-19", product_code: "679067591", product_id: "17195806375", category: "NAILCARE", quantity: 171, sales_amount: 5112.81 },
+                { sale_date: "2026-02-19", product_code: "678994713", product_id: "17180907118", category: "NAILCARE", quantity: 392, sales_amount: 7840.64 },
+                { sale_date: "2026-02-20", product_code: "678994713", product_id: "17180907118", category: "NAILCARE", quantity: 436, sales_amount: 8700.3 },
+                { sale_date: "2026-02-20", product_code: "679067591", product_id: "17195806375", category: "NAILCARE", quantity: 232, sales_amount: 6937.5 },
+                { sale_date: "2026-02-21", product_code: "679067591", product_id: "17195806375", category: "NAILCARE", quantity: 281, sales_amount: 8432.63 },
+                { sale_date: "2026-02-21", product_code: "678994713", product_id: "17180907118", category: "NAILCARE", quantity: 537, sales_amount: 10718.42 },
+                { sale_date: "2026-02-22", product_code: "679067591", product_id: "17195806375", category: "NAILCARE", quantity: 260, sales_amount: 7780.0 },
+                { sale_date: "2026-02-22", product_code: "678994713", product_id: "17180907118", category: "NAILCARE", quantity: 453, sales_amount: 9057.32 },
+                { sale_date: "2026-02-23", product_code: "678994713", product_id: "17180907118", category: "NAILCARE", quantity: 370, sales_amount: 7405.12 },
+                { sale_date: "2026-02-23", product_code: "679067591", product_id: "17195806375", category: "NAILCARE", quantity: 180, sales_amount: 5374.44 },
+                { sale_date: "2026-02-24", product_code: "679067591", product_id: "17195806375", category: "NAILCARE", quantity: 198, sales_amount: 5877.95 },
+                { sale_date: "2026-02-24", product_code: "678994713", product_id: "17180907118", category: "NAILCARE", quantity: 329, sales_amount: 6561.71 },
+                { sale_date: "2026-02-25", product_code: "678994713", product_id: "17180907118", category: "NAILCARE", quantity: 369, sales_amount: 7382.19 },
+                { sale_date: "2026-02-25", product_code: "679067591", product_id: "17195806375", category: "NAILCARE", quantity: 209, sales_amount: 6250.15 },
+                { sale_date: "2026-02-26", product_code: "678994713", product_id: "17180907118", category: "NAILCARE", quantity: 392, sales_amount: 7827.37 },
+                { sale_date: "2026-02-26", product_code: "679067591", product_id: "17195806375", category: "NAILCARE", quantity: 242, sales_amount: 7202.44 },
+                { sale_date: "2026-02-27", product_code: "679067591", product_id: "17195806375", category: "NAILCARE", quantity: 321, sales_amount: 9636.33 },
+                { sale_date: "2026-02-27", product_code: "678994713", product_id: "17180907118", category: "NAILCARE", quantity: 428, sales_amount: 8540.8 }
+            ]
+        };
+
+        let salesData = [];
+        let filteredData = [];
+        let salesTrendChart = null;
+        let productDetailChart = null;
+
+        // ==================== 工具函数 ====================
+        function formatMoney(amount) {
+            return '$' + amount.toLocaleString('zh-CN', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+        }
+
+        // ==================== 初始化 ====================
+        function init() {
+            // 设置默认时间范围（显示全部数据）
+            const startDate = "2026-01-19";
+            const endDate = "2026-02-27";
+            
+            document.getElementById('startDate1').value = startDate;
+            document.getElementById('endDate1').value = endDate;
+            document.getElementById('startDate2').value = startDate;
+            document.getElementById('endDate2').value = endDate;
+            
+            // 加载模拟数据
+            salesData = JSON.parse(JSON.stringify(mockData.salesRecords));
+            filteredData = filterDataByDateRange(salesData, startDate, endDate);
+            
+            renderAll();
+            bindEvents();
+        }
+
+        function filterDataByDateRange(data, startDate, endDate) {
+            return data.filter(record => {
+                const date = record.sale_date;
+                return date >= startDate && date <= endDate;
+            });
+        }
+
+        // ==================== 数据处理 ====================
+        function getDailySalesData(data) {
+            const dailyMap = new Map();
+            
+            data.forEach(record => {
+                if (dailyMap.has(record.sale_date)) {
+                    const existing = dailyMap.get(record.sale_date);
+                    existing.quantity += record.quantity;
+                    existing.sales_amount += record.sales_amount;
+                } else {
+                    dailyMap.set(record.sale_date, {
+                        date: record.sale_date,
+                        quantity: record.quantity,
+                        sales_amount: record.sales_amount
+                    });
+                }
+            });
+            
+            return Array.from(dailyMap.values()).sort((a, b) => a.date.localeCompare(b.date));
+        }
+
+        function getProductSalesData(data) {
+            const productMap = new Map();
+            
+            data.forEach(record => {
+                if (productMap.has(record.product_code)) {
+                    const existing = productMap.get(record.product_code);
+                    existing.quantity += record.quantity;
+                    existing.sales_amount += record.sales_amount;
+                } else {
+                    productMap.set(record.product_code, {
+                        product_code: record.product_code,
+                        quantity: record.quantity,
+                        sales_amount: record.sales_amount
+                    });
+                }
+            });
+            
+            return Array.from(productMap.values())
+                .sort((a, b) => b.sales_amount - a.sales_amount);
+        }
+
+        function getProductDailyData(data, productCode) {
+            const dailyMap = new Map();
+            
+            data.forEach(record => {
+                if (record.product_code === productCode) {
+                    if (dailyMap.has(record.sale_date)) {
+                        const existing = dailyMap.get(record.sale_date);
+                        existing.quantity += record.quantity;
+                        existing.sales_amount += record.sales_amount;
+                    } else {
+                        dailyMap.set(record.sale_date, {
+                            date: record.sale_date,
+                            quantity: record.quantity,
+                            sales_amount: record.sales_amount
+                        });
+                    }
+                }
+            });
+            
+            return Array.from(dailyMap.values()).sort((a, b) => a.date.localeCompare(b.date));
+        }
+
+        // ==================== 查询功能 ====================
+        function queryData(module) {
+            let startDate, endDate;
+            
+            if (module === 1) {
+                startDate = document.getElementById('startDate1').value;
+                endDate = document.getElementById('endDate1').value;
+            } else {
+                startDate = document.getElementById('startDate2').value;
+                endDate = document.getElementById('endDate2').value;
+            }
+            
+            if (!startDate || !endDate) {
+                alert('请选择开始日期和结束日期！');
+                return;
+            }
+            
+            if (startDate > endDate) {
+                alert('开始日期不能大于结束日期！');
+                return;
+            }
+            
+            filteredData = filterDataByDateRange(salesData, startDate, endDate);
+            renderAll();
+        }
+
+        // ==================== 渲染函数 ====================
+        function renderAll() {
+            renderStatsCards();
+            renderSalesTrendChart();
+            renderProductTable();
+        }
+
+        function renderStatsCards() {
+            const dailyData = getDailySalesData(filteredData);
+            
+            const totalSalesAmount = filteredData.reduce((sum, r) => sum + r.sales_amount, 0);
+            const totalQuantity = filteredData.reduce((sum, r) => sum + r.quantity, 0);
+            const avgDailySales = dailyData.length > 0 ? totalSalesAmount / dailyData.length : 0;
+            
+            document.getElementById('totalSalesAmount').textContent = formatMoney(totalSalesAmount);
+            document.getElementById('totalQuantity').textContent = totalQuantity.toLocaleString();
+            document.getElementById('avgDailySales').textContent = formatMoney(Math.round(avgDailySales));
+        }
+
+        function renderSalesTrendChart() {
+            const dailyData = getDailySalesData(filteredData);
+            const dates = dailyData.map(d => d.date);
+            const salesAmounts = dailyData.map(d => d.sales_amount);
+            const quantities = dailyData.map(d => d.quantity);
+            
+            const chartDom = document.getElementById('salesTrendChart');
+            
+            if (salesTrendChart) {
+                salesTrendChart.dispose();
+            }
+            
+            salesTrendChart = echarts.init(chartDom);
+            
+            const option = {
+                tooltip: {
+                    trigger: 'axis',
+                    axisPointer: { type: 'cross' }
+                },
+                legend: {
+                    data: ['销售额', '销量'],
+                    bottom: 0
+                },
+                grid: {
+                    left: '3%',
+                    right: '4%',
+                    bottom: '15%',
+                    top: '10%',
+                    containLabel: true
+                },
+                xAxis: {
+                    type: 'category',
+                    boundaryGap: false,
+                    data: dates,
+                    axisLabel: {
+                        rotate: 45,
+                        fontSize: 11
+                    }
+                },
+                yAxis: [
+                    {
+                        type: 'value',
+                        name: '销售额',
+                        axisLabel: {
+                            formatter: (value) => '$' + value.toLocaleString()
+                        }
+                    },
+                    {
+                        type: 'value',
+                        name: '销量',
+                        axisLabel: {
+                            formatter: (value) => value.toLocaleString()
+                        }
+                    }
+                ],
+                series: [
+                    {
+                        name: '销售额',
+                        type: 'line',
+                        data: salesAmounts,
+                        smooth: true,
+                        lineStyle: { width: 3 },
+                        itemStyle: { color: '#41B983' },
+                        areaStyle: {
+                            color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+                                { offset: 0, color: 'rgba(65, 185, 131, 0.3)' },
+                                { offset: 1, color: 'rgba(65, 185, 131, 0.05)' }
+                            ])
+                        }
+                    },
+                    {
+                        name: '销量',
+                        type: 'bar',
+                        yAxisIndex: 1,
+                        data: quantities,
+                        itemStyle: { color: '#f5576c' }
+                    }
+                ]
+            };
+            
+            salesTrendChart.setOption(option);
+        }
+
+        function renderProductTable() {
+            const productData = getProductSalesData(filteredData);
+            const tbody = document.getElementById('productTableBody');
+            
+            if (productData.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" class="empty-state">暂无数据</td></tr>';
+                return;
+            }
+            
+            tbody.innerHTML = productData.map((p, index) => `
+                <tr>
+                    <td class="rank rank-${index + 1}">${index + 1}</td>
+                    <td>${p.product_code}</td>
+                    <td class="amount">${p.quantity.toLocaleString()}</td>
+                    <td class="amount">${formatMoney(p.sales_amount)}</td>
+                    <td style="text-align: center;">
+                        <button class="btn btn-info" onclick="showProductDetail('${p.product_code}')">
+                            📊 详细数据
+                        </button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        // ==================== 导入弹窗功能 ====================
+        let selectedFile = null;
+
+        function openImportModal() {
+            document.getElementById('importModalOverlay').classList.add('active');
+            document.getElementById('selectedFileName').textContent = '未选择文件';
+            document.getElementById('importSuccess').classList.remove('show');
+            document.getElementById('confirmImportBtn').disabled = true;
+            selectedFile = null;
+        }
+
+        function closeImportModal() {
+            document.getElementById('importModalOverlay').classList.remove('active');
+        }
+
+        function handleFileSelect(event) {
+            const file = event.target.files[0];
+            if (file) {
+                selectedFile = file;
+                document.getElementById('selectedFileName').textContent = file.name;
+                document.getElementById('confirmImportBtn').disabled = false;
+            }
+        }
+
+        function confirmImport() {
+            if (!selectedFile) {
+                alert('请先选择Excel文件！');
+                return;
+            }
+            
+            // 模拟导入成功
+            document.getElementById('importCount').textContent = salesData.length;
+            document.getElementById('importSuccess').classList.add('show');
+            document.getElementById('confirmImportBtn').disabled = true;
+            
+            setTimeout(() => {
+                closeImportModal();
+            }, 1500);
+        }
+
+        // ==================== 产品详情弹窗功能 ====================
+        function showProductDetail(productCode) {
+            const productDailyData = getProductDailyData(filteredData, productCode);
+            
+            document.getElementById('productModalTitle').textContent = `📊 ${productCode} - 每日销售详情`;
+            document.getElementById('productDetailModalOverlay').classList.add('active');
+            
+            const chartDom = document.getElementById('productDetailChart');
+            
+            if (productDetailChart) {
+                productDetailChart.dispose();
+            }
+            
+            productDetailChart = echarts.init(chartDom);
+            
+            const option = {
+                tooltip: {
+                    trigger: 'axis',
+                    axisPointer: { type: 'cross' }
+                },
+                legend: {
+                    data: ['销售额', '销量'],
+                    bottom: 0
+                },
+                grid: {
+                    left: '3%',
+                    right: '4%',
+                    bottom: '15%',
+                    top: '10%',
+                    containLabel: true
+                },
+                xAxis: {
+                    type: 'category',
+                    boundaryGap: false,
+                    data: productDailyData.map(d => d.date),
+                    axisLabel: {
+                        rotate: 45,
+                        fontSize: 11
+                    }
+                },
+                yAxis: [
+                    {
+                        type: 'value',
+                        name: '销售额',
+                        axisLabel: {
+                            formatter: (value) => '$' + value.toLocaleString()
+                        }
+                    },
+                    {
+                        type: 'value',
+                        name: '销量',
+                        axisLabel: {
+                            formatter: (value) => value.toLocaleString()
+                        }
+                    }
+                ],
+                series: [
+                    {
+                        name: '销售额',
+                        type: 'line',
+                        data: productDailyData.map(d => d.sales_amount),
+                        smooth: true,
+                        lineStyle: { width: 3 },
+                        itemStyle: { color: '#41B983' },
+                        areaStyle: {
+                            color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+                                { offset: 0, color: 'rgba(65, 185, 131, 0.3)' },
+                                { offset: 1, color: 'rgba(65, 185, 131, 0.05)' }
+                            ])
+                        }
+                    },
+                    {
+                        name: '销量',
+                        type: 'bar',
+                        yAxisIndex: 1,
+                        data: productDailyData.map(d => d.quantity),
+                        itemStyle: { color: '#f5576c' }
+                    }
+                ]
+            };
+            
+            productDetailChart.setOption(option);
+        }
+
+        function closeProductDetailModal() {
+            document.getElementById('productDetailModalOverlay').classList.remove('active');
+        }
+
+        function bindEvents() {
+            // 产品详情弹窗关闭
+            document.getElementById('productDetailModalOverlay').addEventListener('click', function(e) {
+                if (e.target === this) {
+                    closeProductDetailModal();
+                }
+            });
+            
+            // 导入弹窗关闭
+            document.getElementById('importModalOverlay').addEventListener('click', function(e) {
+                if (e.target === this) {
+                    closeImportModal();
+                }
+            });
+            
+            // 窗口大小改变时重绘图表
+            window.addEventListener('resize', function() {
+                if (salesTrendChart) {
+                    salesTrendChart.resize();
+                }
+                if (productDetailChart) {
+                    productDetailChart.resize();
+                }
+            });
+        }
+
+        // 页面加载完成后初始化
+        window.addEventListener('load', init);
+    </script>
+</body>
+</html>
