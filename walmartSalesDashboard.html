@@ -423,13 +423,17 @@
                     <div class="stat-value" id="totalSalesAmount">$0</div>
                     <div class="stat-label">总销售额</div>
                 </div>
+                <div class="stat-card green">
+                    <div class="stat-value" id="avgDailySales">$0</div>
+                    <div class="stat-label">日均销售额</div>
+                </div>
                 <div class="stat-card orange">
                     <div class="stat-value" id="totalQuantity">0</div>
                     <div class="stat-label">总销量</div>
                 </div>
-                <div class="stat-card green">
-                    <div class="stat-value" id="avgDailySales">$0</div>
-                    <div class="stat-label">日均销售额</div>
+                <div class="stat-card yellow">
+                    <div class="stat-value" id="avgDailyQuantity">0</div>
+                    <div class="stat-label">日均销量</div>
                 </div>
             </div>
             <div id="salesTrendChart" class="chart-container"></div>
@@ -717,10 +721,12 @@
             const totalSalesAmount = filteredData.reduce((sum, r) => sum + r.sales_amount, 0);
             const totalQuantity = filteredData.reduce((sum, r) => sum + r.quantity, 0);
             const avgDailySales = dailyData.length > 0 ? totalSalesAmount / dailyData.length : 0;
+            const avgDailyQuantity = dailyData.length > 0 ? totalQuantity / dailyData.length : 0;
             
             document.getElementById('totalSalesAmount').textContent = formatMoney(totalSalesAmount);
             document.getElementById('totalQuantity').textContent = totalQuantity.toLocaleString();
             document.getElementById('avgDailySales').textContent = formatMoney(Math.round(avgDailySales));
+            document.getElementById('avgDailyQuantity').textContent = Math.round(avgDailyQuantity).toLocaleString();
         }
 
         function renderSalesTrendChart() {
