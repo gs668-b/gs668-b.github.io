@@ -6,6 +6,12 @@
     <title>智能AI客服工作台</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/dayjs@1.11.10/dayjs.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/antd@5.12.8/dist/antd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <style>
         /* 全局样式 */
         * {
@@ -324,6 +330,8 @@
             padding: 2px 6px;
             border-radius: 8px;
             margin-left: 8px;
+            flex-shrink: 0;
+            white-space: nowrap;
         }
 
         .sentiment-negative {
@@ -555,20 +563,8 @@
         <div class="sidebar">
             <div class="sidebar-header">
                 <h6 class="mb-2">会话列表</h6>
-                <div class="filter-row mb-2">
-                    <span class="filter-label">会话状态：</span>
-                    <div class="dropdown">
-                        <button class="btn btn-sm btn-outline-secondary dropdown-toggle filter-btn" type="button" data-bs-toggle="dropdown">
-                            全部
-                        </button>
-                        <ul class="dropdown-menu" style="min-width: 120px;">
-                            <li><a class="dropdown-item" href="#">全部</a></li>
-                            <li><a class="dropdown-item" href="#">待处理</a></li>
-                            <li><a class="dropdown-item" href="#">处理中</a></li>
-                            <li><a class="dropdown-item" href="#">已关闭</a></li>
-                        </ul>
-                    </div>
-                </div>
+                <div id="status-select" style="margin-bottom: 8px;"></div>
+                <div id="category-cascader" style="margin-bottom: 8px;"></div>
                 <div style="margin-bottom: 0.5rem; position: relative;">
                     <input type="text" id="conversation-search" class="form-control form-control-sm" placeholder="输入用户名或邮箱查询..." style="padding-right: 30px;">
                     <button id="search-btn" style="position: absolute; right: 5px; top: 50%; transform: translateY(-50%); background: none; border: none; color: #999; cursor: pointer;">
@@ -588,37 +584,11 @@
                     <h6 class="mb-0" id="chat-username">jorgebarbara27<small style="color: #999; font-weight: normal; margin-left: 20px" id="chat-useremail">jorgebarbara27@example.com</small></h6>
                     <small class="text-muted" id="chat-status">TikTok · 待处理</small>
                 </div>
-                <div class="chat-header-right">
-                    <div class="filter-row me-2" id="agent-dropdown" style="display: none;">
-                        <span class="filter-label">会话负责人：</span>
-                        <div class="dropdown">
-                            <button class="btn btn-sm btn-outline-secondary dropdown-toggle filter-btn" type="button" data-bs-toggle="dropdown">
-                                Morgan.Ying
-                            </button>
-                            <ul class="dropdown-menu" style="min-width: 120px;">
-                                <li><a class="dropdown-item" href="#" data-agent="Morgan.Ying">Morgan.Ying</a></li>
-                                <li><a class="dropdown-item" href="#" data-agent="Lune.Liu">Lune.Liu</a></li>
-                                <li><a class="dropdown-item" href="#" data-agent="Gigi.Liang">Gigi.Liang</a></li>
-                                <li><a class="dropdown-item" href="#" data-agent="Sophie.Peng">Sophie.Peng</a></li>
-                                <li><a class="dropdown-item" href="#" data-agent="待分配">待分配</a></li>
-                            </ul>
-                        </div>
-                    </div>
-                    <div class="filter-row">
-                        <span class="filter-label">会话状态：</span>
-                        <div class="dropdown">
-                            <button class="btn btn-sm btn-outline-secondary dropdown-toggle filter-btn" type="button" data-bs-toggle="dropdown">
-                                待处理
-                            </button>
-                            <ul class="dropdown-menu" style="min-width: 120px;">
-                                <li><a class="dropdown-item" href="#" data-status="pending">待处理</a></li>
-                                <li><a class="dropdown-item" href="#" data-status="processing">处理中</a></li>
-                                <li><a class="dropdown-item" href="#" data-status="closed">已关闭</a></li>
-                            </ul>
-                        </div>
-                    </div>
+                <div class="chat-header-right" id="chat-header-right">
+                    <div id="chat-info-display"></div>
                 </div>
             </div>
+            <div id="edit-modal-container"></div>
             <div class="chat-body" id="chat-messages">
                 <!-- 消息将通过JS动态加载 -->
             </div>
@@ -685,9 +655,397 @@
         </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script>
+    <script type="text/javascript">
+        const { Cascader } = antd;
+
+        const categoryOptions = [
+            {
+                label: '售前',
+                value: 'presale',
+                children: [
+                    {
+                        label: '保修期',
+                        value: 'presale-warranty',
+                        children: [
+                            { label: '如何延保', value: 'presale-warranty-extend' }
+                        ]
+                    },
+                    {
+                        label: '产品',
+                        value: 'presale-product',
+                        children: [
+                            { label: '询问产品参数', value: 'presale-product-spec' },
+                            { label: '产品推荐', value: 'presale-product-recommend' }
+                        ]
+                    },
+                    {
+                        label: '物流',
+                        value: 'presale-logistics',
+                        children: [
+                            { label: '是否有物流配送', value: 'presale-logistics-available' },
+                            { label: '物流费用大概多少', value: 'presale-logistics-fee' },
+                            { label: '税费多少', value: 'presale-logistics-tax' },
+                            { label: '物流运输时间', value: 'presale-logistics-time' }
+                        ]
+                    }
+                ]
+            },
+            {
+                label: '售中',
+                value: 'insale',
+                children: [
+                    {
+                        label: '少发/漏发',
+                        value: 'insale-missing',
+                        children: [
+                            { label: '少发/漏发确认', value: 'insale-missing-confirm' },
+                            { label: '部分发货/部分物流', value: 'insale-missing-partial' },
+                            { label: '询问部分产品物流单号', value: 'insale-missing-tracking' }
+                        ]
+                    },
+                    {
+                        label: '退款',
+                        value: 'insale-refund',
+                        children: [
+                            { label: '仅退款', value: 'insale-refund-only' }
+                        ]
+                    },
+                    {
+                        label: '取消/变更',
+                        value: 'insale-cancel',
+                        children: [
+                            { label: '取消订单', value: 'insale-cancel-order' },
+                            { label: '修改地址', value: 'insale-cancel-address' },
+                            { label: '修改产品', value: 'insale-cancel-product' }
+                        ]
+                    }
+                ]
+            },
+            {
+                label: '售后',
+                value: 'aftersale',
+                children: [
+                    {
+                        label: '质量/瑕疵',
+                        value: 'aftersale-quality',
+                        children: [
+                            { label: '质量问题', value: 'aftersale-quality-issue' },
+                            { label: '发错货', value: 'aftersale-quality-wrong' },
+                            { label: '已使用/非全新', value: 'aftersale-quality-used' }
+                        ]
+                    },
+                    {
+                        label: '退货',
+                        value: 'aftersale-return',
+                        children: [
+                            { label: '退货退款', value: 'aftersale-return-refund' }
+                        ]
+                    },
+                    {
+                        label: '物流',
+                        value: 'aftersale-logistics',
+                        children: [
+                            { label: '妥投未收到', value: 'aftersale-logistics-notreceived' },
+                            { label: '物流延迟/被退回/无更新/无法投递', value: 'aftersale-logistics-delay' }
+                        ]
+                    }
+                ]
+            }
+        ];
+
+        const { Select, Modal } = antd;
+
+        // 状态选项数据
+        const statusOptions = [
+            { label: '待处理', value: 'pending' },
+            { label: '处理中', value: 'processing' },
+            { label: '已关闭', value: 'closed' }
+        ];
+
+        // 负责人选项数据
+        const agentOptions = [
+            { label: 'Morgan.Ying', value: 'Morgan.Ying' },
+            { label: 'Lune.Liu', value: 'Lune.Liu' },
+            { label: 'Gigi.Liang', value: 'Gigi.Liang' },
+            { label: 'Sophie.Peng', value: 'Sophie.Peng' },
+            { label: '待分配', value: '待分配' }
+        ];
+
+        // 状态多选组件
+        class StatusSelect extends React.Component {
+            state = {
+                selectedValue: ['pending', 'processing'],
+            };
+
+            onChange = (value) => {
+                this.setState({ selectedValue: value });
+                if (window.filterByStatus) {
+                    window.filterByStatus(value);
+                }
+            };
+
+            render() {
+                return React.createElement('div', null,
+                    React.createElement('span', {
+                        style: { fontSize: '12px', color: '#666', marginRight: '5px', whiteSpace: 'nowrap' }
+                    }, '会话状态：'),
+                    React.createElement(Select, {
+                        mode: 'multiple',
+                        style: { width: '150px' },
+                        options: statusOptions,
+                        placeholder: '全部',
+                        value: this.state.selectedValue,
+                        onChange: this.onChange,
+                        maxTagCount: 'responsive',
+                        allowClear: true
+                    })
+                );
+            }
+        }
+
+        // 问题类型级联组件
+        class CategoryCascader extends React.Component {
+            state = {
+                selectedValue: [],
+            };
+
+            onChange = (value) => {
+                this.setState({ selectedValue: value });
+                if (window.filterByCategory) {
+                    window.filterByCategory(value);
+                }
+            };
+
+            render() {
+                return React.createElement('div', null,
+                    React.createElement('span', {
+                        style: { fontSize: '12px', color: '#666', marginRight: '5px', whiteSpace: 'nowrap' }
+                    }, '问题类型：'),
+                    React.createElement(Cascader, {
+                        style: { width: '150px' },
+                        options: categoryOptions,
+                        onChange: this.onChange,
+                        multiple: true,
+                        maxTagCount: 'responsive',
+                        placeholder: '选择问题类型',
+                        changeOnSelect: true
+                    })
+                );
+            }
+        }
+
+        // 渲染所有Ant Design组件
+        const appRoot = ReactDOM.createRoot(document.getElementById('category-cascader'));
+        appRoot.render(React.createElement(CategoryCascader));
+
+        const statusRoot = ReactDOM.createRoot(document.getElementById('status-select'));
+        statusRoot.render(React.createElement(StatusSelect));
+
+        // 聊天信息显示组件 - 显示文本+编辑图标
+        class ChatInfoDisplay extends React.Component {
+            state = {
+                modalVisible: false,
+                editingField: null,
+                selectedCategory: null,
+                selectedStatus: null,
+                selectedAgent: null
+            };
+
+            showEditModal = (field) => {
+                const conv = conversationData.conversations.find(function(c) {
+                    return c.id === window.currentConversation;
+                });
+                if (!conv) return;
+
+                this.setState({
+                    modalVisible: true,
+                    editingField: field,
+                    selectedCategory: conv.category,
+                    selectedStatus: conv.status,
+                    selectedAgent: conv.agent
+                });
+            };
+
+            handleOk = () => {
+                const conv = conversationData.conversations.find(function(c) {
+                    return c.id === window.currentConversation;
+                });
+                if (!conv) return;
+
+                if (this.state.editingField === 'category') {
+                    conv.category = this.state.selectedCategory;
+                } else if (this.state.editingField === 'status') {
+                    conv.status = this.state.selectedStatus;
+                } else if (this.state.editingField === 'agent') {
+                    conv.agent = this.state.selectedAgent;
+                }
+
+                renderConversationList();
+                this.setState({ modalVisible: false });
+                this.forceUpdate();
+            };
+
+            handleCancel = () => {
+                this.setState({ modalVisible: false });
+            };
+
+            getCategoryText = () => {
+                const conv = conversationData.conversations.find(function(c) {
+                    return c.id === window.currentConversation;
+                });
+                if (!conv || !conv.category) return '未分类';
+
+                const parts = conv.category.split('-');
+                const level1 = { presale: '售前', insale: '售中', aftersale: '售后' }[parts[0]] || '';
+                const level2Map = {
+                    warranty: '保修期', product: '产品', logistics: '物流',
+                    missing: '少发/漏发', refund: '退款', cancel: '取消/变更',
+                    quality: '质量/瑕疵', return: '退货'
+                };
+                const level2 = level2Map[parts[1]] || '';
+                const level3Map = {
+                    'extend': '如何延保', 'spec': '询问产品参数', 'recommend': '产品推荐',
+                    'available': '是否有物流配送', 'fee': '物流费用', 'tax': '税费', 'time': '运输时间',
+                    'confirm': '少发/漏发确认', 'partial': '部分发货', 'tracking': '询问物流单号',
+                    'only': '仅退款', 'order': '取消订单', 'address': '修改地址', 'product': '修改产品',
+                    'issue': '质量问题', 'wrong': '发错货', 'used': '已使用/非全新',
+                    'refund': '退货退款', 'notreceived': '妥投未收到', 'delay': '物流延迟'
+                };
+                const level3 = level3Map[parts[2]] || '';
+
+                return level1 + ' / ' + level2 + (level3 ? ' / ' + level3 : '');
+            };
+
+            getStatusText = () => {
+                const conv = conversationData.conversations.find(function(c) {
+                    return c.id === window.currentConversation;
+                });
+                if (!conv) return '';
+                return { pending: '待处理', processing: '处理中', closed: '已关闭' }[conv.status] || '';
+            };
+
+            getAgentText = () => {
+                const conv = conversationData.conversations.find(function(c) {
+                    return c.id === window.currentConversation;
+                });
+                if (!conv || !conv.agent) return '待分配';
+                return conv.agent;
+            };
+
+            renderEditIcon = (field) => {
+                return React.createElement('i', {
+                    className: 'fas fa-pencil-alt',
+                    style: { marginLeft: '5px', cursor: 'pointer', color: '#999', fontSize: '12px' },
+                    onClick: () => this.showEditModal(field)
+                });
+            };
+
+            renderModal = () => {
+                const modalContent = [];
+                if (this.state.editingField === 'category') {
+                    modalContent.push(
+                        React.createElement('div', { key: 'category', style: { marginBottom: '15px' } },
+                            React.createElement('label', { style: { display: 'block', marginBottom: '5px' } }, '会话类型：'),
+                            React.createElement(Cascader, {
+                                style: { width: '100%' },
+                                options: categoryOptions,
+                                value: this.state.selectedCategory ? [this.state.selectedCategory] : [],
+                                onChange: (value) => this.setState({ selectedCategory: value[0] }),
+                                placeholder: '选择问题类型'
+                            })
+                        )
+                    );
+                } else if (this.state.editingField === 'status') {
+                    modalContent.push(
+                        React.createElement('div', { key: 'status', style: { marginBottom: '15px' } },
+                            React.createElement('label', { style: { display: 'block', marginBottom: '5px' } }, '会话状态：'),
+                            React.createElement(Select, {
+                                style: { width: '100%' },
+                                options: statusOptions,
+                                value: this.state.selectedStatus,
+                                onChange: (value) => this.setState({ selectedStatus: value })
+                            })
+                        )
+                    );
+                } else if (this.state.editingField === 'agent') {
+                    modalContent.push(
+                        React.createElement('div', { key: 'agent', style: { marginBottom: '15px' } },
+                            React.createElement('label', { style: { display: 'block', marginBottom: '5px' } }, '会话负责人：'),
+                            React.createElement(Select, {
+                                style: { width: '100%' },
+                                options: agentOptions,
+                                value: this.state.selectedAgent || '待分配',
+                                onChange: (value) => this.setState({ selectedAgent: value })
+                            })
+                        )
+                    );
+                }
+
+                return React.createElement(Modal, {
+                    title: '修改会话信息',
+                    open: this.state.modalVisible,
+                    onOk: this.handleOk,
+                    onCancel: this.handleCancel,
+                    okText: '确认',
+                    cancelText: '取消'
+                }, modalContent);
+            };
+
+            render() {
+                const showAgent = currentChannel === 'Amazon';
+
+                return React.createElement('div', {
+                    style: { display: 'flex', alignItems: 'center', fontSize: '13px', color: '#666' }
+                },
+                    React.createElement('span', null,
+                        '会话类型：', this.getCategoryText(),
+                        this.renderEditIcon('category')
+                    ),
+                    React.createElement('span', {
+                        style: { marginLeft: '15px' }
+                    }, '会话状态：', this.getStatusText(),
+                        this.renderEditIcon('status')
+                    ),
+                    showAgent ? React.createElement('span', {
+                        style: { marginLeft: '15px' }
+                    }, '会话负责人：', this.getAgentText(),
+                        this.renderEditIcon('agent')
+                    ) : null,
+                    this.renderModal()
+                );
+            }
+        }
+
+        const chatInfoRoot = ReactDOM.createRoot(document.getElementById('chat-info-display'));
+        chatInfoRoot.render(React.createElement(ChatInfoDisplay));
+
+        window.updateChatInfoDisplay = function() {
+            chatInfoRoot.render(React.createElement(ChatInfoDisplay));
+        };
+
+        // 全局筛选函数
+        window.filterByStatus = function(selectedValues) {
+            currentFilter.status = selectedValues;
+            filterConversations();
+        };
+
+        window.filterByCategory = function(selectedValues) {
+            currentFilter.category = selectedValues;
+            filterConversations();
+        };
+
+        window.filterByAgent = function(value) {
+            currentFilter.agent = value;
+            filterConversations();
+        };
+
+        // 当前筛选状态
+        let currentFilter = {
+            status: ['pending', 'processing'],
+            category: [],
+            agent: null
+        };
+
         // 会话数据
         const conversationData = {
             conversations: [
@@ -701,6 +1059,7 @@
                     },
                     agent: 'Morgan.Ying',
                     status: 'pending',
+                    category: 'aftersale-quality-issue',
                     lastMessage: 'Hello I bought this a few weeks ago and wanted to use it today...',
                     lastMessageTime: '今天 10:30',
                     messages: [
@@ -720,6 +1079,7 @@
                     },
                     agent: 'Lune.Liu',
                     status: 'processing',
+                    category: 'aftersale-return-refund',
                     lastMessage: 'Thank you for your help!',
                     lastMessageTime: '昨天 15:45',
                     messages: [
@@ -737,6 +1097,7 @@
                     },
                     agent: '待分配',
                     status: 'pending',
+                    category: 'presale-product-recommend',
                     lastMessage: 'Your service is excellent!',
                     lastMessageTime: '4天前',
                     messages: [
@@ -754,6 +1115,7 @@
                     },
                     agent: 'Gigi.Liang',
                     status: 'closed',
+                    category: 'insale-missing-confirm',
                     lastMessage: 'Problem solved, thank you!',
                     lastMessageTime: '5天前',
                     messages: [
@@ -771,6 +1133,7 @@
                     },
                     agent: 'Sophie.Peng',
                     status: 'processing',
+                    category: 'aftersale-quality-issue',
                     lastMessage: 'I need a replacement for my order.',
                     lastMessageTime: '今天 09:20',
                     messages: [
@@ -788,6 +1151,7 @@
                     },
                     agent: '待分配',
                     status: 'pending',
+                    category: 'aftersale-logistics-notreceived',
                     lastMessage: 'Product quality issue',
                     lastMessageTime: '今天 08:00',
                     messages: [
@@ -804,6 +1168,7 @@
                     },
                     agent: null,
                     status: 'pending',
+                    category: 'presale-warranty-extend',
                     lastMessage: 'Is there a warranty for this product?',
                     lastMessageTime: '2天前',
                     messages: [
@@ -820,6 +1185,7 @@
                     },
                     agent: null,
                     status: 'processing',
+                    category: 'insale-cancel-order',
                     lastMessage: 'When will my order arrive?',
                     lastMessageTime: '昨天 14:30',
                     messages: [
@@ -837,6 +1203,7 @@
                     },
                     agent: null,
                     status: 'pending',
+                    category: 'presale-logistics-available',
                     lastMessage: 'Could you please help me with my order?',
                     lastMessageTime: '3天前',
                     messages: [
@@ -853,6 +1220,7 @@
                     },
                     agent: null,
                     status: 'closed',
+                    category: 'aftersale-return-refund',
                     lastMessage: 'Thanks for your help!',
                     lastMessageTime: '1周前',
                     messages: [
@@ -879,9 +1247,9 @@
         // 根据渠道更新聊天头部
         function updateChatHeaderForChannel() {
             if (currentChannel === 'Amazon') {
-                $('#agent-dropdown').show();
+                $('#header-agent-select').show();
             } else {
-                $('#agent-dropdown').hide();
+                $('#header-agent-select').hide();
             }
         }
 
@@ -941,35 +1309,28 @@
             const conv = conversationData.conversations.find(function(c) {
                 return c.id === convId;
             });
-            
+
             if (!conv) return;
-            
+
+            window.currentConversation = convId;
             currentConversation = conv;
-            
+
             // 更新会话列表激活状态
             $('.conversation-item').removeClass('active');
             $('.conversation-item[data-id="' + convId + '"]').addClass('active');
-            
+
             // 更新聊天头部
             $('#chat-username').html(conv.user.name + '<small style="color: #999; font-weight: normal; margin-left: 20px">' + conv.user.email + '</small>');
-            
-            const statusText = conv.status === 'pending' ? '待处理' : 
-                             conv.status === 'processing' ? '处理中' : 
-                             conv.status === 'closed' ? '已关闭' : '待处理';
-            
-            $('#chat-status').text(conv.platform + ' · ' + statusText);
-            
-            // 更新负责人显示
-            if (currentChannel === 'Amazon' && conv.agent) {
-                $('#agent-dropdown button').text(conv.agent === '待分配' ? '待分配' : conv.agent);
-            }
-            
-            // 更新状态筛选按钮
-            const chatStatusText = conv.status === 'pending' ? '待处理' :
+
+            const statusText = conv.status === 'pending' ? '待处理' :
                              conv.status === 'processing' ? '处理中' :
                              conv.status === 'closed' ? '已关闭' : '待处理';
-            $('.chat-header-right .filter-row').eq(1).find('button').text(chatStatusText);
-            
+
+            $('#chat-status').text(conv.platform + ' · ' + statusText);
+
+            // 更新聊天信息显示
+            window.updateChatInfoDisplay();
+
             // 渲染消息
             renderMessages(conv.messages);
         }
@@ -1038,49 +1399,6 @@
             
             // 更新按钮文字
             $(this).closest('.dropdown').find('button').text(statusText);
-        });
-
-        // 状态更新
-        $('.chat-header .dropdown-item[data-status]').click(function(e) {
-            e.preventDefault();
-            if (!currentConversation) return;
-            
-            const status = $(this).data('status');
-            const statusText = $(this).text();
-            
-            // 更新数据
-            currentConversation.status = status;
-            
-            // 更新UI
-            const statusClass = status === 'pending' ? 'status-pending' : 
-                               status === 'processing' ? 'status-processing' : 
-                               status === 'closed' ? 'status-closed' : 'status-pending';
-            
-            const $convItem = $('.conversation-item[data-id="' + currentConversation.id + '"]');
-            $convItem.find('.conversation-status').text(statusText).removeClass('status-pending status-processing status-closed').addClass(statusClass);
-            
-            // 更新头部
-            $('#chat-status').text(currentConversation.platform + ' · ' + statusText);
-        });
-
-        // 负责人更新
-        $('#agent-dropdown .dropdown-item').click(function(e) {
-            e.preventDefault();
-            if (!currentConversation) return;
-            
-            const agent = $(this).data('agent');
-            
-            // 更新数据
-            currentConversation.agent = agent;
-            
-            // 更新UI
-            $('#agent-dropdown button').text(agent);
-            
-            // 更新会话列表
-            const $convItem = $('.conversation-item[data-id="' + currentConversation.id + '"]');
-            const agentClass = agent === '待分配' ? 'status-unassigned' : '';
-            const agentText = agent === '待分配' ? '待分配' : agent;
-            $convItem.find('.conversation-agent').text(agentText).removeClass('status-unassigned').addClass(agentClass);
         });
 
         // 发送消息
@@ -1180,6 +1498,57 @@
 
         // 初始化
         $(document).ready(function() {
+            // 会话状态筛选
+            // 筛选函数
+            function filterConversations() {
+                $('.conversation-item').each(function() {
+                    const convId = parseInt($(this).data('id'));
+                    const conv = conversationData.conversations.find(function(c) {
+                        return c.id === convId;
+                    });
+                    if (!conv) {
+                        $(this).hide();
+                        return;
+                    }
+
+                    let show = true;
+
+                    // 状态筛选 - 支持多选
+                    if (currentFilter.status.length > 0 && !currentFilter.status.includes(conv.status)) {
+                        show = false;
+                    }
+
+                    // 负责人筛选
+                    if (show && currentFilter.agent && conv.agent !== currentFilter.agent) {
+                        show = false;
+                    }
+
+                    // 分类筛选 - Ant Design Cascader multiple模式返回数组的数组
+                    if (show && currentFilter.category.length > 0) {
+                        const selectedCategories = currentFilter.category.flat();
+                        const convCategory = conv.category;
+                        if (!selectedCategories.includes(convCategory)) {
+                            const convCategoryParts = convCategory.split('-');
+                            const matched = selectedCategories.some(function(selected) {
+                                const selectedParts = selected.split('-');
+                                if (selectedParts.length === 1 && convCategoryParts[0] === selectedParts[0]) {
+                                    return true;
+                                }
+                                if (selectedParts.length === 2 && convCategoryParts[0] === selectedParts[0] && convCategoryParts[1] === selectedParts[1]) {
+                                    return true;
+                                }
+                                return false;
+                            });
+                            if (!matched) {
+                                show = false;
+                            }
+                        }
+                    }
+
+                    $(this).toggle(show);
+                });
+            }
+
             renderConversationList();
             updateChatHeaderForChannel();
             // 默认选中第一个Amazon会话
