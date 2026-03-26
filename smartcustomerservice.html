@@ -132,13 +132,10 @@
         }
 
         .conversation-header {
-            margin-bottom: 5px;
-        }
-
-        .user-status-row {
             display: flex;
-            align-items: center;
             justify-content: space-between;
+            align-items: center;
+            margin-bottom: 6px;
         }
 
         .conversation-user {
@@ -146,11 +143,16 @@
             font-size: 14px;
         }
 
+        .conversation-time {
+            font-size: 11px;
+            color: #999;
+        }
+
         .conversation-status {
             font-size: 10px;
             padding: 2px 6px;
             border-radius: 8px;
-            margin-left: 5px;
+            margin-right: 5px;
         }
 
         .status-pending {
@@ -216,18 +218,28 @@
         .conversation-message {
             font-size: 13px;
             color: #666;
-            margin-bottom: 5px;
+            margin-bottom: 6px;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
         }
 
-        .conversation-time-row {
+        .conversation-footer {
             display: flex;
             justify-content: space-between;
             align-items: center;
             font-size: 11px;
-            color: #999;
+        }
+
+        .conversation-footer-left {
+            display: flex;
+            align-items: center;
+        }
+
+        .conversation-category {
+            font-size: 11px;
+            color: #666;
+            margin-left: 5px;
         }
 
         .conversation-agent {
@@ -427,6 +439,77 @@
             margin-top: 10px;
         }
 
+        .order-tabs {
+            display: flex;
+            gap: 5px;
+            margin: 10px 0;
+            border-bottom: 1px solid #e0e0e0;
+            padding-bottom: 8px;
+        }
+
+        .order-tab-btn {
+            padding: 6px 12px;
+            border: none;
+            background: none;
+            color: #666;
+            font-size: 13px;
+            cursor: pointer;
+            border-radius: 4px;
+            transition: all 0.2s;
+        }
+
+        .order-tab-btn:hover {
+            background: #f0f0f0;
+        }
+
+        .order-tab-btn.active {
+            background: #2196f3;
+            color: white;
+        }
+
+        .order-tab-content {
+            display: none;
+        }
+
+        .order-tab-content.active {
+            display: block;
+        }
+
+        .current-order {
+            padding: 15px;
+        }
+
+        .order-detail-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .order-detail-row:last-child {
+            border-bottom: none;
+        }
+
+        .order-detail-label {
+            font-size: 12px;
+            color: #999;
+        }
+
+        .order-detail-value {
+            font-size: 12px;
+            color: #333;
+            font-weight: 500;
+        }
+
+        .order-status.shipped {
+            color: #4caf50;
+            font-weight: 600;
+        }
+
+        .product-list {
+            margin-top: 12px;
+        }
+
         .order-item {
             padding: 10px;
             border: 1px solid #e0e0e0;
@@ -437,17 +520,99 @@
         .order-header {
             display: flex;
             justify-content: space-between;
-            margin-bottom: 8px;
+            align-items: center;
+            margin-bottom: 5px;
         }
 
         .order-id {
             font-size: 12px;
             font-weight: 600;
+            word-break: break-all;
+            flex: 1;
+        }
+
+        .order-copy-btn {
+            margin-left: 8px;
+            cursor: pointer;
+            font-size: 12px;
+            color: #2196f3;
+        }
+
+        .order-copy-btn:hover {
+            opacity: 0.7;
+        }
+
+        .order-status.shipped {
+            color: #4caf50;
+            font-weight: 600;
+            font-size: 12px;
         }
 
         .order-date {
             font-size: 11px;
             color: #999;
+        }
+
+        .order-search-box {
+            margin-bottom: 10px;
+        }
+
+        .order-list {
+            max-height: 500px;
+            overflow-y: auto;
+        }
+
+        .order-card {
+            padding: 12px;
+            border: 1px solid #e0e0e0;
+            border-radius: 6px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .order-card:hover {
+            border-color: #2196f3;
+            background: #f8f9fa;
+        }
+
+        .order-card-id {
+            font-size: 12px;
+            font-weight: 600;
+            color: #333;
+            word-break: break-all;
+            flex: 1;
+        }
+
+        .order-card-id-wrapper {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 4px;
+        }
+
+        .order-card-time {
+            font-size: 11px;
+            color: #999;
+            margin-bottom: 8px;
+        }
+
+        .order-card-amount {
+            font-size: 13px;
+            font-weight: 600;
+            color: #2196f3;
+            text-align: right;
+        }
+
+        .order-card-products {
+            display: flex;
+            gap: 5px;
+        }
+
+        .order-card-product-img {
+            width: 35px;
+            height: 35px;
+            border-radius: 4px;
+            object-fit: cover;
         }
 
         .product-item {
@@ -465,12 +630,16 @@
 
         .product-info {
             flex: 1;
+            min-width: 0;
         }
 
         .product-name {
             font-size: 12px;
             font-weight: 500;
             margin-bottom: 2px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
 
         .product-price {
@@ -628,28 +797,68 @@
             </div>
 
             <div class="info-section">
-                <h4>当前订单详情</h4>
-                <div class="order-info">
-                    <div class="order-item">
-                        <div class="order-header">
-                            <span class="order-id">订单号: 7890123</span>
-                            <span class="order-date">2026-03-10</span>
-                        </div>
-                        <div class="product-item">
-                            <img src="https://cdn.shopify.com/s/files/1/0022/7937/4907/files/c663f3b2160630744ad1bbe703fe180f_b012cd1c-eb28-4168-b355-8721a8a01a45.jpg?v=1742538783" alt="产品图片" class="product-image">
-                            <div class="product-info">
-                                <div class="product-name">Professional Rechargeable Drill 30000</div>
-                                <div class="product-price">$99.99 x 1</div>
+                <h4>订单信息</h4>
+                <div class="order-tabs">
+                    <button class="order-tab-btn active" data-tab="current">当前售后订单</button>
+                    <button class="order-tab-btn" data-tab="all">全部订单</button>
+                </div>
+
+                <div class="order-tab-content active" id="tab-current">
+                    <div class="order-info">
+                        <div class="order-item current-order">
+                            <div class="order-header">
+                                <span class="order-id">112-4117876-9857843</span>
+                                <i class="fas fa-copy order-copy-btn" data-order-id="112-4117876-9857843" style="cursor: pointer; color: #2196f3; font-size: 12px;"></i>
                             </div>
-                        </div>
-                        <div class="product-item">
-                            <img src="https://cdn.shopify.com/s/files/1/0022/7937/4907/files/2_4da8162b-bc50-498d-819a-eb34f9fe2b1b.jpg?v=1724925982" alt="产品图片" class="product-image">
-                            <div class="product-info">
-                                <div class="product-name">Drill Bit Set (10pcs)</div>
-                                <div class="product-price">$29.99 x 1</div>
+                            <div class="order-status shipped">已发货</div>
+                            <div class="order-detail-row">
+                                <span class="order-detail-label">订单总金额</span>
+                                <span class="order-detail-value">$129.98</span>
+                            </div>
+                            <div class="order-detail-row">
+                                <span class="order-detail-label">运输方式</span>
+                                <span class="order-detail-value">UPS Ground</span>
+                            </div>
+                            <div class="order-detail-row">
+                                <span class="order-detail-label">订单创建</span>
+                                <span class="order-detail-value">2026-03-10 14:30:25</span>
+                            </div>
+                            <div class="order-detail-row">
+                                <span class="order-detail-label">运单号</span>
+                                <span class="order-detail-value tracking-value">
+                                    1Z999AA10123456784
+                                    <i class="fas fa-copy order-copy-btn" data-order-id="1Z999AA10123456784" style="cursor: pointer; color: #2196f3; font-size: 11px; margin-left: 5px;"></i>
+                                </span>
+                            </div>
+                            <div class="order-detail-row">
+                                <span class="order-detail-label">退换货</span>
+                                <span class="order-detail-value">否</span>
+                            </div>
+                            <div class="product-list">
+                                <div class="product-item">
+                                    <img src="https://cdn.shopify.com/s/files/1/0022/7937/4907/files/c663f3b2160630744ad1bbe703fe180f_b012cd1c-eb28-4168-b355-8721a8a01a45.jpg?v=1742538783" alt="产品图片" class="product-image">
+                                    <div class="product-info">
+                                        <div class="product-name">Professional Rechargeable Drill 30000</div>
+                                        <div class="product-price">$99.99 x 1</div>
+                                    </div>
+                                </div>
+                                <div class="product-item">
+                                    <img src="https://cdn.shopify.com/s/files/1/0022/7937/4907/files/2_4da8162b-bc50-498d-819a-eb34f9fe2b1b.jpg?v=1724925982" alt="产品图片" class="product-image">
+                                    <div class="product-info">
+                                        <div class="product-name">Drill Bit Set (10pcs)</div>
+                                        <div class="product-price">$29.99 x 1</div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
+                </div>
+
+                <div class="order-tab-content" id="tab-all">
+                    <div class="order-search-box">
+                        <input type="text" class="form-control form-control-sm" id="order-search-input" placeholder="输入订单号搜索...">
+                    </div>
+                    <div class="order-list" id="order-list"></div>
                 </div>
             </div>
         </div>
@@ -763,14 +972,6 @@
         ];
 
         // 负责人选项数据
-        const agentOptions = [
-            { label: 'Morgan.Ying', value: 'Morgan.Ying' },
-            { label: 'Lune.Liu', value: 'Lune.Liu' },
-            { label: 'Gigi.Liang', value: 'Gigi.Liang' },
-            { label: 'Sophie.Peng', value: 'Sophie.Peng' },
-            { label: '待分配', value: '待分配' }
-        ];
-
         // 状态多选组件
         class StatusSelect extends React.Component {
             state = {
@@ -847,8 +1048,7 @@
                 modalVisible: false,
                 editingField: null,
                 selectedCategory: null,
-                selectedStatus: null,
-                selectedAgent: null
+                selectedStatus: null
             };
 
             showEditModal = (field) => {
@@ -861,8 +1061,7 @@
                     modalVisible: true,
                     editingField: field,
                     selectedCategory: conv.category,
-                    selectedStatus: conv.status,
-                    selectedAgent: conv.agent
+                    selectedStatus: conv.status
                 });
             };
 
@@ -876,8 +1075,6 @@
                     conv.category = this.state.selectedCategory;
                 } else if (this.state.editingField === 'status') {
                     conv.status = this.state.selectedStatus;
-                } else if (this.state.editingField === 'agent') {
-                    conv.agent = this.state.selectedAgent;
                 }
 
                 renderConversationList();
@@ -924,18 +1121,10 @@
                 return { pending: '待处理', processing: '处理中', closed: '已关闭' }[conv.status] || '';
             };
 
-            getAgentText = () => {
-                const conv = conversationData.conversations.find(function(c) {
-                    return c.id === window.currentConversation;
-                });
-                if (!conv || !conv.agent) return '待分配';
-                return conv.agent;
-            };
-
             renderEditIcon = (field) => {
                 return React.createElement('i', {
                     className: 'fas fa-pencil-alt',
-                    style: { marginLeft: '5px', cursor: 'pointer', color: '#999', fontSize: '12px' },
+                    style: { marginLeft: '5px', cursor: 'pointer', color: '#2196f3', fontSize: '12px' },
                     onClick: () => this.showEditModal(field)
                 });
             };
@@ -967,18 +1156,6 @@
                             })
                         )
                     );
-                } else if (this.state.editingField === 'agent') {
-                    modalContent.push(
-                        React.createElement('div', { key: 'agent', style: { marginBottom: '15px' } },
-                            React.createElement('label', { style: { display: 'block', marginBottom: '5px' } }, '会话负责人：'),
-                            React.createElement(Select, {
-                                style: { width: '100%' },
-                                options: agentOptions,
-                                value: this.state.selectedAgent || '待分配',
-                                onChange: (value) => this.setState({ selectedAgent: value })
-                            })
-                        )
-                    );
                 }
 
                 return React.createElement(Modal, {
@@ -992,25 +1169,23 @@
             };
 
             render() {
-                const showAgent = currentChannel === 'Amazon';
-
                 return React.createElement('div', {
                     style: { display: 'flex', alignItems: 'center', fontSize: '13px', color: '#666' }
                 },
                     React.createElement('span', null,
-                        '会话类型：', this.getCategoryText(),
-                        this.renderEditIcon('category')
+                        '会话类型：'
                     ),
                     React.createElement('span', {
+                        style: { color: '#2196f3', marginRight: '5px' }
+                    }, this.getCategoryText()),
+                    this.renderEditIcon('category'),
+                    React.createElement('span', {
                         style: { marginLeft: '15px' }
-                    }, '会话状态：', this.getStatusText(),
-                        this.renderEditIcon('status')
-                    ),
-                    showAgent ? React.createElement('span', {
-                        style: { marginLeft: '15px' }
-                    }, '会话负责人：', this.getAgentText(),
-                        this.renderEditIcon('agent')
-                    ) : null,
+                    }, '会话状态：'),
+                    React.createElement('span', {
+                        style: { color: '#2196f3', marginRight: '5px' }
+                    }, this.getStatusText()),
+                    this.renderEditIcon('status'),
                     this.renderModal()
                 );
             }
@@ -1034,16 +1209,10 @@
             filterConversations();
         };
 
-        window.filterByAgent = function(value) {
-            currentFilter.agent = value;
-            filterConversations();
-        };
-
         // 当前筛选状态
         let currentFilter = {
             status: ['pending', 'processing'],
-            category: [],
-            agent: null
+            category: []
         };
 
         // 会话数据
@@ -1231,6 +1400,100 @@
             ]
         };
 
+        // 用户历史订单数据
+        const userOrders = [
+            {
+                id: '7890123',
+                time: '2026-03-10 14:30:25',
+                amount: '$129.98',
+                products: [
+                    { img: 'https://cdn.shopify.com/s/files/1/0022/7937/4907/files/c663f3b2160630744ad1bbe703fe180f_b012cd1c-eb28-4168-b355-8721a8a01a45.jpg?v=1742538783' },
+                    { img: 'https://cdn.shopify.com/s/files/1/0022/7937/4907/files/2_4da8162b-bc50-498d-819a-eb34f9fe2b1b.jpg?v=1724925982' }
+                ]
+            },
+            {
+                id: '7890111',
+                time: '2026-02-15 09:20:10',
+                amount: '$79.99',
+                products: [
+                    { img: 'https://cdn.shopify.com/s/files/1/0022/7937/4907/files/c663f3b2160630744ad1bbe703fe180f_b012cd1c-eb28-4168-b355-8721a8a01a45.jpg?v=1742538783' }
+                ]
+            },
+            {
+                id: '7890098',
+                time: '2026-01-20 16:45:30',
+                amount: '$59.99',
+                products: [
+                    { img: 'https://cdn.shopify.com/s/files/1/0022/7937/4907/files/2_4da8162b-bc50-498d-819a-eb34f9fe2b1b.jpg?v=1724925982' }
+                ]
+            },
+            {
+                id: '7890085',
+                time: '2025-12-05 11:15:00',
+                amount: '$199.98',
+                products: [
+                    { img: 'https://cdn.shopify.com/s/files/1/0022/7937/4907/files/c663f3b2160630744ad1bbe703fe180f_b012cd1c-eb28-4168-b355-8721a8a01a45.jpg?v=1742538783' },
+                    { img: 'https://cdn.shopify.com/s/files/1/0022/7937/4907/files/2_4da8162b-bc50-498d-819a-eb34f9fe2b1b.jpg?v=1724925982' }
+                ]
+            }
+        ];
+
+        // 渲染全部订单列表
+        function renderOrderList(searchText) {
+            const $list = $('#order-list');
+            $list.empty();
+
+            const filteredOrders = userOrders.filter(function(order) {
+                if (!searchText) return true;
+                return order.id.includes(searchText);
+            });
+
+            filteredOrders.forEach(function(order) {
+                const productsHtml = order.products.map(function(p) {
+                    return '<img src="' + p.img + '" class="order-card-product-img">';
+                }).join('');
+
+                const html = '<div class="order-card" data-order-id="' + order.id + '">' +
+                    '<div class="order-card-id-wrapper">' +
+                    '<span class="order-card-id">' + order.id + '</span>' +
+                    '<i class="fas fa-copy order-copy-btn" data-order-id="' + order.id + '"></i>' +
+                    '</div>' +
+                    '<div class="order-card-time">' + order.time + '</div>' +
+                    '<div class="order-card-products">' + productsHtml + '</div>' +
+                    '<div class="order-card-amount">Total: ' + order.amount + '</div>' +
+                    '</div>';
+                $list.append(html);
+            });
+        }
+
+        // Tab切换事件
+        $(document).on('click', '.order-tab-btn', function() {
+            $('.order-tab-btn').removeClass('active');
+            $('.order-tab-content').removeClass('active');
+            $(this).addClass('active');
+            const tabId = $(this).data('tab');
+            $('#tab-' + tabId).addClass('active');
+
+            if (tabId === 'all') {
+                renderOrderList('');
+            }
+        });
+
+        // 订单搜索事件
+        $(document).on('input', '#order-search-input', function() {
+            const searchText = $(this).val();
+            renderOrderList(searchText);
+        });
+
+        // 复制订单号或运单号
+        $(document).on('click', '.order-copy-btn', function() {
+            const orderId = $(this).data('order-id');
+            const textToCopy = orderId || $(this).closest('.tracking-value, .order-detail-value').text().trim();
+            navigator.clipboard.writeText(textToCopy).then(function() {
+                alert('已复制: ' + textToCopy);
+            });
+        });
+
         // 当前选中的渠道和会话
         let currentChannel = 'Amazon';
         let currentConversation = null;
@@ -1253,6 +1516,21 @@
             }
         }
 
+        // 获取问题类型前两级中文显示
+        function getCategoryLevel2(category) {
+            if (!category) return '未分类';
+            const parts = category.split('-');
+            const level1Map = { presale: '售前', insale: '售中', aftersale: '售后' };
+            const level2Map = {
+                warranty: '保修期', product: '产品', logistics: '物流',
+                missing: '少发/漏发', refund: '退款', cancel: '取消/变更',
+                quality: '质量/瑕疵', return: '退货'
+            };
+            const level1 = level1Map[parts[0]] || parts[0];
+            const level2 = level2Map[parts[1]] || parts[1];
+            return level1 + ':' + level2;
+        }
+
         // 渲染会话列表
         function renderConversationList() {
             const $list = $('#conversation-list');
@@ -1263,37 +1541,32 @@
             });
 
             filteredConversations.forEach(function(conv, index) {
-                const statusClass = conv.status === 'pending' ? 'status-pending' : 
-                                   conv.status === 'processing' ? 'status-processing' : 
+                const statusClass = conv.status === 'pending' ? 'status-pending' :
+                                   conv.status === 'processing' ? 'status-processing' :
                                    conv.status === 'closed' ? 'status-closed' : 'status-pending';
-                
-                const statusText = conv.status === 'pending' ? '待处理' : 
-                                 conv.status === 'processing' ? '处理中' : 
+
+                const statusText = conv.status === 'pending' ? '待处理' :
+                                 conv.status === 'processing' ? '处理中' :
                                  conv.status === 'closed' ? '已关闭' : '待处理';
-                
-                let agentHtml = '';
-                if (currentChannel === 'Amazon') {
-                    const agentClass = conv.agent === '待分配' ? 'status-unassigned' : '';
-                    const agentText = conv.agent === '待分配' ? '待分配' : conv.agent;
-                    agentHtml = '<span class="conversation-agent ' + agentClass + '">' + agentText + '</span>';
-                }
+
+                const categoryText = getCategoryLevel2(conv.category);
 
                 const isActive = currentConversation && currentConversation.id === conv.id ? 'active' : '';
 
                 const html = '<div class="conversation-item ' + isActive + '" data-id="' + conv.id + '">' +
                     '<div class="conversation-header">' +
-                    '<div class="user-status-row">' +
                     '<span class="conversation-user">' + conv.user.name + '</span>' +
-                    '<span class="conversation-status ' + statusClass + '">' + statusText + '</span>' +
-                    '</div>' +
+                    '<span class="conversation-time">' + conv.lastMessageTime + '</span>' +
                     '</div>' +
                     '<div class="conversation-message">' + conv.lastMessage + '</div>' +
-                    '<div class="conversation-time-row">' +
-                    '<span class="conversation-time">' + conv.lastMessageTime + '</span>' +
-                    agentHtml +
+                    '<div class="conversation-footer">' +
+                    '<div class="conversation-footer-left">' +
+                    '<span class="conversation-status ' + statusClass + '">' + statusText + '</span>' +
+                    '<span class="conversation-category">' + categoryText + '</span>' +
+                    '</div>' +
                     '</div>' +
                     '</div>';
-                
+
                 $list.append(html);
             });
 
@@ -1515,11 +1788,6 @@
 
                     // 状态筛选 - 支持多选
                     if (currentFilter.status.length > 0 && !currentFilter.status.includes(conv.status)) {
-                        show = false;
-                    }
-
-                    // 负责人筛选
-                    if (show && currentFilter.agent && conv.agent !== currentFilter.agent) {
                         show = false;
                     }
 
