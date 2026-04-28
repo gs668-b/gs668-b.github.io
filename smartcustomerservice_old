@@ -1,0 +1,1832 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>智能AI客服工作台</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/dayjs@1.11.10/dayjs.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/antd@5.12.8/dist/antd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+        /* 全局样式 */
+        * {
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background-color: #f5f7fa;
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* 主容器 */
+        .main-container {
+            display: flex;
+            height: calc(100vh - 60px);
+            overflow: hidden;
+        }
+
+        /* 顶部导航栏 */
+        .top-nav {
+            height: 60px;
+        }
+
+        /* 渠道切换侧边栏 */
+        .channel-sidebar {
+            width: 50px;
+            background-color: #f8f9fa;
+            border-right: 1px solid #e0e0e0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding-top: 15px;
+        }
+
+        .channel-icon {
+            width: 35px;
+            height: 35px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 15px;
+            cursor: pointer;
+            border-radius: 8px;
+            transition: all 0.2s ease;
+            font-size: 18px;
+        }
+
+        .channel-icon:hover {
+            background-color: #e0e0e0;
+        }
+
+        .channel-icon.active {
+            background-color: #2196f3;
+            color: white;
+        }
+
+        .channel-icon.amazon {
+            color: #FF9900;
+        }
+
+        .channel-icon.shopify {
+            color: #96BF48;
+        }
+
+        .channel-icon.tiktok {
+            color: #000000;
+        }
+
+        .channel-icon.active.amazon,
+        .channel-icon.active.shopify,
+        .channel-icon.active.tiktok {
+            color: white;
+        }
+
+        /* 左侧栏 - 会话列表 */
+        .sidebar {
+            width: 250px;
+            background-color: white;
+            border-right: 1px solid #e0e0e0;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+
+        .sidebar-header {
+            padding: 10px;
+            border-bottom: 1px solid #e0e0e0;
+            background-color: #f8f9fa;
+            flex-shrink: 0;
+        }
+
+        .sidebar-body {
+            flex: 1;
+            overflow-y: auto;
+            padding: 10px;
+        }
+
+        .conversation-item {
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border: 1px solid #e0e0e0;
+        }
+
+        .conversation-item:hover {
+            background-color: #f0f2f5;
+        }
+
+        .conversation-item.active {
+            background-color: #e3f2fd;
+            border-color: #2196f3;
+        }
+
+        .conversation-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 6px;
+        }
+
+        .conversation-user {
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .conversation-time {
+            font-size: 11px;
+            color: #999;
+        }
+
+        .conversation-status {
+            font-size: 10px;
+            padding: 2px 6px;
+            border-radius: 8px;
+            margin-right: 5px;
+        }
+
+        .status-pending {
+            background-color: #fff3cd;
+            color: #856404;
+        }
+
+        .status-processing {
+            background-color: #cce7ff;
+            color: #004085;
+        }
+
+        .status-closed {
+            background-color: #e0e0e0;
+            color: #666;
+        }
+
+        .status-unassigned {
+            background-color: #fdecea;
+            color: #c62828;
+        }
+
+        .filter-row {
+            display: flex;
+            align-items: center;
+        }
+
+        .filter-label {
+            font-size: 12px;
+            color: #666;
+            margin-right: 5px;
+            white-space: nowrap;
+        }
+
+        .filter-btn {
+            width: 120px;
+            text-align: left;
+            padding-right: 25px;
+            position: relative;
+        }
+
+        .filter-btn.dropdown-toggle::after {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            margin: 0;
+            border: none;
+            content: '\f078';
+            font-family: 'Font Awesome 6 Free';
+            font-weight: 900;
+            font-size: 10px;
+        }
+
+        .filter-btn:not(.dropdown-toggle)::after {
+            display: none;
+        }
+
+        .dropdown-menu {
+            min-width: 100px !important;
+        }
+
+        .conversation-message {
+            font-size: 13px;
+            color: #666;
+            margin-bottom: 6px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .conversation-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 11px;
+        }
+
+        .conversation-footer-left {
+            display: flex;
+            align-items: center;
+        }
+
+        .conversation-category {
+            font-size: 11px;
+            color: #666;
+            margin-left: 5px;
+        }
+
+        .conversation-agent {
+            font-size: 11px;
+            color: #666;
+        }
+
+        /* 中间栏 - 对话框 */
+        .chat-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background-color: white;
+            height: 100%;
+        }
+
+        .chat-header {
+            padding: 15px;
+            border-bottom: 1px solid #e0e0e0;
+            background-color: #f8f9fa;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-shrink: 0;
+        }
+
+        .chat-header-left {
+            display: flex;
+            align-items: center;
+        }
+
+        .chat-header-right {
+            display: flex;
+            align-items: center;
+        }
+
+        .chat-body {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            background-color: #f8f9fa;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .chat-input-area {
+            padding: 15px;
+            border-top: 1px solid #e0e0e0;
+            background-color: white;
+            flex-shrink: 0;
+        }
+
+        .message {
+            margin-bottom: 15px;
+            max-width: 70%;
+        }
+
+        .message-customer {
+            align-self: flex-start;
+            margin-left: 0;
+        }
+
+        .message-agent {
+            align-self: flex-end !important;
+            margin-left: auto !important;
+        }
+
+        .message-content {
+            padding: 10px 15px;
+            border-radius: 18px;
+            position: relative;
+        }
+
+        .message-customer .message-content {
+            background-color: white;
+            border-bottom-left-radius: 4px;
+        }
+
+        .message-agent .message-content {
+            background-color: #2196f3;
+            color: white;
+            border-bottom-right-radius: 4px;
+        }
+
+        .message-time {
+            font-size: 11px;
+            color: #999;
+            margin-top: 5px;
+            margin-left: 10px;
+        }
+
+        .message-agent .message-time {
+            text-align: right;
+            margin-right: 10px;
+            margin-left: 0;
+        }
+
+        .sentiment-tag {
+            font-size: 10px;
+            padding: 2px 6px;
+            border-radius: 8px;
+            margin-left: 8px;
+            flex-shrink: 0;
+            white-space: nowrap;
+        }
+
+        .sentiment-negative {
+            background-color: #fdecea;
+            color: #c62828;
+        }
+
+        .sentiment-neutral {
+            background-color: #f5f5f5;
+            color: #666;
+        }
+
+        .sentiment-positive {
+            background-color: #e8f5e8;
+            color: #2e7d32;
+        }
+
+        .recommendation-area {
+            position: fixed;
+            bottom: 100px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80%;
+            max-width: 800px;
+            padding: 15px;
+            background-color: #f0f8ff;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            z-index: 1000;
+        }
+
+        .recommendation-title {
+            font-size: 12px;
+            font-weight: 600;
+            color: #1976d2;
+            margin-bottom: 8px;
+        }
+
+        .recommendation-item {
+            font-size: 13px;
+            padding: 8px;
+            background-color: white;
+            border-radius: 6px;
+            margin-bottom: 5px;
+            cursor: pointer;
+            border: 1px solid #e3f2fd;
+        }
+
+        .recommendation-item:hover {
+            background-color: #e3f2fd;
+        }
+
+        /* 右侧栏 - 客户信息 */
+        .customer-info {
+            width: 300px;
+            background-color: white;
+            border-left: 1px solid #e0e0e0;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            overflow-y: auto;
+        }
+
+        .info-section {
+            padding: 15px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .info-section h4 {
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: #333;
+        }
+
+        .stats-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-size: 13px;
+        }
+
+        .stats-label {
+            color: #666;
+        }
+
+        .stats-value {
+            font-weight: 600;
+            color: #333;
+        }
+
+        .order-info {
+            margin-top: 10px;
+        }
+
+        .order-tabs {
+            display: flex;
+            gap: 5px;
+            margin: 10px 0;
+            border-bottom: 1px solid #e0e0e0;
+            padding-bottom: 8px;
+        }
+
+        .order-tab-btn {
+            padding: 6px 12px;
+            border: none;
+            background: none;
+            color: #666;
+            font-size: 13px;
+            cursor: pointer;
+            border-radius: 4px;
+            transition: all 0.2s;
+        }
+
+        .order-tab-btn:hover {
+            background: #f0f0f0;
+        }
+
+        .order-tab-btn.active {
+            background: #2196f3;
+            color: white;
+        }
+
+        .order-tab-content {
+            display: none;
+        }
+
+        .order-tab-content.active {
+            display: block;
+        }
+
+        .current-order {
+            padding: 15px;
+        }
+
+        .order-detail-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .order-detail-row:last-child {
+            border-bottom: none;
+        }
+
+        .order-detail-label {
+            font-size: 12px;
+            color: #999;
+        }
+
+        .order-detail-value {
+            font-size: 12px;
+            color: #333;
+            font-weight: 500;
+        }
+
+        .order-status.shipped {
+            color: #4caf50;
+            font-weight: 600;
+        }
+
+        .product-list {
+            margin-top: 12px;
+        }
+
+        .order-item {
+            padding: 10px;
+            border: 1px solid #e0e0e0;
+            border-radius: 6px;
+            margin-bottom: 10px;
+        }
+
+        .order-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 5px;
+        }
+
+        .order-id {
+            font-size: 12px;
+            font-weight: 600;
+            word-break: break-all;
+            flex: 1;
+        }
+
+        .order-copy-btn {
+            margin-left: 8px;
+            cursor: pointer;
+            font-size: 12px;
+            color: #2196f3;
+        }
+
+        .order-copy-btn:hover {
+            opacity: 0.7;
+        }
+
+        .order-status.shipped {
+            color: #4caf50;
+            font-weight: 600;
+            font-size: 12px;
+        }
+
+        .order-date {
+            font-size: 11px;
+            color: #999;
+        }
+
+        .order-search-box {
+            margin-bottom: 10px;
+        }
+
+        .order-list {
+            max-height: 500px;
+            overflow-y: auto;
+        }
+
+        .order-card {
+            padding: 12px;
+            border: 1px solid #e0e0e0;
+            border-radius: 6px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .order-card:hover {
+            border-color: #2196f3;
+            background: #f8f9fa;
+        }
+
+        .order-card-id {
+            font-size: 12px;
+            font-weight: 600;
+            color: #333;
+            word-break: break-all;
+            flex: 1;
+        }
+
+        .order-card-id-wrapper {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 4px;
+        }
+
+        .order-card-time {
+            font-size: 11px;
+            color: #999;
+            margin-bottom: 8px;
+        }
+
+        .order-card-amount {
+            font-size: 13px;
+            font-weight: 600;
+            color: #2196f3;
+            text-align: right;
+        }
+
+        .order-card-products {
+            display: flex;
+            gap: 5px;
+        }
+
+        .order-card-product-img {
+            width: 35px;
+            height: 35px;
+            border-radius: 4px;
+            object-fit: cover;
+        }
+
+        .product-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .product-image {
+            width: 40px;
+            height: 40px;
+            border-radius: 4px;
+            margin-right: 10px;
+        }
+
+        .product-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .product-name {
+            font-size: 12px;
+            font-weight: 500;
+            margin-bottom: 2px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .product-price {
+            font-size: 11px;
+            color: #666;
+        }
+
+        /* 顶部导航栏 */
+        .top-nav {
+            background-color: #2196f3;
+            color: white;
+            padding: 10px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .nav-title {
+            font-size: 16px;
+            font-weight: 600;
+        }
+
+        .nav-actions {
+            display: flex;
+            align-items: center;
+        }
+
+        .nav-actions i {
+            margin-left: 15px;
+            cursor: pointer;
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 1200px) {
+            .customer-info {
+                width: 250px;
+            }
+        }
+
+        @media (max-width: 992px) {
+            .sidebar {
+                width: 200px;
+            }
+            
+            .customer-info {
+                width: 200px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .main-container {
+                flex-direction: column;
+            }
+            
+            .channel-sidebar,
+            .sidebar,
+            .customer-info {
+                width: 100%;
+                max-height: 200px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 顶部导航栏 -->
+    <div class="top-nav">
+        <div class="nav-title">智能AI客服工作台</div>
+        <div class="nav-actions">
+            <i class="fas fa-bell"></i>
+            <i class="fas fa-user"></i>
+        </div>
+    </div>
+
+    <!-- 主容器 -->
+    <div class="main-container">
+        <!-- 渠道切换侧边栏 -->
+        <div class="channel-sidebar">
+            <div class="channel-icon amazon active" data-channel="Amazon" title="Amazon">
+                <i class="fab fa-amazon"></i>
+            </div>
+            <div class="channel-icon shopify" data-channel="Shopify" title="Shopify">
+                <i class="fab fa-shopify"></i>
+            </div>
+            <div class="channel-icon tiktok" data-channel="TikTok" title="TikTok">
+                <i class="fab fa-tiktok"></i>
+            </div>
+        </div>
+
+        <!-- 左侧栏 - 会话列表 -->
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <h6 class="mb-2">会话列表</h6>
+                <div id="status-select" style="margin-bottom: 8px;"></div>
+                <div id="category-cascader" style="margin-bottom: 8px;"></div>
+                <div style="margin-bottom: 0.5rem; position: relative;">
+                    <input type="text" id="conversation-search" class="form-control form-control-sm" placeholder="输入用户名或邮箱查询..." style="padding-right: 30px;">
+                    <button id="search-btn" style="position: absolute; right: 5px; top: 50%; transform: translateY(-50%); background: none; border: none; color: #999; cursor: pointer;">
+                        <i class="fas fa-search"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="sidebar-body" id="conversation-list">
+                <!-- 会话列表将通过JS动态加载 -->
+            </div>
+        </div>
+
+        <!-- 中间栏 - 对话框 -->
+        <div class="chat-container">
+            <div class="chat-header">
+                <div style="flex: 1;">
+                    <h6 class="mb-0" id="chat-username">jorgebarbara27<small style="color: #999; font-weight: normal; margin-left: 20px" id="chat-useremail">jorgebarbara27@example.com</small></h6>
+                    <small class="text-muted" id="chat-status">TikTok · 待处理</small>
+                </div>
+                <div class="chat-header-right" id="chat-header-right">
+                    <div id="chat-info-display"></div>
+                </div>
+            </div>
+            <div id="edit-modal-container"></div>
+            <div class="chat-body" id="chat-messages">
+                <!-- 消息将通过JS动态加载 -->
+            </div>
+            <div style="padding: 0 15px 5px; background-color: #f8f9fa;">
+                <button class="btn btn-sm btn-primary" id="recommend-btn" style="opacity: 0.8; margin-left: 5px;">
+                    <i class="fas fa-robot"></i> 智能推荐
+                </button>
+            </div>
+            <div class="chat-input-area">
+                <div class="input-group">
+                    <input type="text" id="message-input" class="form-control" placeholder="输入回复...">
+                    <button id="send-btn" class="btn btn-primary"><i class="fas fa-paper-plane"></i> 发送</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 右侧栏 - 客户信息 -->
+        <div class="customer-info">
+            <div class="info-section">
+                <h4>历史购物记录</h4>
+                <div class="stats-item">
+                    <span class="stats-label">历史订单数量:</span>
+                    <span class="stats-value">12</span>
+                </div>
+                <div class="stats-item">
+                    <span class="stats-label">总GMV:</span>
+                    <span class="stats-value">$1,234.56</span>
+                </div>
+                <div class="stats-item">
+                    <span class="stats-label">平均订单金额:</span>
+                    <span class="stats-value">$102.88</span>
+                </div>
+                <div class="stats-item">
+                    <span class="stats-label">最近购买:</span>
+                    <span class="stats-value">2026-03-15</span>
+                </div>
+            </div>
+
+            <div class="info-section">
+                <h4>订单信息</h4>
+                <div class="order-tabs">
+                    <button class="order-tab-btn active" data-tab="current">当前售后订单</button>
+                    <button class="order-tab-btn" data-tab="all">全部订单</button>
+                </div>
+
+                <div class="order-tab-content active" id="tab-current">
+                    <div class="order-info">
+                        <div class="order-item current-order">
+                            <div class="order-header">
+                                <span class="order-id">112-4117876-9857843</span>
+                                <i class="fas fa-copy order-copy-btn" data-order-id="112-4117876-9857843" style="cursor: pointer; color: #2196f3; font-size: 12px;"></i>
+                            </div>
+                            <div class="order-status shipped">已发货</div>
+                            <div class="order-detail-row">
+                                <span class="order-detail-label">订单总金额</span>
+                                <span class="order-detail-value">$129.98</span>
+                            </div>
+                            <div class="order-detail-row">
+                                <span class="order-detail-label">运输方式</span>
+                                <span class="order-detail-value">UPS Ground</span>
+                            </div>
+                            <div class="order-detail-row">
+                                <span class="order-detail-label">订单创建</span>
+                                <span class="order-detail-value">2026-03-10 14:30:25</span>
+                            </div>
+                            <div class="order-detail-row">
+                                <span class="order-detail-label">运单号</span>
+                                <span class="order-detail-value tracking-value">
+                                    1Z999AA10123456784
+                                    <i class="fas fa-copy order-copy-btn" data-order-id="1Z999AA10123456784" style="cursor: pointer; color: #2196f3; font-size: 11px; margin-left: 5px;"></i>
+                                </span>
+                            </div>
+                            <div class="order-detail-row">
+                                <span class="order-detail-label">退换货</span>
+                                <span class="order-detail-value">否</span>
+                            </div>
+                            <div class="product-list">
+                                <div class="product-item">
+                                    <img src="https://cdn.shopify.com/s/files/1/0022/7937/4907/files/c663f3b2160630744ad1bbe703fe180f_b012cd1c-eb28-4168-b355-8721a8a01a45.jpg?v=1742538783" alt="产品图片" class="product-image">
+                                    <div class="product-info">
+                                        <div class="product-name">Professional Rechargeable Drill 30000</div>
+                                        <div class="product-price">$99.99 x 1</div>
+                                    </div>
+                                </div>
+                                <div class="product-item">
+                                    <img src="https://cdn.shopify.com/s/files/1/0022/7937/4907/files/2_4da8162b-bc50-498d-819a-eb34f9fe2b1b.jpg?v=1724925982" alt="产品图片" class="product-image">
+                                    <div class="product-info">
+                                        <div class="product-name">Drill Bit Set (10pcs)</div>
+                                        <div class="product-price">$29.99 x 1</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="order-tab-content" id="tab-all">
+                    <div class="order-search-box">
+                        <input type="text" class="form-control form-control-sm" id="order-search-input" placeholder="输入订单号搜索...">
+                    </div>
+                    <div class="order-list" id="order-list"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script type="text/javascript">
+        const { Cascader } = antd;
+
+        const categoryOptions = [
+            {
+                label: '售前',
+                value: 'presale',
+                children: [
+                    {
+                        label: '保修期',
+                        value: 'presale-warranty',
+                        children: [
+                            { label: '如何延保', value: 'presale-warranty-extend' }
+                        ]
+                    },
+                    {
+                        label: '产品',
+                        value: 'presale-product',
+                        children: [
+                            { label: '询问产品参数', value: 'presale-product-spec' },
+                            { label: '产品推荐', value: 'presale-product-recommend' }
+                        ]
+                    },
+                    {
+                        label: '物流',
+                        value: 'presale-logistics',
+                        children: [
+                            { label: '是否有物流配送', value: 'presale-logistics-available' },
+                            { label: '物流费用大概多少', value: 'presale-logistics-fee' },
+                            { label: '税费多少', value: 'presale-logistics-tax' },
+                            { label: '物流运输时间', value: 'presale-logistics-time' }
+                        ]
+                    }
+                ]
+            },
+            {
+                label: '售中',
+                value: 'insale',
+                children: [
+                    {
+                        label: '少发/漏发',
+                        value: 'insale-missing',
+                        children: [
+                            { label: '少发/漏发确认', value: 'insale-missing-confirm' },
+                            { label: '部分发货/部分物流', value: 'insale-missing-partial' },
+                            { label: '询问部分产品物流单号', value: 'insale-missing-tracking' }
+                        ]
+                    },
+                    {
+                        label: '退款',
+                        value: 'insale-refund',
+                        children: [
+                            { label: '仅退款', value: 'insale-refund-only' }
+                        ]
+                    },
+                    {
+                        label: '取消/变更',
+                        value: 'insale-cancel',
+                        children: [
+                            { label: '取消订单', value: 'insale-cancel-order' },
+                            { label: '修改地址', value: 'insale-cancel-address' },
+                            { label: '修改产品', value: 'insale-cancel-product' }
+                        ]
+                    }
+                ]
+            },
+            {
+                label: '售后',
+                value: 'aftersale',
+                children: [
+                    {
+                        label: '质量/瑕疵',
+                        value: 'aftersale-quality',
+                        children: [
+                            { label: '质量问题', value: 'aftersale-quality-issue' },
+                            { label: '发错货', value: 'aftersale-quality-wrong' },
+                            { label: '已使用/非全新', value: 'aftersale-quality-used' }
+                        ]
+                    },
+                    {
+                        label: '退货',
+                        value: 'aftersale-return',
+                        children: [
+                            { label: '退货退款', value: 'aftersale-return-refund' }
+                        ]
+                    },
+                    {
+                        label: '物流',
+                        value: 'aftersale-logistics',
+                        children: [
+                            { label: '妥投未收到', value: 'aftersale-logistics-notreceived' },
+                            { label: '物流延迟/被退回/无更新/无法投递', value: 'aftersale-logistics-delay' }
+                        ]
+                    }
+                ]
+            }
+        ];
+
+        const { Select, Modal } = antd;
+
+        // 状态选项数据
+        const statusOptions = [
+            { label: '待处理', value: 'pending' },
+            { label: '处理中', value: 'processing' },
+            { label: '已关闭', value: 'closed' }
+        ];
+
+        // 负责人选项数据
+        // 状态多选组件
+        class StatusSelect extends React.Component {
+            state = {
+                selectedValue: ['pending', 'processing'],
+            };
+
+            onChange = (value) => {
+                this.setState({ selectedValue: value });
+                if (window.filterByStatus) {
+                    window.filterByStatus(value);
+                }
+            };
+
+            render() {
+                return React.createElement('div', null,
+                    React.createElement('span', {
+                        style: { fontSize: '12px', color: '#666', marginRight: '5px', whiteSpace: 'nowrap' }
+                    }, '会话状态：'),
+                    React.createElement(Select, {
+                        mode: 'multiple',
+                        style: { width: '150px' },
+                        options: statusOptions,
+                        placeholder: '全部',
+                        value: this.state.selectedValue,
+                        onChange: this.onChange,
+                        maxTagCount: 'responsive',
+                        allowClear: true
+                    })
+                );
+            }
+        }
+
+        // 问题类型级联组件
+        class CategoryCascader extends React.Component {
+            state = {
+                selectedValue: [],
+            };
+
+            onChange = (value) => {
+                this.setState({ selectedValue: value });
+                if (window.filterByCategory) {
+                    window.filterByCategory(value);
+                }
+            };
+
+            render() {
+                return React.createElement('div', null,
+                    React.createElement('span', {
+                        style: { fontSize: '12px', color: '#666', marginRight: '5px', whiteSpace: 'nowrap' }
+                    }, '问题类型：'),
+                    React.createElement(Cascader, {
+                        style: { width: '150px' },
+                        options: categoryOptions,
+                        onChange: this.onChange,
+                        multiple: true,
+                        maxTagCount: 'responsive',
+                        placeholder: '选择问题类型',
+                        changeOnSelect: true
+                    })
+                );
+            }
+        }
+
+        // 渲染所有Ant Design组件
+        const appRoot = ReactDOM.createRoot(document.getElementById('category-cascader'));
+        appRoot.render(React.createElement(CategoryCascader));
+
+        const statusRoot = ReactDOM.createRoot(document.getElementById('status-select'));
+        statusRoot.render(React.createElement(StatusSelect));
+
+        // 聊天信息显示组件 - 显示文本+编辑图标
+        class ChatInfoDisplay extends React.Component {
+            state = {
+                modalVisible: false,
+                editingField: null,
+                selectedCategory: null,
+                selectedStatus: null
+            };
+
+            showEditModal = (field) => {
+                const conv = conversationData.conversations.find(function(c) {
+                    return c.id === window.currentConversation;
+                });
+                if (!conv) return;
+
+                this.setState({
+                    modalVisible: true,
+                    editingField: field,
+                    selectedCategory: conv.category,
+                    selectedStatus: conv.status
+                });
+            };
+
+            handleOk = () => {
+                const conv = conversationData.conversations.find(function(c) {
+                    return c.id === window.currentConversation;
+                });
+                if (!conv) return;
+
+                if (this.state.editingField === 'category') {
+                    conv.category = this.state.selectedCategory;
+                } else if (this.state.editingField === 'status') {
+                    conv.status = this.state.selectedStatus;
+                }
+
+                renderConversationList();
+                this.setState({ modalVisible: false });
+                this.forceUpdate();
+            };
+
+            handleCancel = () => {
+                this.setState({ modalVisible: false });
+            };
+
+            getCategoryText = () => {
+                const conv = conversationData.conversations.find(function(c) {
+                    return c.id === window.currentConversation;
+                });
+                if (!conv || !conv.category) return '未分类';
+
+                const parts = conv.category.split('-');
+                const level1 = { presale: '售前', insale: '售中', aftersale: '售后' }[parts[0]] || '';
+                const level2Map = {
+                    warranty: '保修期', product: '产品', logistics: '物流',
+                    missing: '少发/漏发', refund: '退款', cancel: '取消/变更',
+                    quality: '质量/瑕疵', return: '退货'
+                };
+                const level2 = level2Map[parts[1]] || '';
+                const level3Map = {
+                    'extend': '如何延保', 'spec': '询问产品参数', 'recommend': '产品推荐',
+                    'available': '是否有物流配送', 'fee': '物流费用', 'tax': '税费', 'time': '运输时间',
+                    'confirm': '少发/漏发确认', 'partial': '部分发货', 'tracking': '询问物流单号',
+                    'only': '仅退款', 'order': '取消订单', 'address': '修改地址', 'product': '修改产品',
+                    'issue': '质量问题', 'wrong': '发错货', 'used': '已使用/非全新',
+                    'refund': '退货退款', 'notreceived': '妥投未收到', 'delay': '物流延迟'
+                };
+                const level3 = level3Map[parts[2]] || '';
+
+                return level1 + ' / ' + level2 + (level3 ? ' / ' + level3 : '');
+            };
+
+            getStatusText = () => {
+                const conv = conversationData.conversations.find(function(c) {
+                    return c.id === window.currentConversation;
+                });
+                if (!conv) return '';
+                return { pending: '待处理', processing: '处理中', closed: '已关闭' }[conv.status] || '';
+            };
+
+            renderEditIcon = (field) => {
+                return React.createElement('i', {
+                    className: 'fas fa-pencil-alt',
+                    style: { marginLeft: '5px', cursor: 'pointer', color: '#2196f3', fontSize: '12px' },
+                    onClick: () => this.showEditModal(field)
+                });
+            };
+
+            renderModal = () => {
+                const modalContent = [];
+                if (this.state.editingField === 'category') {
+                    modalContent.push(
+                        React.createElement('div', { key: 'category', style: { marginBottom: '15px' } },
+                            React.createElement('label', { style: { display: 'block', marginBottom: '5px' } }, '会话类型：'),
+                            React.createElement(Cascader, {
+                                style: { width: '100%' },
+                                options: categoryOptions,
+                                value: this.state.selectedCategory ? [this.state.selectedCategory] : [],
+                                onChange: (value) => this.setState({ selectedCategory: value[0] }),
+                                placeholder: '选择问题类型'
+                            })
+                        )
+                    );
+                } else if (this.state.editingField === 'status') {
+                    modalContent.push(
+                        React.createElement('div', { key: 'status', style: { marginBottom: '15px' } },
+                            React.createElement('label', { style: { display: 'block', marginBottom: '5px' } }, '会话状态：'),
+                            React.createElement(Select, {
+                                style: { width: '100%' },
+                                options: statusOptions,
+                                value: this.state.selectedStatus,
+                                onChange: (value) => this.setState({ selectedStatus: value })
+                            })
+                        )
+                    );
+                }
+
+                return React.createElement(Modal, {
+                    title: '修改会话信息',
+                    open: this.state.modalVisible,
+                    onOk: this.handleOk,
+                    onCancel: this.handleCancel,
+                    okText: '确认',
+                    cancelText: '取消'
+                }, modalContent);
+            };
+
+            render() {
+                return React.createElement('div', {
+                    style: { display: 'flex', alignItems: 'center', fontSize: '13px', color: '#666' }
+                },
+                    React.createElement('span', null,
+                        '会话类型：'
+                    ),
+                    React.createElement('span', {
+                        style: { color: '#2196f3', marginRight: '5px' }
+                    }, this.getCategoryText()),
+                    this.renderEditIcon('category'),
+                    React.createElement('span', {
+                        style: { marginLeft: '15px' }
+                    }, '会话状态：'),
+                    React.createElement('span', {
+                        style: { color: '#2196f3', marginRight: '5px' }
+                    }, this.getStatusText()),
+                    this.renderEditIcon('status'),
+                    this.renderModal()
+                );
+            }
+        }
+
+        const chatInfoRoot = ReactDOM.createRoot(document.getElementById('chat-info-display'));
+        chatInfoRoot.render(React.createElement(ChatInfoDisplay));
+
+        window.updateChatInfoDisplay = function() {
+            chatInfoRoot.render(React.createElement(ChatInfoDisplay));
+        };
+
+        // 全局筛选函数
+        window.filterByStatus = function(selectedValues) {
+            currentFilter.status = selectedValues;
+            filterConversations();
+        };
+
+        window.filterByCategory = function(selectedValues) {
+            currentFilter.category = selectedValues;
+            filterConversations();
+        };
+
+        // 当前筛选状态
+        let currentFilter = {
+            status: ['pending', 'processing'],
+            category: []
+        };
+
+        // 会话数据
+        const conversationData = {
+            conversations: [
+                {
+                    id: 1,
+                    platform: 'Amazon',
+                    user: {
+                        id: 'jorgebarbara27',
+                        name: 'jorgebarbara27',
+                        email: 'jorgebarbara27@example.com'
+                    },
+                    agent: 'Morgan.Ying',
+                    status: 'pending',
+                    category: 'aftersale-quality-issue',
+                    lastMessage: 'Hello I bought this a few weeks ago and wanted to use it today...',
+                    lastMessageTime: '今天 10:30',
+                    messages: [
+                        { sender: 'customer', content: 'Hello I bought this a few weeks ago and wanted to use it today it stopped working even when it is fully charged and I purchased it as safe and was not cheap I pay $99.99 please help me out I would be so happy, thank you.', time: '今天 10:30', sentiment: 'negative' },
+                        { sender: 'agent', content: 'I am sorry I do not know the answer to that, but I am always learning. I will connect you with the seller\'s human agent.', time: '今天 10:35' },
+                        { sender: 'customer', content: 'Hi there, are you the seller\'s support?', time: '今天 10:40', sentiment: 'neutral' },
+                        { sender: 'agent', content: 'Hi there, we are sorry to hear you are encountering an issue with the product. Could you please take a troubleshooting video? Hit click it and send you a replacement once the problem confirmed. If the video can be sent to us message here, please send it, along with your order ID, to support@melodysusie.com. Thank you!', time: '今天 10:45' }
+                    ]
+                },
+                {
+                    id: 2,
+                    platform: 'Amazon',
+                    user: {
+                        id: 'habacucamayordylan',
+                        name: 'habacucamayordylan',
+                        email: 'habacucamayordylan@example.com'
+                    },
+                    agent: 'Lune.Liu',
+                    status: 'processing',
+                    category: 'aftersale-return-refund',
+                    lastMessage: 'Thank you for your help!',
+                    lastMessageTime: '昨天 15:45',
+                    messages: [
+                        { sender: 'customer', content: 'Thank you for your help!', time: '昨天 15:45', sentiment: 'positive' },
+                        { sender: 'agent', content: 'You are welcome! Is there anything else I can help you with?', time: '昨天 15:50' }
+                    ]
+                },
+                {
+                    id: 3,
+                    platform: 'Amazon',
+                    user: {
+                        id: 'heartbeat94',
+                        name: 'heartbeat94',
+                        email: 'heartbeat94@example.com'
+                    },
+                    agent: '待分配',
+                    status: 'pending',
+                    category: 'presale-product-recommend',
+                    lastMessage: 'Your service is excellent!',
+                    lastMessageTime: '4天前',
+                    messages: [
+                        { sender: 'customer', content: 'Your service is excellent!', time: '4天前', sentiment: 'positive' },
+                        { sender: 'agent', content: 'Thank you for your kind words!', time: '4天前' }
+                    ]
+                },
+                {
+                    id: 4,
+                    platform: 'Amazon',
+                    user: {
+                        id: 'sophie.liu88',
+                        name: 'sophie.liu88',
+                        email: 'sophie.liu88@example.com'
+                    },
+                    agent: 'Gigi.Liang',
+                    status: 'closed',
+                    category: 'insale-missing-confirm',
+                    lastMessage: 'Problem solved, thank you!',
+                    lastMessageTime: '5天前',
+                    messages: [
+                        { sender: 'customer', content: 'Problem solved, thank you!', time: '5天前', sentiment: 'positive' },
+                        { sender: 'agent', content: 'Glad to hear that! Have a great day!', time: '5天前' }
+                    ]
+                },
+                {
+                    id: 5,
+                    platform: 'Amazon',
+                    user: {
+                        id: 'mike.wang123',
+                        name: 'mike.wang123',
+                        email: 'mike.wang123@example.com'
+                    },
+                    agent: 'Sophie.Peng',
+                    status: 'processing',
+                    category: 'aftersale-quality-issue',
+                    lastMessage: 'I need a replacement for my order.',
+                    lastMessageTime: '今天 09:20',
+                    messages: [
+                        { sender: 'customer', content: 'I need a replacement for my order.', time: '今天 09:20', sentiment: 'neutral' },
+                        { sender: 'agent', content: 'I understand. Let me check your order details and help you with the replacement.', time: '今天 09:25' }
+                    ]
+                },
+                {
+                    id: 6,
+                    platform: 'Amazon',
+                    user: {
+                        id: '待分配用户001',
+                        name: '待分配用户001',
+                        email: 'unassigned1@example.com'
+                    },
+                    agent: '待分配',
+                    status: 'pending',
+                    category: 'aftersale-logistics-notreceived',
+                    lastMessage: 'Product quality issue',
+                    lastMessageTime: '今天 08:00',
+                    messages: [
+                        { sender: 'customer', content: 'Product quality issue', time: '今天 08:00', sentiment: 'negative' }
+                    ]
+                },
+                {
+                    id: 7,
+                    platform: 'Shopify',
+                    user: {
+                        id: 'salome598',
+                        name: 'salome598',
+                        email: 'salome598@melodysusie.com'
+                    },
+                    agent: null,
+                    status: 'pending',
+                    category: 'presale-warranty-extend',
+                    lastMessage: 'Is there a warranty for this product?',
+                    lastMessageTime: '2天前',
+                    messages: [
+                        { sender: 'customer', content: 'Is there a warranty for this product?', time: '2天前', sentiment: 'neutral' }
+                    ]
+                },
+                {
+                    id: 8,
+                    platform: 'Shopify',
+                    user: {
+                        id: 'john.doe456',
+                        name: 'john.doe456',
+                        email: 'john.doe456@melodysusie.com'
+                    },
+                    agent: null,
+                    status: 'processing',
+                    category: 'insale-cancel-order',
+                    lastMessage: 'When will my order arrive?',
+                    lastMessageTime: '昨天 14:30',
+                    messages: [
+                        { sender: 'customer', content: 'When will my order arrive?', time: '昨天 14:30', sentiment: 'neutral' },
+                        { sender: 'agent', content: 'Your order is expected to arrive within 3-5 business days.', time: '昨天 14:35' }
+                    ]
+                },
+                {
+                    id: 9,
+                    platform: 'TikTok',
+                    user: {
+                        id: 'leny96',
+                        name: 'leny96',
+                        email: 'leny96@tiktok.com'
+                    },
+                    agent: null,
+                    status: 'pending',
+                    category: 'presale-logistics-available',
+                    lastMessage: 'Could you please help me with my order?',
+                    lastMessageTime: '3天前',
+                    messages: [
+                        { sender: 'customer', content: 'Could you please help me with my order?', time: '3天前', sentiment: 'neutral' }
+                    ]
+                },
+                {
+                    id: 10,
+                    platform: 'TikTok',
+                    user: {
+                        id: 'user_tiktok_001',
+                        name: 'user_tiktok_001',
+                        email: 'user_tiktok_001@tiktok.com'
+                    },
+                    agent: null,
+                    status: 'closed',
+                    category: 'aftersale-return-refund',
+                    lastMessage: 'Thanks for your help!',
+                    lastMessageTime: '1周前',
+                    messages: [
+                        { sender: 'customer', content: 'Thanks for your help!', time: '1周前', sentiment: 'positive' },
+                        { sender: 'agent', content: 'You are welcome!', time: '1周前' }
+                    ]
+                }
+            ]
+        };
+
+        // 用户历史订单数据
+        const userOrders = [
+            {
+                id: '7890123',
+                time: '2026-03-10 14:30:25',
+                amount: '$129.98',
+                products: [
+                    { img: 'https://cdn.shopify.com/s/files/1/0022/7937/4907/files/c663f3b2160630744ad1bbe703fe180f_b012cd1c-eb28-4168-b355-8721a8a01a45.jpg?v=1742538783' },
+                    { img: 'https://cdn.shopify.com/s/files/1/0022/7937/4907/files/2_4da8162b-bc50-498d-819a-eb34f9fe2b1b.jpg?v=1724925982' }
+                ]
+            },
+            {
+                id: '7890111',
+                time: '2026-02-15 09:20:10',
+                amount: '$79.99',
+                products: [
+                    { img: 'https://cdn.shopify.com/s/files/1/0022/7937/4907/files/c663f3b2160630744ad1bbe703fe180f_b012cd1c-eb28-4168-b355-8721a8a01a45.jpg?v=1742538783' }
+                ]
+            },
+            {
+                id: '7890098',
+                time: '2026-01-20 16:45:30',
+                amount: '$59.99',
+                products: [
+                    { img: 'https://cdn.shopify.com/s/files/1/0022/7937/4907/files/2_4da8162b-bc50-498d-819a-eb34f9fe2b1b.jpg?v=1724925982' }
+                ]
+            },
+            {
+                id: '7890085',
+                time: '2025-12-05 11:15:00',
+                amount: '$199.98',
+                products: [
+                    { img: 'https://cdn.shopify.com/s/files/1/0022/7937/4907/files/c663f3b2160630744ad1bbe703fe180f_b012cd1c-eb28-4168-b355-8721a8a01a45.jpg?v=1742538783' },
+                    { img: 'https://cdn.shopify.com/s/files/1/0022/7937/4907/files/2_4da8162b-bc50-498d-819a-eb34f9fe2b1b.jpg?v=1724925982' }
+                ]
+            }
+        ];
+
+        // 渲染全部订单列表
+        function renderOrderList(searchText) {
+            const $list = $('#order-list');
+            $list.empty();
+
+            const filteredOrders = userOrders.filter(function(order) {
+                if (!searchText) return true;
+                return order.id.includes(searchText);
+            });
+
+            filteredOrders.forEach(function(order) {
+                const productsHtml = order.products.map(function(p) {
+                    return '<img src="' + p.img + '" class="order-card-product-img">';
+                }).join('');
+
+                const html = '<div class="order-card" data-order-id="' + order.id + '">' +
+                    '<div class="order-card-id-wrapper">' +
+                    '<span class="order-card-id">' + order.id + '</span>' +
+                    '<i class="fas fa-copy order-copy-btn" data-order-id="' + order.id + '"></i>' +
+                    '</div>' +
+                    '<div class="order-card-time">' + order.time + '</div>' +
+                    '<div class="order-card-products">' + productsHtml + '</div>' +
+                    '<div class="order-card-amount">Total: ' + order.amount + '</div>' +
+                    '</div>';
+                $list.append(html);
+            });
+        }
+
+        // Tab切换事件
+        $(document).on('click', '.order-tab-btn', function() {
+            $('.order-tab-btn').removeClass('active');
+            $('.order-tab-content').removeClass('active');
+            $(this).addClass('active');
+            const tabId = $(this).data('tab');
+            $('#tab-' + tabId).addClass('active');
+
+            if (tabId === 'all') {
+                renderOrderList('');
+            }
+        });
+
+        // 订单搜索事件
+        $(document).on('input', '#order-search-input', function() {
+            const searchText = $(this).val();
+            renderOrderList(searchText);
+        });
+
+        // 复制订单号或运单号
+        $(document).on('click', '.order-copy-btn', function() {
+            const orderId = $(this).data('order-id');
+            const textToCopy = orderId || $(this).closest('.tracking-value, .order-detail-value').text().trim();
+            navigator.clipboard.writeText(textToCopy).then(function() {
+                alert('已复制: ' + textToCopy);
+            });
+        });
+
+        // 当前选中的渠道和会话
+        let currentChannel = 'Amazon';
+        let currentConversation = null;
+
+        // 渠道切换
+        $('.channel-icon').click(function() {
+            $('.channel-icon').removeClass('active');
+            $(this).addClass('active');
+            currentChannel = $(this).data('channel');
+            renderConversationList();
+            updateChatHeaderForChannel();
+        });
+
+        // 根据渠道更新聊天头部
+        function updateChatHeaderForChannel() {
+            if (currentChannel === 'Amazon') {
+                $('#header-agent-select').show();
+            } else {
+                $('#header-agent-select').hide();
+            }
+        }
+
+        // 获取问题类型前两级中文显示
+        function getCategoryLevel2(category) {
+            if (!category) return '未分类';
+            const parts = category.split('-');
+            const level1Map = { presale: '售前', insale: '售中', aftersale: '售后' };
+            const level2Map = {
+                warranty: '保修期', product: '产品', logistics: '物流',
+                missing: '少发/漏发', refund: '退款', cancel: '取消/变更',
+                quality: '质量/瑕疵', return: '退货'
+            };
+            const level1 = level1Map[parts[0]] || parts[0];
+            const level2 = level2Map[parts[1]] || parts[1];
+            return level1 + ':' + level2;
+        }
+
+        // 渲染会话列表
+        function renderConversationList() {
+            const $list = $('#conversation-list');
+            $list.empty();
+            
+            const filteredConversations = conversationData.conversations.filter(function(conv) {
+                return conv.platform === currentChannel;
+            });
+
+            filteredConversations.forEach(function(conv, index) {
+                const statusClass = conv.status === 'pending' ? 'status-pending' :
+                                   conv.status === 'processing' ? 'status-processing' :
+                                   conv.status === 'closed' ? 'status-closed' : 'status-pending';
+
+                const statusText = conv.status === 'pending' ? '待处理' :
+                                 conv.status === 'processing' ? '处理中' :
+                                 conv.status === 'closed' ? '已关闭' : '待处理';
+
+                const categoryText = getCategoryLevel2(conv.category);
+
+                const isActive = currentConversation && currentConversation.id === conv.id ? 'active' : '';
+
+                const html = '<div class="conversation-item ' + isActive + '" data-id="' + conv.id + '">' +
+                    '<div class="conversation-header">' +
+                    '<span class="conversation-user">' + conv.user.name + '</span>' +
+                    '<span class="conversation-time">' + conv.lastMessageTime + '</span>' +
+                    '</div>' +
+                    '<div class="conversation-message">' + conv.lastMessage + '</div>' +
+                    '<div class="conversation-footer">' +
+                    '<div class="conversation-footer-left">' +
+                    '<span class="conversation-status ' + statusClass + '">' + statusText + '</span>' +
+                    '<span class="conversation-category">' + categoryText + '</span>' +
+                    '</div>' +
+                    '</div>' +
+                    '</div>';
+
+                $list.append(html);
+            });
+
+            // 绑定会话项点击事件
+            $('.conversation-item').click(function() {
+                const convId = parseInt($(this).data('id'));
+                selectConversation(convId);
+            });
+        }
+
+        // 选择会话
+        function selectConversation(convId) {
+            const conv = conversationData.conversations.find(function(c) {
+                return c.id === convId;
+            });
+
+            if (!conv) return;
+
+            window.currentConversation = convId;
+            currentConversation = conv;
+
+            // 更新会话列表激活状态
+            $('.conversation-item').removeClass('active');
+            $('.conversation-item[data-id="' + convId + '"]').addClass('active');
+
+            // 更新聊天头部
+            $('#chat-username').html(conv.user.name + '<small style="color: #999; font-weight: normal; margin-left: 20px">' + conv.user.email + '</small>');
+
+            const statusText = conv.status === 'pending' ? '待处理' :
+                             conv.status === 'processing' ? '处理中' :
+                             conv.status === 'closed' ? '已关闭' : '待处理';
+
+            $('#chat-status').text(conv.platform + ' · ' + statusText);
+
+            // 更新聊天信息显示
+            window.updateChatInfoDisplay();
+
+            // 渲染消息
+            renderMessages(conv.messages);
+        }
+
+        // 渲染消息
+        function renderMessages(messages) {
+            const $chatBody = $('#chat-messages');
+            $chatBody.empty();
+            
+            messages.forEach(function(msg) {
+                const senderClass = msg.sender === 'customer' ? 'message-customer' : 'message-agent';
+                const sentimentHtml = msg.sentiment ? 
+                    '<span class="sentiment-tag sentiment-' + msg.sentiment + '">' + 
+                    (msg.sentiment === 'negative' ? '负面' : msg.sentiment === 'positive' ? '正面' : '中性') + '</span>' : '';
+                
+                const html = '<div class="message ' + senderClass + '">' +
+                    '<div class="d-flex align-items-center">' +
+                    '<div class="message-content">' + msg.content + '</div>' +
+                    sentimentHtml +
+                    '</div>' +
+                    '<div class="message-time">' + msg.time + '</div>' +
+                    '</div>';
+                
+                $chatBody.append(html);
+            });
+            
+            // 滚动到底部
+            $chatBody.scrollTop($chatBody[0].scrollHeight);
+        }
+
+        // 会话搜索
+        function performSearch() {
+            const searchTerm = $('#conversation-search').val().toLowerCase();
+            
+            $('.conversation-item').each(function() {
+                const user = $(this).find('.conversation-user').text().toLowerCase();
+                const message = $(this).find('.conversation-message').text().toLowerCase();
+                
+                if (user.includes(searchTerm) || message.includes(searchTerm)) {
+                    $(this).show();
+                } else {
+                    $(this).hide();
+                }
+            });
+        }
+
+        $('#conversation-search').on('keyup', function() {
+            performSearch();
+        });
+
+        $('#search-btn').click(function() {
+            performSearch();
+        });
+
+        // 状态筛选
+        $('.sidebar-header .dropdown-item').click(function(e) {
+            e.preventDefault();
+            const statusText = $(this).text();
+            
+            if (statusText === '全部') {
+                $('.conversation-item').show();
+            } else {
+                $('.conversation-item').hide();
+                $('.conversation-status:contains("' + statusText + '")').closest('.conversation-item').show();
+            }
+            
+            // 更新按钮文字
+            $(this).closest('.dropdown').find('button').text(statusText);
+        });
+
+        // 发送消息
+        $('#send-btn').click(function() {
+            const message = $('#message-input').val();
+            if (!message || !currentConversation) return;
+            
+            // 添加消息到数据
+            currentConversation.messages.push({
+                sender: 'agent',
+                content: message,
+                time: '今天 ' + new Date().toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' })
+            });
+            
+            // 更新最后消息
+            currentConversation.lastMessage = message;
+            currentConversation.lastMessageTime = '今天 ' + new Date().toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' });
+            
+            // 重新渲染
+            renderMessages(currentConversation.messages);
+            renderConversationList();
+            
+            // 清空输入框
+            $('#message-input').val('');
+        });
+
+        $('#message-input').keypress(function(e) {
+            if (e.which === 13) {
+                $('#send-btn').click();
+            }
+        });
+
+        // 智能推荐按钮
+        $('#recommend-btn').click(function() {
+            const $recommendationArea = $('#recommendation-area');
+            if ($recommendationArea.length) {
+                $recommendationArea.toggle();
+            } else {
+                const html = '<div class="recommendation-area" id="recommendation-area">' +
+                    '<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">' +
+                    '<div class="recommendation-title">智能回复推荐</div>' +
+                    '<button class="close-recommendation" style="background: none; border: none; color: #666; font-size: 16px; cursor: pointer;">' +
+                    '<i class="fas fa-times"></i>' +
+                    '</button>' +
+                    '</div>' +
+                    '<div class="recommendation-item">' +
+                    '<div style="display: flex; align-items: flex-start;">' +
+                    '<button class="copy-recommendation" style="margin-right: 8px; background: none; border: 1px solid #ddd; border-radius: 3px; padding: 2px 6px; font-size: 12px; cursor: pointer;">' +
+                    '<i class="fas fa-copy"></i>' +
+                    '</button>' +
+                    '<span>Thank you for reaching out. We are sorry to hear about the issue. Could you please provide your order ID and a video of the problem? We will arrange a replacement for you.</span>' +
+                    '</div>' +
+                    '</div>' +
+                    '<div class="recommendation-item">' +
+                    '<div style="display: flex; align-items: flex-start;">' +
+                    '<button class="copy-recommendation" style="margin-right: 8px; background: none; border: 1px solid #ddd; border-radius: 3px; padding: 2px 6px; font-size: 12px; cursor: pointer;">' +
+                    '<i class="fas fa-copy"></i>' +
+                    '</button>' +
+                    '<span>I understand your concern. Let me check your order details and provide you with the best solution.</span>' +
+                    '</div>' +
+                    '</div>' +
+                    '<div class="recommendation-item">' +
+                    '<div style="display: flex; align-items: flex-start;">' +
+                    '<button class="copy-recommendation" style="margin-right: 8px; background: none; border: 1px solid #ddd; border-radius: 3px; padding: 2px 6px; font-size: 12px; cursor: pointer;">' +
+                    '<i class="fas fa-copy"></i>' +
+                    '</button>' +
+                    '<span>We take product quality seriously. Please share your order information and we will process your request promptly.</span>' +
+                    '</div>' +
+                    '</div>' +
+                    '</div>';
+                
+                $('body').append(html);
+            }
+        });
+
+        // 关闭推荐区域
+        $(document).on('click', '.close-recommendation', function() {
+            $(this).closest('.recommendation-area').remove();
+        });
+
+        // 复制推荐回复
+        $(document).on('click', '.copy-recommendation', function(e) {
+            e.stopPropagation();
+            const text = $(this).next('span').text();
+            navigator.clipboard.writeText(text).then(function() {
+                // 复制成功
+            }).catch(function(err) {
+                // 复制失败
+            });
+        });
+
+        // 推荐回复点击填充
+        $(document).on('click', '.recommendation-item', function() {
+            const text = $(this).find('span').text();
+            $('#message-input').val(text);
+        });
+
+        // 初始化
+        $(document).ready(function() {
+            // 会话状态筛选
+            // 筛选函数
+            function filterConversations() {
+                $('.conversation-item').each(function() {
+                    const convId = parseInt($(this).data('id'));
+                    const conv = conversationData.conversations.find(function(c) {
+                        return c.id === convId;
+                    });
+                    if (!conv) {
+                        $(this).hide();
+                        return;
+                    }
+
+                    let show = true;
+
+                    // 状态筛选 - 支持多选
+                    if (currentFilter.status.length > 0 && !currentFilter.status.includes(conv.status)) {
+                        show = false;
+                    }
+
+                    // 分类筛选 - Ant Design Cascader multiple模式返回数组的数组
+                    if (show && currentFilter.category.length > 0) {
+                        const selectedCategories = currentFilter.category.flat();
+                        const convCategory = conv.category;
+                        if (!selectedCategories.includes(convCategory)) {
+                            const convCategoryParts = convCategory.split('-');
+                            const matched = selectedCategories.some(function(selected) {
+                                const selectedParts = selected.split('-');
+                                if (selectedParts.length === 1 && convCategoryParts[0] === selectedParts[0]) {
+                                    return true;
+                                }
+                                if (selectedParts.length === 2 && convCategoryParts[0] === selectedParts[0] && convCategoryParts[1] === selectedParts[1]) {
+                                    return true;
+                                }
+                                return false;
+                            });
+                            if (!matched) {
+                                show = false;
+                            }
+                        }
+                    }
+
+                    $(this).toggle(show);
+                });
+            }
+
+            renderConversationList();
+            updateChatHeaderForChannel();
+            // 默认选中第一个Amazon会话
+            const firstAmazonConv = conversationData.conversations.find(function(c) {
+                return c.platform === 'Amazon';
+            });
+            if (firstAmazonConv) {
+                selectConversation(firstAmazonConv.id);
+            }
+        });
+    </script>
+</body>
+</html>
