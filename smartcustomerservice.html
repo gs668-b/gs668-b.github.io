@@ -12,6 +12,7 @@
     <script src="https://cdn.jsdelivr.net/npm/antd@5.12.8/dist/antd.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
     <style>
         /* 全局样式 */
         * {
@@ -41,26 +42,28 @@
 
         /* 渠道切换侧边栏 */
         .channel-sidebar {
-            width: 50px;
+            width: 180px;
             background-color: #f8f9fa;
             border-right: 1px solid #e0e0e0;
             display: flex;
             flex-direction: column;
-            align-items: center;
-            padding-top: 15px;
+            align-items: flex-start;
+            padding: 15px 10px;
         }
 
         .channel-icon {
-            width: 35px;
-            height: 35px;
+            width: 100%;
             display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-bottom: 15px;
+            flex-wrap: wrap;
+            align-items: flex-start;
+            justify-content: flex-start;
+            margin-bottom: 10px;
             cursor: pointer;
             border-radius: 8px;
             transition: all 0.2s ease;
             font-size: 18px;
+            padding: 8px 10px;
+            gap: 10px;
         }
 
         .channel-icon:hover {
@@ -69,6 +72,28 @@
 
         .channel-icon.active {
             background-color: #2196f3;
+            color: white;
+        }
+
+        .amazon-shop-selector {
+            width: 100%;
+            margin-top: 5px;
+            margin-left: 0;
+            margin-bottom: 5px;
+        }
+
+        .amazon-shop-selector select {
+            font-size: 12px;
+            padding: 5px;
+        }
+
+        .channel-name {
+            font-size: 13px;
+            color: #333;
+            font-weight: 500;
+        }
+
+        .channel-icon.active .channel-name {
             color: white;
         }
 
@@ -237,9 +262,15 @@
         }
 
         .conversation-category {
-            font-size: 11px;
+            font-size: 12px;
             color: #666;
-            margin-left: 5px;
+            margin-left: 8px;
+        }
+
+        .conversation-shop-row {
+            font-size: 12px;
+            color: #2196f3;
+            padding: 2px 0;
         }
 
         .conversation-agent {
@@ -672,6 +703,56 @@
             cursor: pointer;
         }
 
+        /* 亚马逊站内信样式 */
+        .email-stat-card {
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+
+        .email-stat-card:hover {
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            transform: translateY(-2px);
+        }
+
+        .email-stat-numbers {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .clickable-number {
+            font-size: 24px;
+            font-weight: bold;
+            color: #2196f3;
+            cursor: pointer;
+            text-decoration: underline;
+            transition: all 0.2s ease;
+        }
+
+        .clickable-number:hover {
+            color: #1976d2;
+            text-decoration: none;
+        }
+
+        .email-list-item {
+            border-left: 3px solid transparent;
+            transition: all 0.2s ease;
+        }
+
+        .email-list-item:hover {
+            background-color: #f8f9fa;
+        }
+
+        .email-list-item.unread {
+            border-left-color: #2196f3;
+            background-color: #f0f8ff;
+        }
+
+        .email-list-item.active {
+            background-color: #e3f2fd;
+        }
+
         /* 响应式设计 */
         @media (max-width: 1200px) {
             .customer-info {
@@ -717,14 +798,36 @@
     <div class="main-container">
         <!-- 渠道切换侧边栏 -->
         <div class="channel-sidebar">
+            <div class="channel-icon dashboard" data-channel="Dashboard" title="综合看板">
+                <i class="fas fa-chart-pie"></i>
+                <span class="channel-name">综合看板</span>
+            </div>
             <div class="channel-icon amazon active" data-channel="Amazon" title="Amazon">
                 <i class="fab fa-amazon"></i>
+                <span class="channel-name">Amazon</span>
+                <!-- Amazon店铺选择器 -->
+                <div class="amazon-shop-selector">
+                    <select id="shop-select" class="form-select form-select-sm">
+                        <option value="all">全部店铺</option>
+                        <option value="jujin">JUJIN</option>
+                        <option value="hk-melody">香港旋律</option>
+                        <option value="temeiteni">Temeiteni</option>
+                        <option value="mpca">MPCA</option>
+                        <option value="kkstar-us">KKSTAR US</option>
+                        <option value="kkstar-ca">KKSTAR CA</option>
+                        <option value="nsus">NSUS</option>
+                        <option value="lkus">LKUS</option>
+                        <option value="mcu">MCUS</option>
+                    </select>
+                </div>
             </div>
             <div class="channel-icon shopify" data-channel="Shopify" title="Shopify">
                 <i class="fab fa-shopify"></i>
+                <span class="channel-name">Shopify</span>
             </div>
             <div class="channel-icon tiktok" data-channel="TikTok" title="TikTok">
                 <i class="fab fa-tiktok"></i>
+                <span class="channel-name">TikTok</span>
             </div>
         </div>
 
@@ -780,19 +883,19 @@
                 <h4>历史购物记录</h4>
                 <div class="stats-item">
                     <span class="stats-label">历史订单数量:</span>
-                    <span class="stats-value">12</span>
+                    <span class="stats-value" id="history-order-count">12</span>
                 </div>
                 <div class="stats-item">
                     <span class="stats-label">总GMV:</span>
-                    <span class="stats-value">$1,234.56</span>
+                    <span class="stats-value" id="history-total-gmv">$1,234.56</span>
                 </div>
                 <div class="stats-item">
                     <span class="stats-label">平均订单金额:</span>
-                    <span class="stats-value">$102.88</span>
+                    <span class="stats-value" id="history-avg-amount">$102.88</span>
                 </div>
                 <div class="stats-item">
                     <span class="stats-label">最近购买:</span>
-                    <span class="stats-value">2026-03-15</span>
+                    <span class="stats-value" id="history-recent-purchase">2026-03-15</span>
                 </div>
             </div>
 
@@ -807,25 +910,25 @@
                     <div class="order-info">
                         <div class="order-item current-order">
                             <div class="order-header">
-                                <span class="order-id">112-4117876-9857843</span>
-                                <i class="fas fa-copy order-copy-btn" data-order-id="112-4117876-9857843" style="cursor: pointer; color: #2196f3; font-size: 12px;"></i>
+                                <span class="order-id" id="current-order-id">112-4117876-9857843</span>
+                                <i class="fas fa-copy order-copy-btn" id="current-order-copy-btn" data-order-id="112-4117876-9857843" style="cursor: pointer; color: #2196f3; font-size: 12px;"></i>
                             </div>
-                            <div class="order-status shipped">已发货</div>
+                            <div class="order-status shipped" id="current-order-status">已发货</div>
                             <div class="order-detail-row">
                                 <span class="order-detail-label">订单总金额</span>
-                                <span class="order-detail-value">$129.98</span>
+                                <span class="order-detail-value" id="current-order-amount">$129.98</span>
                             </div>
                             <div class="order-detail-row">
                                 <span class="order-detail-label">运输方式</span>
-                                <span class="order-detail-value">UPS Ground</span>
+                                <span class="order-detail-value" id="current-order-shipping">UPS Ground</span>
                             </div>
                             <div class="order-detail-row">
                                 <span class="order-detail-label">订单创建</span>
-                                <span class="order-detail-value">2026-03-10 14:30:25</span>
+                                <span class="order-detail-value" id="current-order-time">2026-03-10 14:30:25</span>
                             </div>
                             <div class="order-detail-row">
                                 <span class="order-detail-label">运单号</span>
-                                <span class="order-detail-value tracking-value">
+                                <span class="order-detail-value tracking-value" id="current-order-tracking">
                                     1Z999AA10123456784
                                     <i class="fas fa-copy order-copy-btn" data-order-id="1Z999AA10123456784" style="cursor: pointer; color: #2196f3; font-size: 11px; margin-left: 5px;"></i>
                                 </span>
@@ -834,7 +937,7 @@
                                 <span class="order-detail-label">退换货</span>
                                 <span class="order-detail-value">否</span>
                             </div>
-                            <div class="product-list">
+                            <div class="product-list" id="current-order-products">
                                 <div class="product-item">
                                     <img src="https://cdn.shopify.com/s/files/1/0022/7937/4907/files/c663f3b2160630744ad1bbe703fe180f_b012cd1c-eb28-4168-b355-8721a8a01a45.jpg?v=1742538783" alt="产品图片" class="product-image">
                                     <div class="product-info">
@@ -861,6 +964,168 @@
                     <div class="order-list" id="order-list"></div>
                 </div>
             </div>
+        </div>
+
+        <!-- 综合看板容器 -->
+        <div class="dashboard-container" style="flex: 1; padding: 20px; display: none; overflow-y: auto; height: 100%;">
+            <h4 class="mb-4">综合看板</h4>
+            
+            <!-- 区域4：亚马逊站内信 -->
+            <div class="dashboard-section mb-4" style="border-bottom: 2px solid #e0e0e0; padding-bottom: 20px;">
+                <h5 class="mb-3">亚马逊站内信</h5>
+                <div class="row">
+                    <div class="col-md-3">
+                        <div class="card email-stat-card" style="border-left: 4px solid #dc3545;">
+                            <div class="card-body">
+                                <h6 class="card-subtitle mb-2 text-muted">紧急</h6>
+                                <div class="email-stat-numbers mb-3">
+                                    <small class="text-muted">未读</small>
+                                    <span class="clickable-number" data-importance="紧急" data-type="unread">5</span>
+                                    <small class="text-muted">| 近7天总数</small>
+                                    <span class="clickable-number" data-importance="紧急" data-type="7days">35</span>
+                                </div>
+                                <div class="text-right" style="display: block; text-align: right;">
+                                    <span class="history-link" style="color: #2196f3; text-decoration: underline; cursor: pointer;">历史信息</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card email-stat-card" style="border-left: 4px solid #fd7e14;">
+                            <div class="card-body">
+                                <h6 class="card-subtitle mb-2 text-muted">重要</h6>
+                                <div class="email-stat-numbers mb-3">
+                                    <small class="text-muted">未读</small>
+                                    <span class="clickable-number" data-importance="重要" data-type="unread">8</span>
+                                    <small class="text-muted">| 近7天总数</small>
+                                    <span class="clickable-number" data-importance="重要" data-type="7days">42</span>
+                                </div>
+                                <div class="text-right" style="display: block; text-align: right;">
+                                    <span class="history-link" style="color: #2196f3; text-decoration: underline; cursor: pointer;">历史信息</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card email-stat-card" style="border-left: 4px solid #0d6efd;">
+                            <div class="card-body">
+                                <h6 class="card-subtitle mb-2 text-muted">需关注</h6>
+                                <div class="email-stat-numbers mb-3">
+                                    <small class="text-muted">未读</small>
+                                    <span class="clickable-number" data-importance="需关注" data-type="unread">12</span>
+                                    <small class="text-muted">| 近7天总数</small>
+                                    <span class="clickable-number" data-importance="需关注" data-type="7days">58</span>
+                                </div>
+                                <div class="text-right" style="display: block; text-align: right;">
+                                    <span class="history-link" style="color: #2196f3; text-decoration: underline; cursor: pointer;">历史信息</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card email-stat-card" style="border-left: 4px solid #6c757d;">
+                            <div class="card-body">
+                                <h6 class="card-subtitle mb-2 text-muted">一般</h6>
+                                <div class="email-stat-numbers mb-3">
+                                    <small class="text-muted">未读</small>
+                                    <span class="clickable-number" data-importance="一般" data-type="unread">20</span>
+                                    <small class="text-muted">| 近7天总数</small>
+                                    <span class="clickable-number" data-importance="一般" data-type="7days">75</span>
+                                </div>
+                                <div class="text-right" style="display: block; text-align: right;">
+                                    <span class="history-link" style="color: #2196f3; text-decoration: underline; cursor: pointer;">历史信息</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 区域1：即时看板 -->
+            <div class="dashboard-section mb-4" style="border-bottom: 2px solid #e0e0e0; padding-bottom: 20px;">
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <h5>即时数据</h5>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="input-group" style="width: 350px; display: flex; float: right;">
+                            <input type="date" id="metrics-start-date" class="form-control form-control-sm" value="2026-03-25">
+                            <span class="input-group-text">至</span>
+                            <input type="date" id="metrics-end-date" class="form-control form-control-sm" value="2026-04-23">
+                            <button type="button" id="metrics-filter-btn" class="btn btn-sm btn-primary">筛选</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-3">
+                        <div class="card text-center">
+                            <div class="card-body">
+                                <h6 class="card-subtitle mb-2 text-muted">总会话数</h6>
+                                <p class="card-title" id="total-conversations">156</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card text-center">
+                            <div class="card-body">
+                                <h6 class="card-subtitle mb-2 text-muted">待处理</h6>
+                                <p class="card-title" id="pending-conversations">45</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card text-center">
+                            <div class="card-body">
+                                <h6 class="card-subtitle mb-2 text-muted">处理中</h6>
+                                <p class="card-title" id="processing-conversations">67</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card text-center">
+                            <div class="card-body">
+                                <h6 class="card-subtitle mb-2 text-muted">已关闭</h6>
+                                <p class="card-title" id="closed-conversations">44</p>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+            
+            <!-- 区域2：堆叠柱状图 -->
+            <div class="dashboard-section mb-4" style="border-bottom: 2px solid #e0e0e0; padding-bottom: 20px;">
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <h5>每日客诉会话数</h5>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="input-group" style="width: 350px; display: flex; float: right;">
+                            <input type="date" id="chart-start-date" class="form-control form-control-sm" value="2026-03-25">
+                            <span class="input-group-text">至</span>
+                            <input type="date" id="chart-end-date" class="form-control form-control-sm" value="2026-04-23">
+                            <button type="button" id="chart-filter-btn" class="btn btn-sm btn-primary">筛选</button>
+                        </div>
+                    </div>
+                </div>
+                <div id="daily-conversations-chart" style="width: 100%; height: 400px;"></div>
+            </div>
+            
+            <!-- 区域3：饼图 -->
+            <div class="dashboard-section" style="border-bottom: 2px solid #e0e0e0; padding-bottom: 20px;">
+                <h5>会话分析</h5>
+                <div class="row">
+                    <div class="col-md-6">
+                        <div id="conversation-types-chart" style="width: 100%; height: 300px;"></div>
+                    </div>
+                    <div class="col-md-6">
+                        <div id="urgency-levels-chart" style="width: 100%; height: 300px;"></div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 邮件详情弹窗容器 -->
+            <div id="email-modal-container"></div>
         </div>
     </div>
 
@@ -1215,12 +1480,123 @@
             category: []
         };
 
+        // 产品图片URL列表
+        const productImages = [
+            'https://m.media-amazon.com/images/I/31b7eZmDheL.jpg',
+            'https://m.media-amazon.com/images/I/41LrTdUVabL.jpg',
+            'https://m.media-amazon.com/images/I/31kPGV3nZ-L.jpg',
+            'https://m.media-amazon.com/images/I/31jYZg6WVPL.jpg',
+            'https://m.media-amazon.com/images/I/41D2nbC9kgL.jpg',
+            'https://m.media-amazon.com/images/I/41UQzON8ErL.jpg',
+            'https://m.media-amazon.com/images/I/418524g8n7L.jpg',
+            'https://m.media-amazon.com/images/I/41YmH3ueSiL.jpg',
+            'https://m.media-amazon.com/images/I/41g2iVhsBFL.jpg',
+            'https://m.media-amazon.com/images/I/410nmFUwQnL.jpg',
+            'https://m.media-amazon.com/images/I/41MN3OOncwL.jpg',
+            'https://m.media-amazon.com/images/I/318eP-LNNCL.jpg',
+            'https://m.media-amazon.com/images/I/318Q7Vph0aL.jpg',
+            'https://m.media-amazon.com/images/I/31dZe-fTwyL.jpg',
+            'https://m.media-amazon.com/images/I/3160oBuEqyL.jpg',
+            'https://m.media-amazon.com/images/I/41VO38h5-0L.jpg'
+        ];
+
+        // 获取随机图片
+        function getRandomImage() {
+            return productImages[Math.floor(Math.random() * productImages.length)];
+        }
+
+        // 用户历史订单数据（按用户ID存储）
+        const userOrdersData = {
+            'jorgebarbara27': [
+                { id: '112-4117876-9857843', time: '2026-03-10 14:30:25', amount: '$129.98', status: 'delivered', products: [{ name: 'Electric Nail Drill', img: null }, { name: 'Nail File Set', img: null }] },
+                { id: '112-5556667-1234567', time: '2026-02-15 09:20:10', amount: '$79.99', status: 'delivered', products: [{ name: 'UV LED Lamp', img: null }] }
+            ],
+            'habacucamayordylan': [
+                { id: '112-7778889-9876543', time: '2026-03-20 16:45:30', amount: '$59.99', status: 'processing', products: [{ name: 'Nail Polish Set', img: null }] }
+            ],
+            'heartbeat94': [],
+            'sophie.liu88': [
+                { id: '112-2223334-5556667', time: '2026-01-05 11:15:00', amount: '$199.98', status: 'delivered', products: [{ name: 'Professional Nail Kit', img: null }, { name: 'Acrylic Powder', img: null }] },
+                { id: '112-8889990-1112223', time: '2025-12-10 08:30:00', amount: '$45.99', status: 'delivered', products: [{ name: 'Nail Glue', img: null }] },
+                { id: '112-4445556-7778889', time: '2025-11-20 14:20:00', amount: '$89.99', status: 'delivered', products: [{ name: 'Nail Art Brushes', img: null }] }
+            ],
+            'mike.wang123': [],
+            'david.martin': [
+                { id: '112-1112223-4445556', time: '2026-03-25 10:00:00', amount: '$149.99', status: 'shipped', products: [{ name: 'Cordless Nail Drill', img: null }] }
+            ],
+            'emily.johnson': [],
+            'robert.smith': [
+                { id: '112-3334445-6667778', time: '2026-03-18 15:30:00', amount: '$69.99', status: 'delivered', products: [{ name: 'Nail Clippers Set', img: null }] },
+                { id: '112-5556667-8889990', time: '2026-02-28 11:00:00', amount: '$125.00', status: 'delivered', products: [{ name: 'Gel Nail Polish Kit', img: null }] }
+            ],
+            'jennifer.lee': [],
+            'michael.brown': [
+                { id: '112-7778889-0001112', time: '2026-03-22 13:45:00', amount: '$89.99', status: 'delivered', products: [{ name: 'Nail Buffer Blocks', img: null }] }
+            ],
+            'sarah.davis': [],
+            'chris.taylor': [
+                { id: '112-9990001-2223334', time: '2026-03-15 09:15:00', amount: '$159.99', status: 'delivered', products: [{ name: 'Complete Nail Station', img: null }] },
+                { id: '112-1112223-5556667', time: '2026-01-20 16:00:00', amount: '$55.99', status: 'delivered', products: [{ name: 'Cuticle Oil', img: null }] }
+            ],
+            'lisa.anderson': [],
+            'salome598': [
+                { id: 'SHOP-001-202603', time: '2026-03-20 10:30:00', amount: '$75.00', status: 'delivered', products: [{ name: 'Nail Polish Remover', img: null }] }
+            ],
+            'john.doe456': [],
+            'leny96': [
+                { id: 'TIK-001-202603', time: '2026-03-23 14:20:00', amount: '$49.99', status: 'processing', products: [{ name: 'Mini Nail Drill', img: null }] }
+            ],
+            'user_tiktok_001': [],
+            'alex.thomas': [],
+            'maria.garcia': [
+                { id: '112-4445556-8889990', time: '2026-03-19 11:00:00', amount: '$99.99', status: 'delivered', products: [{ name: 'Nail Art Stickers', img: null }] }
+            ],
+            'james.wilson': [],
+            'anna.nguyen': [
+                { id: '112-6667778-1112223', time: '2026-03-12 17:30:00', amount: '$119.99', status: 'shipped', products: [{ name: 'Nail Dryer', img: null }] },
+                { id: '112-8889990-4445556', time: '2026-02-05 09:00:00', amount: '$35.99', status: 'delivered', products: [{ name: 'Nail Files', img: null }] }
+            ],
+            'peter.jones': [],
+            'amy.white': [
+                { id: '112-2223334-6667778', time: '2026-03-08 12:15:00', amount: '$139.99', status: 'delivered', products: [{ name: 'Nail Drill Bits Set', img: null }] }
+            ],
+            'kevin.miller': [],
+            'samantha.hall': [
+                { id: '112-5556667-9990001', time: '2026-03-05 15:45:00', amount: '$65.99', status: 'delivered', products: [{ name: 'Nail Primer', img: null }] },
+                { id: '112-7778889-222334', time: '2026-01-15 10:30:00', amount: '$89.99', status: 'delivered', products: [{ name: 'Nail Forms', img: null }] }
+            ],
+            'daniel.young': [],
+            'rachel.adams': [
+                { id: 'SHOP-002-202603', time: '2026-03-24 08:00:00', amount: '$159.99', status: 'processing', products: [{ name: 'Professional UV Lamp', img: null }] }
+            ],
+            'william.martinez': [],
+            'stephanie.turner': [
+                { id: 'TIK-002-202603', time: '2026-03-21 16:30:00', amount: '$79.99', status: 'shipped', products: [{ name: 'Nail Art Kit', img: null }] }
+            ],
+            'jason.scott': []
+        };
+
+        // 初始化产品图片 - 从productImages列表中随机分配
+        function initProductImages() {
+            Object.values(userOrdersData).forEach(function(orders) {
+                orders.forEach(function(order) {
+                    order.products.forEach(function(product) {
+                        product.img = getRandomImage();
+                    });
+                });
+            });
+        }
+
+        // 页面加载时初始化产品图片
+        initProductImages();
+
         // 会话数据
         const conversationData = {
             conversations: [
                 {
                     id: 1,
                     platform: 'Amazon',
+                    shop: 'JUJIN',
                     user: {
                         id: 'jorgebarbara27',
                         name: 'jorgebarbara27',
@@ -1241,6 +1617,7 @@
                 {
                     id: 2,
                     platform: 'Amazon',
+                    shop: 'HK Melody',
                     user: {
                         id: 'habacucamayordylan',
                         name: 'habacucamayordylan',
@@ -1259,12 +1636,13 @@
                 {
                     id: 3,
                     platform: 'Amazon',
+                    shop: 'Temeiteni',
                     user: {
                         id: 'heartbeat94',
                         name: 'heartbeat94',
                         email: 'heartbeat94@example.com'
                     },
-                    agent: '待分配',
+                    agent: 'Unassigned',
                     status: 'pending',
                     category: 'presale-product-recommend',
                     lastMessage: 'Your service is excellent!',
@@ -1277,6 +1655,7 @@
                 {
                     id: 4,
                     platform: 'Amazon',
+                    shop: 'MPCA',
                     user: {
                         id: 'sophie.liu88',
                         name: 'sophie.liu88',
@@ -1295,6 +1674,7 @@
                 {
                     id: 5,
                     platform: 'Amazon',
+                    shop: 'KKSTAR US',
                     user: {
                         id: 'mike.wang123',
                         name: 'mike.wang123',
@@ -1313,22 +1693,135 @@
                 {
                     id: 6,
                     platform: 'Amazon',
+                    shop: 'KKSTAR CA',
                     user: {
-                        id: '待分配用户001',
-                        name: '待分配用户001',
-                        email: 'unassigned1@example.com'
+                        id: 'david.martin',
+                        name: 'david.martin',
+                        email: 'david.martin@example.com'
                     },
-                    agent: '待分配',
+                    agent: 'Unassigned',
                     status: 'pending',
                     category: 'aftersale-logistics-notreceived',
-                    lastMessage: 'Product quality issue',
+                    lastMessage: 'I have not received my order yet.',
                     lastMessageTime: '今天 08:00',
                     messages: [
-                        { sender: 'customer', content: 'Product quality issue', time: '今天 08:00', sentiment: 'negative' }
+                        { sender: 'customer', content: 'I have not received my order yet. It has been 10 days since it was shipped.', time: '今天 08:00', sentiment: 'negative' }
                     ]
                 },
                 {
                     id: 7,
+                    platform: 'Amazon',
+                    shop: 'NSUS',
+                    user: {
+                        id: 'emily.johnson',
+                        name: 'emily.johnson',
+                        email: 'emily.johnson@example.com'
+                    },
+                    agent: 'Morgan.Ying',
+                    status: 'pending',
+                    category: 'presale-warranty-extend',
+                    lastMessage: 'What is the warranty period for this product?',
+                    lastMessageTime: '今天 07:30',
+                    messages: [
+                        { sender: 'customer', content: 'What is the warranty period for this product?', time: '今天 07:30', sentiment: 'neutral' }
+                    ]
+                },
+                {
+                    id: 8,
+                    platform: 'Amazon',
+                    shop: 'LKUS',
+                    user: {
+                        id: 'robert.smith',
+                        name: 'robert.smith',
+                        email: 'robert.smith@example.com'
+                    },
+                    agent: 'Lune.Liu',
+                    status: 'processing',
+                    category: 'insale-cancel-order',
+                    lastMessage: 'Can I cancel my order?',
+                    lastMessageTime: '昨天 16:20',
+                    messages: [
+                        { sender: 'customer', content: 'Can I cancel my order? I placed it by mistake.', time: '昨天 16:20', sentiment: 'neutral' },
+                        { sender: 'agent', content: 'Let me check your order status. If it has not been shipped yet, we can cancel it for you.', time: '昨天 16:25' }
+                    ]
+                },
+                {
+                    id: 9,
+                    platform: 'Amazon',
+                    shop: 'MCUS',
+                    user: {
+                        id: 'jennifer.lee',
+                        name: 'jennifer.lee',
+                        email: 'jennifer.lee@example.com'
+                    },
+                    agent: 'Gigi.Liang',
+                    status: 'closed',
+                    category: 'aftersale-return-refund',
+                    lastMessage: 'Refund processed successfully.',
+                    lastMessageTime: '3天前',
+                    messages: [
+                        { sender: 'customer', content: 'Refund processed successfully.', time: '3天前', sentiment: 'positive' },
+                        { sender: 'agent', content: 'Thank you for your patience!', time: '3天前' }
+                    ]
+                },
+                {
+                    id: 10,
+                    platform: 'Amazon',
+                    shop: 'JUJIN',
+                    user: {
+                        id: 'michael.brown',
+                        name: 'michael.brown',
+                        email: 'michael.brown@example.com'
+                    },
+                    agent: 'Sophie.Peng',
+                    status: 'pending',
+                    category: 'presale-product-recommend',
+                    lastMessage: 'Which product would you recommend for beginners?',
+                    lastMessageTime: '昨天 11:15',
+                    messages: [
+                        { sender: 'customer', content: 'Which product would you recommend for beginners?', time: '昨天 11:15', sentiment: 'neutral' }
+                    ]
+                },
+                {
+                    id: 11,
+                    platform: 'Amazon',
+                    shop: 'HK Melody',
+                    user: {
+                        id: 'sarah.davis',
+                        name: 'sarah.davis',
+                        email: 'sarah.davis@example.com'
+                    },
+                    agent: 'Unassigned',
+                    status: 'processing',
+                    category: 'aftersale-quality-issue',
+                    lastMessage: 'The product arrived damaged.',
+                    lastMessageTime: '昨天 14:00',
+                    messages: [
+                        { sender: 'customer', content: 'The product arrived damaged. I need a replacement.', time: '昨天 14:00', sentiment: 'negative' },
+                        { sender: 'agent', content: 'I am sorry to hear that. Please provide photos of the damaged product.', time: '昨天 14:05' }
+                    ]
+                },
+                {
+                    id: 12,
+                    platform: 'Amazon',
+                    shop: 'Temeiteni',
+                    user: {
+                        id: 'chris.taylor',
+                        name: 'chris.taylor',
+                        email: 'chris.taylor@example.com'
+                    },
+                    agent: 'Morgan.Ying',
+                    status: 'closed',
+                    category: 'presale-logistics-available',
+                    lastMessage: 'Thank you for the information!',
+                    lastMessageTime: '1周前',
+                    messages: [
+                        { sender: 'customer', content: 'Thank you for the information!', time: '1周前', sentiment: 'positive' },
+                        { sender: 'agent', content: 'You are welcome!', time: '1周前' }
+                    ]
+                },
+                {
+                    id: 13,
                     platform: 'Shopify',
                     user: {
                         id: 'salome598',
@@ -1345,7 +1838,7 @@
                     ]
                 },
                 {
-                    id: 8,
+                    id: 14,
                     platform: 'Shopify',
                     user: {
                         id: 'john.doe456',
@@ -1363,7 +1856,148 @@
                     ]
                 },
                 {
-                    id: 9,
+                    id: 15,
+                    platform: 'Shopify',
+                    user: {
+                        id: 'lisa.anderson',
+                        name: 'lisa.anderson',
+                        email: 'lisa.anderson@melodysusie.com'
+                    },
+                    agent: null,
+                    status: 'pending',
+                    category: 'aftersale-return-refund',
+                    lastMessage: 'I want to return my purchase.',
+                    lastMessageTime: '今天 06:45',
+                    messages: [
+                        { sender: 'customer', content: 'I want to return my purchase. It does not fit my needs.', time: '今天 06:45', sentiment: 'neutral' }
+                    ]
+                },
+                {
+                    id: 16,
+                    platform: 'Shopify',
+                    user: {
+                        id: 'alex.thomas',
+                        name: 'alex.thomas',
+                        email: 'alex.thomas@melodysusie.com'
+                    },
+                    agent: null,
+                    status: 'closed',
+                    category: 'presale-product-recommend',
+                    lastMessage: 'Thanks for the recommendation!',
+                    lastMessageTime: '4天前',
+                    messages: [
+                        { sender: 'customer', content: 'Thanks for the recommendation!', time: '4天前', sentiment: 'positive' },
+                        { sender: 'agent', content: 'Happy to help!', time: '4天前' }
+                    ]
+                },
+                {
+                    id: 17,
+                    platform: 'Shopify',
+                    user: {
+                        id: 'maria.garcia',
+                        name: 'maria.garcia',
+                        email: 'maria.garcia@melodysusie.com'
+                    },
+                    agent: null,
+                    status: 'processing',
+                    category: 'aftersale-quality-issue',
+                    lastMessage: 'The product is defective.',
+                    lastMessageTime: '昨天 10:00',
+                    messages: [
+                        { sender: 'customer', content: 'The product is defective. It stopped working after one use.', time: '昨天 10:00', sentiment: 'negative' },
+                        { sender: 'agent', content: 'We are sorry to hear that. Please contact our support team for a replacement.', time: '昨天 10:05' }
+                    ]
+                },
+                {
+                    id: 18,
+                    platform: 'Shopify',
+                    user: {
+                        id: 'james.wilson',
+                        name: 'james.wilson',
+                        email: 'james.wilson@melodysusie.com'
+                    },
+                    agent: null,
+                    status: 'pending',
+                    category: 'insale-missing-confirm',
+                    lastMessage: 'I did not receive all items in my order.',
+                    lastMessageTime: '今天 09:00',
+                    messages: [
+                        { sender: 'customer', content: 'I did not receive all items in my order. One item is missing.', time: '今天 09:00', sentiment: 'negative' }
+                    ]
+                },
+                {
+                    id: 19,
+                    platform: 'Shopify',
+                    user: {
+                        id: 'anna.nguyen',
+                        name: 'anna.nguyen',
+                        email: 'anna.nguyen@melodysusie.com'
+                    },
+                    agent: null,
+                    status: 'closed',
+                    category: 'aftersale-logistics-notreceived',
+                    lastMessage: 'Order received, thanks!',
+                    lastMessageTime: '1周前',
+                    messages: [
+                        { sender: 'customer', content: 'Order received, thanks!', time: '1周前', sentiment: 'positive' },
+                        { sender: 'agent', content: 'You are welcome!', time: '1周前' }
+                    ]
+                },
+                {
+                    id: 20,
+                    platform: 'Shopify',
+                    user: {
+                        id: 'peter.jones',
+                        name: 'peter.jones',
+                        email: 'peter.jones@melodysusie.com'
+                    },
+                    agent: null,
+                    status: 'pending',
+                    category: 'presale-logistics-available',
+                    lastMessage: 'Do you ship to Canada?',
+                    lastMessageTime: '3天前',
+                    messages: [
+                        { sender: 'customer', content: 'Do you ship to Canada?', time: '3天前', sentiment: 'neutral' }
+                    ]
+                },
+                {
+                    id: 21,
+                    platform: 'Shopify',
+                    user: {
+                        id: 'amy.white',
+                        name: 'amy.white',
+                        email: 'amy.white@melodysusie.com'
+                    },
+                    agent: null,
+                    status: 'processing',
+                    category: 'presale-product-recommend',
+                    lastMessage: 'What is the difference between these two products?',
+                    lastMessageTime: '昨天 13:00',
+                    messages: [
+                        { sender: 'customer', content: 'What is the difference between these two products?', time: '昨天 13:00', sentiment: 'neutral' },
+                        { sender: 'agent', content: 'Let me explain the differences...', time: '昨天 13:05' }
+                    ]
+                },
+                {
+                    id: 22,
+                    platform: 'Shopify',
+                    user: {
+                        id: 'kevin.miller',
+                        name: 'kevin.miller',
+                        email: 'kevin.miller@melodysusie.com'
+                    },
+                    agent: null,
+                    status: 'closed',
+                    category: 'aftersale-return-refund',
+                    lastMessage: 'Refund received, thank you!',
+                    lastMessageTime: '5天前',
+                    messages: [
+                        { sender: 'customer', content: 'Refund received, thank you!', time: '5天前', sentiment: 'positive' },
+                        { sender: 'agent', content: 'You are welcome!', time: '5天前' }
+                    ]
+                },
+                {
+                    id: 23,
                     platform: 'TikTok',
                     user: {
                         id: 'leny96',
@@ -1380,7 +2014,7 @@
                     ]
                 },
                 {
-                    id: 10,
+                    id: 24,
                     platform: 'TikTok',
                     user: {
                         id: 'user_tiktok_001',
@@ -1395,6 +2029,111 @@
                     messages: [
                         { sender: 'customer', content: 'Thanks for your help!', time: '1周前', sentiment: 'positive' },
                         { sender: 'agent', content: 'You are welcome!', time: '1周前' }
+                    ]
+                },
+                {
+                    id: 25,
+                    platform: 'TikTok',
+                    user: {
+                        id: 'samantha.hall',
+                        name: 'samantha.hall',
+                        email: 'samantha.hall@tiktok.com'
+                    },
+                    agent: null,
+                    status: 'pending',
+                    category: 'aftersale-quality-issue',
+                    lastMessage: 'The product is not working.',
+                    lastMessageTime: '今天 11:00',
+                    messages: [
+                        { sender: 'customer', content: 'The product is not working. I need help.', time: '今天 11:00', sentiment: 'negative' }
+                    ]
+                },
+                {
+                    id: 26,
+                    platform: 'TikTok',
+                    user: {
+                        id: 'daniel.young',
+                        name: 'daniel.young',
+                        email: 'daniel.young@tiktok.com'
+                    },
+                    agent: null,
+                    status: 'processing',
+                    category: 'presale-warranty-extend',
+                    lastMessage: 'Does this have a warranty?',
+                    lastMessageTime: '昨天 16:00',
+                    messages: [
+                        { sender: 'customer', content: 'Does this have a warranty?', time: '昨天 16:00', sentiment: 'neutral' },
+                        { sender: 'agent', content: 'Yes, this product comes with a 1-year warranty.', time: '昨天 16:05' }
+                    ]
+                },
+                {
+                    id: 27,
+                    platform: 'TikTok',
+                    user: {
+                        id: 'rachel.adams',
+                        name: 'rachel.adams',
+                        email: 'rachel.adams@tiktok.com'
+                    },
+                    agent: null,
+                    status: 'pending',
+                    category: 'insale-cancel-order',
+                    lastMessage: 'Can I cancel my order?',
+                    lastMessageTime: '昨天 08:30',
+                    messages: [
+                        { sender: 'customer', content: 'Can I cancel my order?', time: '昨天 08:30', sentiment: 'neutral' }
+                    ]
+                },
+                {
+                    id: 28,
+                    platform: 'TikTok',
+                    user: {
+                        id: 'william.martinez',
+                        name: 'william.martinez',
+                        email: 'william.martinez@tiktok.com'
+                    },
+                    agent: null,
+                    status: 'closed',
+                    category: 'presale-product-recommend',
+                    lastMessage: 'Great recommendation!',
+                    lastMessageTime: '2周前',
+                    messages: [
+                        { sender: 'customer', content: 'Great recommendation!', time: '2周前', sentiment: 'positive' },
+                        { sender: 'agent', content: 'Happy to help!', time: '2周前' }
+                    ]
+                },
+                {
+                    id: 29,
+                    platform: 'TikTok',
+                    user: {
+                        id: 'stephanie.turner',
+                        name: 'stephanie.turner',
+                        email: 'stephanie.turner@tiktok.com'
+                    },
+                    agent: null,
+                    status: 'processing',
+                    category: 'aftersale-logistics-notreceived',
+                    lastMessage: 'Where is my order?',
+                    lastMessageTime: '今天 10:00',
+                    messages: [
+                        { sender: 'customer', content: 'Where is my order? It has been 7 days.', time: '今天 10:00', sentiment: 'negative' },
+                        { sender: 'agent', content: 'Let me check the tracking information for you.', time: '今天 10:05' }
+                    ]
+                },
+                {
+                    id: 30,
+                    platform: 'TikTok',
+                    user: {
+                        id: 'jason.scott',
+                        name: 'jason.scott',
+                        email: 'jason.scott@tiktok.com'
+                    },
+                    agent: null,
+                    status: 'pending',
+                    category: 'insale-missing-confirm',
+                    lastMessage: 'Missing items in my order.',
+                    lastMessageTime: '2天前',
+                    messages: [
+                        { sender: 'customer', content: 'Missing items in my order. Please help.', time: '2天前', sentiment: 'negative' }
                     ]
                 }
             ]
@@ -1438,20 +2177,151 @@
             }
         ];
 
+        // 综合看板数据
+        const dashboardData = {
+            // 即时看板数据
+            instantMetrics: {
+                totalConversations: 156,        // 总会话数
+                pendingConversations: 45,       // 待处理会话
+                processingConversations: 67,     // 处理中会话
+                closedConversations: 44,         // 已关闭会话
+                averageResponseTime: "15分钟",   // 平均响应时间
+                customerSatisfaction: "85%"      // 客户满意度
+            },
+            
+            // 每日会话数据（近30天）
+            dailyConversations: [
+                { date: "2026-03-25", amazon: 5, shopify: 3, total: 8 },
+                { date: "2026-03-26", amazon: 7, shopify: 4, total: 11 },
+                { date: "2026-03-27", amazon: 6, shopify: 5, total: 11 },
+                { date: "2026-03-28", amazon: 8, shopify: 3, total: 11 },
+                { date: "2026-03-29", amazon: 4, shopify: 2, total: 6 },
+                { date: "2026-03-30", amazon: 3, shopify: 1, total: 4 },
+                { date: "2026-03-31", amazon: 9, shopify: 4, total: 13 },
+                { date: "2026-04-01", amazon: 7, shopify: 5, total: 12 },
+                { date: "2026-04-02", amazon: 6, shopify: 3, total: 9 },
+                { date: "2026-04-03", amazon: 8, shopify: 4, total: 12 },
+                { date: "2026-04-04", amazon: 5, shopify: 2, total: 7 },
+                { date: "2026-04-05", amazon: 4, shopify: 1, total: 5 },
+                { date: "2026-04-06", amazon: 10, shopify: 6, total: 16 },
+                { date: "2026-04-07", amazon: 8, shopify: 5, total: 13 },
+                { date: "2026-04-08", amazon: 7, shopify: 4, total: 11 },
+                { date: "2026-04-09", amazon: 9, shopify: 5, total: 14 },
+                { date: "2026-04-10", amazon: 6, shopify: 3, total: 9 },
+                { date: "2026-04-11", amazon: 5, shopify: 2, total: 7 },
+                { date: "2026-04-12", amazon: 4, shopify: 1, total: 5 },
+                { date: "2026-04-13", amazon: 8, shopify: 4, total: 12 },
+                { date: "2026-04-14", amazon: 7, shopify: 5, total: 12 },
+                { date: "2026-04-15", amazon: 9, shopify: 6, total: 15 },
+                { date: "2026-04-16", amazon: 6, shopify: 3, total: 9 },
+                { date: "2026-04-17", amazon: 8, shopify: 4, total: 12 },
+                { date: "2026-04-18", amazon: 5, shopify: 2, total: 7 },
+                { date: "2026-04-19", amazon: 4, shopify: 1, total: 5 },
+                { date: "2026-04-20", amazon: 7, shopify: 4, total: 11 },
+                { date: "2026-04-21", amazon: 6, shopify: 3, total: 9 },
+                { date: "2026-04-22", amazon: 8, shopify: 5, total: 13 },
+                { date: "2026-04-23", amazon: 9, shopify: 4, total: 13 }
+            ],
+            
+            // 会话类型分布
+            conversationTypes: [
+                { name: "售前", value: 45 },
+                { name: "售中", value: 32 },
+                { name: "售后", value: 79 }
+            ],
+            
+            // 会话紧急程度分布
+            urgencyLevels: [
+                { name: "高", value: 23 },
+                { name: "中", value: 87 },
+                { name: "低", value: 46 }
+            ],
+            
+            // 情绪分析分布
+            sentimentDistribution: [
+                { name: "正面", value: 65 },
+                { name: "中性", value: 58 },
+                { name: "负面", value: 33 }
+            ],
+            
+            // 渠道分布
+            channelDistribution: [
+                { name: "Amazon", value: 102 },
+                { name: "Shopify", value: 54 }
+            ]
+        };
+
+        // 更新客户信息面板
+        function updateCustomerInfo() {
+            const userId = currentConversation ? currentConversation.user.id : null;
+            const userOrdersList = userId && userOrdersData[userId] ? userOrdersData[userId] : [];
+
+            const totalOrders = userOrdersList.length;
+            const totalGMV = userOrdersList.reduce((sum, order) => sum + parseFloat(order.amount.replace('$', '')), 0);
+            const avgOrderAmount = totalOrders > 0 ? (totalGMV / totalOrders).toFixed(2) : '0.00';
+            const recentOrder = userOrdersList.length > 0 ? userOrdersList[0].time.split(' ')[0] : '-';
+
+            $('#history-order-count').text(totalOrders);
+            $('#history-total-gmv').text('$' + totalGMV.toFixed(2));
+            $('#history-avg-amount').text('$' + avgOrderAmount);
+            $('#history-recent-purchase').text(recentOrder);
+
+            if (userOrdersList.length > 0) {
+                const currentOrder = userOrdersList[0];
+                $('#current-order-id').text(currentOrder.id);
+                $('#current-order-copy-btn').data('order-id', currentOrder.id);
+                $('#current-order-status').text(currentOrder.status === 'delivered' ? '已送达' : 
+                    currentOrder.status === 'shipped' ? '已发货' : 
+                    currentOrder.status === 'processing' ? '处理中' : '待处理');
+                $('#current-order-status').removeClass('delivered shipped processing pending').addClass(currentOrder.status);
+                $('#current-order-amount').text(currentOrder.amount);
+                $('#current-order-shipping').text('UPS Ground');
+                $('#current-order-time').text(currentOrder.time);
+                $('#current-order-tracking').text('1Z999AA10123456784');
+
+                let productsHtml = '';
+                currentOrder.products.forEach(function(p) {
+                    productsHtml += '<div class="product-item">' +
+                        '<img src="' + p.img + '" alt="产品图片" class="product-image">' +
+                        '<div class="product-info">' +
+                        '<div class="product-name">' + p.name + '</div>' +
+                        '<div class="product-price">$99.99 x 1</div>' +
+                        '</div>' +
+                        '</div>';
+                });
+                $('#current-order-products').html(productsHtml);
+            }
+        }
+
         // 渲染全部订单列表
         function renderOrderList(searchText) {
             const $list = $('#order-list');
             $list.empty();
 
-            const filteredOrders = userOrders.filter(function(order) {
+            const userId = currentConversation ? currentConversation.user.id : null;
+            const userOrdersList = userId && userOrdersData[userId] ? userOrdersData[userId] : [];
+
+            if (userOrdersList.length === 0) {
+                $list.append('<div class="text-center text-gray-500 py-8">暂无历史订单</div>');
+                return;
+            }
+
+            const filteredOrders = userOrdersList.filter(function(order) {
                 if (!searchText) return true;
                 return order.id.includes(searchText);
             });
 
             filteredOrders.forEach(function(order) {
-                const productsHtml = order.products.map(function(p) {
-                    return '<img src="' + p.img + '" class="order-card-product-img">';
-                }).join('');
+                let productsHtml = '';
+                order.products.forEach(function(p) {
+                    productsHtml += '<div class="product-item">' +
+                        '<img src="' + p.img + '" alt="产品图片" class="product-image">' +
+                        '<div class="product-info">' +
+                        '<div class="product-name">' + p.name + '</div>' +
+                        '<div class="product-price">$99.99 x 1</div>' +
+                        '</div>' +
+                        '</div>';
+                });
 
                 const html = '<div class="order-card" data-order-id="' + order.id + '">' +
                     '<div class="order-card-id-wrapper">' +
@@ -1459,7 +2329,7 @@
                     '<i class="fas fa-copy order-copy-btn" data-order-id="' + order.id + '"></i>' +
                     '</div>' +
                     '<div class="order-card-time">' + order.time + '</div>' +
-                    '<div class="order-card-products">' + productsHtml + '</div>' +
+                    '<div class="product-list">' + productsHtml + '</div>' +
                     '<div class="order-card-amount">Total: ' + order.amount + '</div>' +
                     '</div>';
                 $list.append(html);
@@ -1498,13 +2368,483 @@
         let currentChannel = 'Amazon';
         let currentConversation = null;
 
+        // 综合看板图表初始化
+        function initDashboardCharts() {
+            // 绑定日期筛选事件
+            $('#metrics-filter-btn').click(function() {
+                filterMetricsByDate();
+            });
+            
+            $('#chart-filter-btn').click(function() {
+                filterChartByDate();
+            });
+        }
+        
+        // 按日期筛选即时数据
+        function filterMetricsByDate() {
+            const startDate = $('#metrics-start-date').val();
+            const endDate = $('#metrics-end-date').val();
+            
+            // 模拟数据筛选
+            // 实际项目中这里应该根据日期范围从后端获取数据
+            console.log('筛选即时数据:', startDate, '至', endDate);
+            
+            // 这里可以添加实际的数据筛选逻辑
+            // 为了演示，我们保持现有数据不变
+        }
+        
+        // 按日期筛选图表数据
+        function filterChartByDate() {
+            const startDate = $('#chart-start-date').val();
+            const endDate = $('#chart-end-date').val();
+            
+            // 筛选数据
+            const filteredData = dashboardData.dailyConversations.filter(function(item) {
+                return item.date >= startDate && item.date <= endDate;
+            });
+            
+            // 更新图表
+            updateDailyConversationsChart(filteredData);
+        }
+        
+        // 更新每日会话数图表
+        function updateDailyConversationsChart(data) {
+            const dailyChart = echarts.getInstanceByDom(document.getElementById('daily-conversations-chart'));
+            if (dailyChart) {
+                dailyChart.setOption({
+                    xAxis: {
+                        data: data.map(item => item.date)
+                    },
+                    series: [
+                        {
+                            name: 'Amazon',
+                            data: data.map(item => item.amazon)
+                        },
+                        {
+                            name: 'Shopify',
+                            data: data.map(item => item.shopify)
+                        }
+                    ]
+                });
+            }
+        }
+        
+        // 亚马逊站内信数据
+        const amazonEmails = [
+            {
+                id: 1,
+                type: "政策合规类-产品合规要求",
+                subtype: "产品合规要求",
+                subject: "Action required: Important information about your product listings",
+                sender: "Amazon Seller Central notifications",
+                sentTime: "2023/10/8 2:09:17",
+                content: "Action required: Important information about your product listings\n\nWe are contacting you because you have listed products that require you to submit compliance documents. Hello from Amazon, We are contacting you because you have listed products that require you to submit compliance documents. Click View Compliance Requirements below to see the list of affected products and submit the required compliance documents.",
+                asin: "N/A",
+                importance: "重要",
+                basis: "涉及产品合规要求，需要提交文档但listing尚未移除，有缓冲时间处理",
+                read: false
+            },
+            {
+                id: 2,
+                type: "政策合规类-产品移除通知",
+                subtype: "产品移除通知",
+                subject: "Action Required: Listing Removed from Amazon",
+                sender: "no-replies-appeals@amazon.com",
+                sentTime: "2026/3/26 0:08:10",
+                content: "Dear MELODYSUSIE Direct,\n\nYour listings have been removed due to negative customer returns comments. The items we received complaints about are listed at the end of this email.\n\nWhy did I receive this message?\nWe took this action after customer feedback across our product catalog, our systems have detected a pattern of negative experiences reported by customers who purchased this product.",
+                asin: "B0FM88VN3Y",
+                importance: "紧急",
+                basis: "listing已被移除，需要立即通过Account Health页面申诉，否则影响账户健康评分180天",
+                read: false
+            },
+            {
+                id: 3,
+                type: "政策合规类-知识产权侵权",
+                subtype: "listing停用通知",
+                subject: "Action required: Your listings have been deactivated",
+                sender: "Amazon Services",
+                sentTime: "2024/4/19 17:11:53",
+                content: "Dear seller,\n\nWe have deactivated the listings shown at the bottom of this email.\n\nWhy is this happening?\nWe have taken this measure because we suspect your listing for this product infringes on the intellectual property of others.",
+                asin: "B0CZ6J5Z97/B0CZ6QYLBJ",
+                importance: "紧急",
+                basis: "listing已被停用，涉及知识产权侵权，若不处理可能导致账户被停用",
+                read: false
+            },
+            {
+                id: 4,
+                type: "政策合规类-产品质量投诉",
+                subtype: "缺陷产品投诉",
+                subject: "Customer Complaints Received About Defective Products - Action Required",
+                sender: "no-replies-appeals@amazon.com",
+                sentTime: "2025/11/5 3:23:51",
+                content: "Dear MELODYSUSIE Direct,\n\nWe received buyer complaints that a product they received from you was damaged or did not accurately match the condition or description in the product detail page.",
+                asin: "B0FB3BWH16",
+                importance: "重要",
+                basis: "涉及产品质量投诉，listing仍活跃但如不处理可能面临移除风险",
+                read: false
+            },
+            {
+                id: 5,
+                type: "库存物流类-入库通知",
+                subtype: "货物签收通知",
+                subject: "FBA Inbound Shipment Checked-In (FBA1945SWK40)",
+                sender: "Amazon.com",
+                sentTime: "2026/2/7 2:34:43",
+                content: "Hello from Fulfillment by Amazon,\nThis is to inform you that the carrier delivering your inbound shipment (FBA1945SWK40) has checked-in their trailer at the destination Amazon fulfillment center.",
+                asin: "FBA1945SWK40",
+                importance: "需关注",
+                basis: "仅为入库状态通知，货物正在处理中，不影响业务运营",
+                read: true
+            },
+            {
+                id: 6,
+                type: "库存物流类-库存问题",
+                subtype: "库存滞留问题",
+                subject: "AWD inventory issues reported in 1 SKUs (10000 units)",
+                sender: "Amazon Warehousing & Distribution",
+                sentTime: "2025/3/10 15:19:45",
+                content: "AWD has detected issues with 1 SKU(s) in US that will prevent these SKUs from being replenished into FBA. Refer to the table below to see the issues as well as the links to fix them.",
+                asin: "05-06MSUS-001-011225FBA001X",
+                importance: "重要",
+                basis: "涉及10000件库存滞留问题，需要处理才能恢复补货资格，影响销售",
+                read: false
+            },
+            {
+                id: 7,
+                type: "库存物流类-运输延误",
+                subtype: "配送延误通知",
+                subject: "Delivery Disruption for Shipment ID: FBA18X5S85M3",
+                sender: "Amazon Inbound Transportation",
+                sentTime: "2025/7/4 7:10:42",
+                content: "We are writing to inform you that the delivery plan for the following shipments have been updated. Please see the details below outlining the changes.",
+                asin: "FBA18X5S85M3",
+                importance: "需关注",
+                basis: "运输延误通知，货物预计10天后到达，需了解但无需立即行动",
+                read: true
+            },
+            {
+                id: 8,
+                type: "费用财务类-费用调整",
+                subtype: "费用退还通知",
+                subject: "Credit for incorrect FBA fees on non-US Haul orders",
+                sender: "Amazon Services",
+                sentTime: "2025/6/16 19:24:05",
+                content: "We've identified that the FBA fulfillment fee, instead of the Haul FBA fulfillment fee, was incorrectly applied to your non-US Haul orders placed between May 5 and May 20, 2025.",
+                asin: "N/A",
+                importance: "需关注",
+                basis: "Amazon系统错误导致多收费用，已自动退还，只需确认到账即可",
+                read: true
+            },
+            {
+                id: 9,
+                type: "账户设置类-通知设置变更",
+                subtype: "订阅设置变更",
+                subject: "[Amazon.com] [Messaging > Confirmation Notifications] Pending change to seller notification settings",
+                sender: "Amazon Seller Central Notifications",
+                sentTime: "2025/8/14 20:17:41",
+                content: "Our records indicate you haven't recently been engaging with: Messaging > Confirmation Notifications. In an effort to reduce unwanted notification volume, we plan to automatically opt you out of emails for this communication category one week from now.",
+                asin: "N/A",
+                importance: "一般",
+                basis: "仅为通知订阅设置变更，不影响业务运营，可自行决定是否保留",
+                read: true
+            },
+            {
+                id: 10,
+                type: "其他类-系统通知",
+                subtype: "仓库关闭通知",
+                subject: "Closure of the LIT1 fulfillment center",
+                sender: "The Amazon Services team",
+                sentTime: "2025/12/2 0:46:12",
+                content: "We're writing to notify you of an update to the LIT1 fulfillment center in Little Rock, Arkansas. After conducting a full review with outside experts, we've determined that the structural engineering firm that designed the LIT1 building made errors in the initial design of the facility.",
+                asin: "N/A",
+                importance: "需关注",
+                basis: "仓库关闭系统通知，Amazon会自动处理库存转移，需了解但无需卖家操作",
+                read: true
+            }
+        ];
+
+        // 邮件统计数据
+        const emailStats = {
+            unreadByImportance: {
+                "紧急": 2,
+                "重要": 3,
+                "需关注": 1,
+                "一般": 0
+            },
+            last7DaysByImportance: {
+                "紧急": 1,
+                "重要": 2,
+                "需关注": 3,
+                "一般": 2
+            }
+        };
+
+        // 打开邮件弹窗
+        function openEmailModal(importance, type) {
+            // 筛选对应级别的邮件
+            const filteredEmails = amazonEmails.filter(function(email) {
+                if (type === 'unread') {
+                    return email.importance === importance && !email.read;
+                } else {
+                    // 近7天的邮件（简化处理，实际应该按日期计算）
+                    return email.importance === importance;
+                }
+            });
+
+            // 创建弹窗HTML
+            const modalHtml = `
+                <div class="modal fade" id="emailModal" tabindex="-1" aria-hidden="true">
+                    <div class="modal-dialog modal-xl" style="max-width: 90vw;">
+                        <div class="modal-content" style="height: 80vh;">
+                            <div class="modal-header">
+                                <h5 class="modal-title">${importance} - ${type === 'unread' ? '未读邮件' : '近7天邮件'}</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body p-0">
+                                <div class="row g-0" style="height: 100%;">
+                                    <!-- 左侧邮件列表 -->
+                                    <div class="col-md-4 border-end" style="height: 100%; overflow-y: auto;">
+                                        <div class="list-group list-group-flush" id="email-list">
+                                            ${filteredEmails.map(function(email, index) {
+                                                return `
+                                                    <div class="list-group-item email-list-item ${!email.read ? 'unread' : ''}" data-email-id="${email.id}" style="cursor: pointer;">
+                                                        <div class="d-flex w-100 justify-content-between">
+                                                            <h6 class="mb-1 ${!email.read ? 'fw-bold' : ''}" style="font-size: 14px;">${email.sender}</h6>
+                                                            <small class="text-muted">${email.sentTime.split(' ')[0]}</small>
+                                                        </div>
+                                                        <p class="mb-1 ${!email.read ? 'fw-bold' : ''}" style="font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${email.subject}</p>
+                                                        <small class="text-muted" style="font-size: 12px; display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${email.content.substring(0, 50)}...</small>
+                                                    </div>
+                                                `;
+                                            }).join('')}
+                                        </div>
+                                    </div>
+                                    <!-- 右侧邮件详情 -->
+                                    <div class="col-md-8" style="height: 100%; overflow-y: auto;">
+                                        <div id="email-detail" class="p-4">
+                                            ${filteredEmails.length > 0 ? renderEmailDetail(filteredEmails[0]) : '<div class="text-center text-muted mt-5">请选择邮件查看详情</div>'}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            // 移除已存在的弹窗
+            $('#emailModal').remove();
+            // 添加新弹窗
+            $('body').append(modalHtml);
+            // 显示弹窗
+            const modal = new bootstrap.Modal(document.getElementById('emailModal'));
+            modal.show();
+
+            // 绑定邮件列表点击事件
+            $('.email-list-item').click(function() {
+                const emailId = parseInt($(this).data('email-id'));
+                const email = amazonEmails.find(function(e) { return e.id === emailId; });
+                if (email) {
+                    $('#email-detail').html(renderEmailDetail(email));
+                    // 标记为已读
+                    if (!email.read) {
+                        email.read = true;
+                        $(this).removeClass('unread');
+                        $(this).find('h6, p').removeClass('fw-bold');
+                        updateEmailStats();
+                    }
+                }
+            });
+        }
+
+        // 渲染邮件详情
+        function renderEmailDetail(email) {
+            return `
+                <div class="email-detail-header mb-3 pb-3 border-bottom">
+                    <h5 class="mb-2">${email.subject}</h5>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <span class="text-muted">发件人：</span>${email.sender}
+                        </div>
+                        <small class="text-muted">${email.sentTime}</small>
+                    </div>
+                    ${email.asin !== 'N/A' ? `<div class="mt-2"><span class="text-muted">关联ASIN：</span><span class="badge bg-secondary">${email.asin}</span></div>` : ''}
+                </div>
+                <div class="email-detail-body mb-3">
+                    <pre style="white-space: pre-wrap; font-family: inherit; font-size: 14px; line-height: 1.6;">${email.content}</pre>
+                </div>
+                <div class="email-detail-footer pt-3 border-top">
+                    <div class="mb-2"><span class="text-muted">邮件类型：</span>${email.type}</div>
+                    <div class="mb-2"><span class="text-muted">子类别：</span>${email.subtype}</div>
+                    <div><span class="text-muted">分类依据：</span><span class="text-info">${email.basis}</span></div>
+                </div>
+            `;
+        }
+
+        // 更新邮件统计数据
+        function updateEmailStats() {
+            // 重新计算未读数
+            const unreadCounts = {
+                "紧急": amazonEmails.filter(function(e) { return e.importance === "紧急" && !e.read; }).length,
+                "重要": amazonEmails.filter(function(e) { return e.importance === "重要" && !e.read; }).length,
+                "需关注": amazonEmails.filter(function(e) { return e.importance === "需关注" && !e.read; }).length,
+                "一般": amazonEmails.filter(function(e) { return e.importance === "一般" && !e.read; }).length
+            };
+
+            // 更新显示
+            $('.clickable-number[data-type="unread"]').each(function() {
+                const importance = $(this).data('importance');
+                $(this).text(unreadCounts[importance]);
+            });
+        }
+
+        // 综合看板图表初始化
+        function initDashboardCharts() {
+            // 初始化每日会话数堆叠柱状图
+            const dailyChart = echarts.init(document.getElementById('daily-conversations-chart'));
+            const dailyOption = {
+                tooltip: {
+                    trigger: 'axis',
+                    axisPointer: {
+                        type: 'shadow'
+                    }
+                },
+                legend: {
+                    data: ['Amazon', 'Shopify']
+                },
+                grid: {
+                    left: '3%',
+                    right: '4%',
+                    bottom: '3%',
+                    containLabel: true
+                },
+                xAxis: {
+                    type: 'category',
+                    data: dashboardData.dailyConversations.map(item => item.date),
+                    axisLabel: {
+                        rotate: 45
+                    }
+                },
+                yAxis: {
+                    type: 'value'
+                },
+                series: [
+                    {
+                        name: 'Amazon',
+                        type: 'bar',
+                        stack: 'total',
+                        emphasis: {
+                            focus: 'series'
+                        },
+                        data: dashboardData.dailyConversations.map(item => item.amazon),
+                        itemStyle: {
+                            color: '#FF9900'
+                        }
+                    },
+                    {
+                        name: 'Shopify',
+                        type: 'bar',
+                        stack: 'total',
+                        emphasis: {
+                            focus: 'series'
+                        },
+                        data: dashboardData.dailyConversations.map(item => item.shopify),
+                        itemStyle: {
+                            color: '#96BF48'
+                        }
+                    }
+                ]
+            };
+            dailyChart.setOption(dailyOption);
+
+            // 初始化会话类型饼图
+            const typesChart = echarts.init(document.getElementById('conversation-types-chart'));
+            const typesOption = {
+                tooltip: {
+                    trigger: 'item'
+                },
+                legend: {
+                    orient: 'vertical',
+                    left: 'left'
+                },
+                series: [
+                    {
+                        name: '会话类型',
+                        type: 'pie',
+                        radius: '50%',
+                        data: dashboardData.conversationTypes,
+                        emphasis: {
+                            itemStyle: {
+                                shadowBlur: 10,
+                                shadowOffsetX: 0,
+                                shadowColor: 'rgba(0, 0, 0, 0.5)'
+                            }
+                        }
+                    }
+                ]
+            };
+            typesChart.setOption(typesOption);
+
+            // 初始化紧急程度饼图
+            const urgencyChart = echarts.init(document.getElementById('urgency-levels-chart'));
+            const urgencyOption = {
+                tooltip: {
+                    trigger: 'item'
+                },
+                legend: {
+                    orient: 'vertical',
+                    left: 'left'
+                },
+                series: [
+                    {
+                        name: '紧急程度',
+                        type: 'pie',
+                        radius: '50%',
+                        data: dashboardData.urgencyLevels,
+                        emphasis: {
+                            itemStyle: {
+                                shadowBlur: 10,
+                                shadowOffsetX: 0,
+                                shadowColor: 'rgba(0, 0, 0, 0.5)'
+                            }
+                        }
+                    }
+                ]
+            };
+            urgencyChart.setOption(urgencyOption);
+
+            // 响应式处理
+            window.addEventListener('resize', function() {
+                dailyChart.resize();
+                typesChart.resize();
+                urgencyChart.resize();
+            });
+        }
+
         // 渠道切换
         $('.channel-icon').click(function() {
+            const channel = $(this).data('channel');
+            
+            // 移除所有激活状态
             $('.channel-icon').removeClass('active');
+            // 添加当前激活状态
             $(this).addClass('active');
-            currentChannel = $(this).data('channel');
-            renderConversationList();
-            updateChatHeaderForChannel();
+            
+            if (channel === 'Dashboard') {
+                // 显示综合看板
+                $('.sidebar, .chat-container, .customer-info').hide();
+                $('.dashboard-container').show();
+                // 初始化图表
+                initDashboardCharts();
+            } else {
+                // 显示会话界面
+                $('.dashboard-container').hide();
+                $('.sidebar, .chat-container, .customer-info').show();
+                // 筛选对应渠道的会话
+                currentChannel = channel;
+                renderConversationList();
+                updateChatHeaderForChannel();
+            }
         });
 
         // 根据渠道更新聊天头部
@@ -1553,7 +2893,9 @@
 
                 const isActive = currentConversation && currentConversation.id === conv.id ? 'active' : '';
 
+                const shopHtml = conv.platform === 'Amazon' && conv.shop ? '<div class="conversation-shop-row">' + conv.shop + '</div>' : '';
                 const html = '<div class="conversation-item ' + isActive + '" data-id="' + conv.id + '">' +
+                    shopHtml +
                     '<div class="conversation-header">' +
                     '<span class="conversation-user">' + conv.user.name + '</span>' +
                     '<span class="conversation-time">' + conv.lastMessageTime + '</span>' +
@@ -1606,6 +2948,12 @@
 
             // 渲染消息
             renderMessages(conv.messages);
+
+            // 更新客户信息面板（历史购物记录和订单信息）
+            updateCustomerInfo();
+
+            // 更新用户历史订单列表（全部订单标签页）
+            renderOrderList();
         }
 
         // 渲染消息
@@ -1826,6 +3174,20 @@
             if (firstAmazonConv) {
                 selectConversation(firstAmazonConv.id);
             }
+
+            // 绑定亚马逊站内信数字点击事件
+            $(document).on('click', '.clickable-number', function() {
+                const importance = $(this).data('importance');
+                const type = $(this).data('type');
+                openEmailModal(importance, type);
+            });
+            
+            // 绑定历史信息点击事件
+            $(document).on('click', '.history-link', function() {
+                const card = $(this).closest('.email-stat-card');
+                const importance = card.find('.card-subtitle').text().trim();
+                openEmailModal(importance, '7days');
+            });
         });
     </script>
 </body>
