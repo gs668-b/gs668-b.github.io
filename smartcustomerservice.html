@@ -973,8 +973,25 @@
             <!-- 区域4：亚马逊站内信 -->
             <div class="dashboard-section mb-4" style="border-bottom: 2px solid #e0e0e0; padding-bottom: 20px;">
                 <h5 class="mb-3">亚马逊站内信</h5>
-                <div class="row">
-                    <div class="col-md-3">
+                <div class="row" style="display: flex; flex-wrap: wrap;">
+                    <div class="col" style="flex: 1; min-width: 150px;">
+                        <div class="card email-stat-card" style="border-left: 4px solid #dc3545;">
+                            <div class="card-body">
+                                <h6 class="card-subtitle mb-2 text-muted">敏感词会话</h6>
+                                <div class="email-stat-numbers mb-3">
+                                    <small class="text-muted">未读</small>
+                                    <span class="clickable-number" data-importance="敏感词会话" data-type="unread">3</span>
+                                    <small class="text-muted">| 近7天总数</small>
+                                    <span class="clickable-number" data-importance="敏感词会话" data-type="7days">15</span>
+                                </div>
+                                <div style="display: flex; justify-content: space-between; align-items: center;">
+                                    <span style="color: #2196f3; text-decoration: underline; cursor: pointer;" onclick="openSensitiveConfig()">敏感词配置</span>
+                                    <span class="history-link" style="color: #2196f3; text-decoration: underline; cursor: pointer;">历史信息</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col" style="flex: 1; min-width: 150px;">
                         <div class="card email-stat-card" style="border-left: 4px solid #dc3545;">
                             <div class="card-body">
                                 <h6 class="card-subtitle mb-2 text-muted">紧急</h6>
@@ -990,7 +1007,7 @@
                             </div>
                         </div>
                     </div>
-                    <div class="col-md-3">
+                    <div class="col" style="flex: 1; min-width: 150px;">
                         <div class="card email-stat-card" style="border-left: 4px solid #fd7e14;">
                             <div class="card-body">
                                 <h6 class="card-subtitle mb-2 text-muted">重要</h6>
@@ -1006,7 +1023,7 @@
                             </div>
                         </div>
                     </div>
-                    <div class="col-md-3">
+                    <div class="col" style="flex: 1; min-width: 150px;">
                         <div class="card email-stat-card" style="border-left: 4px solid #0d6efd;">
                             <div class="card-body">
                                 <h6 class="card-subtitle mb-2 text-muted">需关注</h6>
@@ -1022,7 +1039,7 @@
                             </div>
                         </div>
                     </div>
-                    <div class="col-md-3">
+                    <div class="col" style="flex: 1; min-width: 150px;">
                         <div class="card email-stat-card" style="border-left: 4px solid #6c757d;">
                             <div class="card-body">
                                 <h6 class="card-subtitle mb-2 text-muted">一般</h6>
@@ -1113,12 +1130,26 @@
             
             <!-- 区域3：饼图 -->
             <div class="dashboard-section" style="border-bottom: 2px solid #e0e0e0; padding-bottom: 20px;">
-                <h5>会话分析</h5>
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <h5>会话分析</h5>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="input-group" style="width: 350px; display: flex; float: right;">
+                            <input type="date" id="analysis-start-date" class="form-control form-control-sm" value="2026-03-25">
+                            <span class="input-group-text">至</span>
+                            <input type="date" id="analysis-end-date" class="form-control form-control-sm" value="2026-04-23">
+                            <button type="button" id="analysis-filter-btn" class="btn btn-sm btn-primary">筛选</button>
+                        </div>
+                    </div>
+                </div>
                 <div class="row">
                     <div class="col-md-6">
+                        <h6 class="text-center mb-2">会话类型</h6>
                         <div id="conversation-types-chart" style="width: 100%; height: 300px;"></div>
                     </div>
                     <div class="col-md-6">
+                        <h6 class="text-center mb-2">站内信紧急程度</h6>
                         <div id="urgency-levels-chart" style="width: 100%; height: 300px;"></div>
                     </div>
                 </div>
@@ -1126,6 +1157,60 @@
             
             <!-- 邮件详情弹窗容器 -->
             <div id="email-modal-container"></div>
+            
+            <!-- 敏感词配置弹窗 -->
+            <div id="sensitive-config-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; justify-content: center; align-items: center;">
+                <div style="background: white; width: 600px; border-radius: 8px; box-shadow: 0 4px 20px rgba(0,0,0,0.2);">
+                    <div style="display: flex; justify-content: space-between; align-items: center; padding: 16px; border-bottom: 1px solid #eee;">
+                        <h4 style="margin: 0;">敏感词配置</h4>
+                        <span style="cursor: pointer; font-size: 20px; color: #999;" onclick="closeSensitiveConfig()">&times;</span>
+                    </div>
+                    <div style="padding: 16px;">
+                        <textarea id="sensitive-words-input" rows="12" style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 4px; font-family: monospace; font-size: 14px; resize: vertical;">attorney
+birth defects
+blew
+burn
+CA WARNING
+CA65
+California Proposition 65
+CALIFORNIA WARNING
+cancer
+Claimant
+compensation
+court
+CP65
+explode
+Explosion
+fire
+fire damage
+flame
+hazardous substance
+infringement
+insured
+lawsuit
+lawyer
+lawyer's letter
+litigation
+moved your inventory
+patent
+product issue
+Prop65
+property damage
+reproductive harm
+Sedgwick
+settlement demand
+smoke
+substantial
+suit
+toxic chemical
+trademark</textarea>
+                    </div>
+                    <div style="display: flex; justify-content: flex-end; gap: 12px; padding: 16px; border-top: 1px solid #eee;">
+                        <button type="button" style="padding: 8px 16px; border: 1px solid #ddd; border-radius: 4px; background: white; cursor: pointer;" onclick="closeSensitiveConfig()">取消</button>
+                        <button type="button" style="padding: 8px 16px; border: none; border-radius: 4px; background: #2196f3; color: white; cursor: pointer;" onclick="saveSensitiveConfig()">保存</button>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -2230,11 +2315,12 @@
                 { name: "售后", value: 79 }
             ],
             
-            // 会话紧急程度分布
+            // 会话紧急程度分布（亚马逊站内信类型）
             urgencyLevels: [
-                { name: "高", value: 23 },
-                { name: "中", value: 87 },
-                { name: "低", value: 46 }
+                { name: "紧急", value: 35 },
+                { name: "重要", value: 42 },
+                { name: "需关注", value: 58 },
+                { name: "一般", value: 75 }
             ],
             
             // 情绪分析分布
@@ -2367,6 +2453,21 @@
         // 当前选中的渠道和会话
         let currentChannel = 'Amazon';
         let currentConversation = null;
+
+        // 敏感词配置弹窗函数
+        function openSensitiveConfig() {
+            document.getElementById('sensitive-config-modal').style.display = 'flex';
+        }
+
+        function closeSensitiveConfig() {
+            document.getElementById('sensitive-config-modal').style.display = 'none';
+        }
+
+        function saveSensitiveConfig() {
+            const sensitiveWords = document.getElementById('sensitive-words-input').value;
+            alert('敏感词配置已保存！');
+            closeSensitiveConfig();
+        }
 
         // 综合看板图表初始化
         function initDashboardCharts() {
