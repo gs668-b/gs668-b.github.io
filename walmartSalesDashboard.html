@@ -5,6 +5,19 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Walmart线下数据看板</title>
     <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+    
+    <!-- React 核心 -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    
+    <!-- Ant Design -->
+    <link rel="stylesheet" href="https://unpkg.com/antd@5/dist/reset.css">
+    <script src="https://unpkg.com/dayjs@1/dayjs.min.js"></script>
+    <script src="https://unpkg.com/dayjs@1/locale/zh-cn.js"></script>
+    <script src="https://unpkg.com/antd@5/dist/antd.min.js"></script>
+    
+    <!-- Babel 用于转译 JSX -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <style>
         :root {
             --primary-color: #41B983;
@@ -394,6 +407,204 @@
                 grid-template-columns: 1fr;
             }
         }
+
+        /* 收款看板样式 */
+        .collection-table-wrapper {
+            height: 600px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .collection-table-wrapper::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .collection-table-wrapper::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+
+        .collection-table-wrapper::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 4px;
+        }
+
+        .collection-table-wrapper::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
+
+        .collection-table {
+            font-size: 13px;
+            border-collapse: collapse;
+            width: 100%;
+            table-layout: fixed;
+        }
+
+        .collection-table thead th {
+            background: #EDF2F7;
+            font-size: 12px;
+            padding: 10px 6px;
+            text-align: center;
+            border-bottom: 2px solid var(--border-color);
+            position: sticky;
+            top: 0;
+            z-index: 20;
+        }
+
+        .collection-table thead th[title] {
+            cursor: help;
+            color: #2B6CB0;
+            font-weight: 600;
+            text-decoration: underline dotted;
+            text-underline-offset: 3px;
+        }
+
+        .collection-table thead th[title]:hover {
+            background: #E6FFFA;
+            color: #234E52;
+        }
+
+        .section-header {
+            background: #E2E8F0 !important;
+            font-weight: 700;
+            font-size: 14px !important;
+            width: 100px;
+            vertical-align: middle;
+        }
+
+        .subsection-header {
+            background: #F7FAFC !important;
+            font-weight: 600;
+            font-size: 13px !important;
+            border-left: 1px solid var(--border-color);
+        }
+
+        .highlight-header {
+            background: #FEFCBF !important;
+            color: #975A16;
+            font-weight: 700;
+        }
+
+        .highlight-col {
+            background: #FFFAE6 !important;
+            color: #B7791F;
+            font-weight: 600;
+        }
+
+        .negative-col {
+            color: #C53030 !important;
+        }
+
+        .collection-table tbody tr td:nth-child(1) { width: 10%; min-width: 100px; }
+        .collection-table tbody tr td:nth-child(2) { width: 8%; }
+        .collection-table tbody tr td:nth-child(3) { width: 8%; }
+        .collection-table tbody tr td:nth-child(4) { width: 7%; }
+        .collection-table tbody tr td:nth-child(5) { width: 8%; }
+        .collection-table tbody tr td:nth-child(6) { width: 12%; }
+        .collection-table tbody tr td:nth-child(7) { width: 12%; }
+        .collection-table tbody tr td:nth-child(8) { width: 12%; }
+        .collection-table tbody tr td:nth-child(9) { width: 8%; }
+        .collection-table tbody tr td:nth-child(10) { width: 13%; }
+        .collection-table tbody tr td:nth-child(11) { width: 14%; }
+
+        .collection-table thead tr th:nth-child(1) { width: 10%; min-width: 100px; }
+        .collection-table thead tr th:nth-child(2) { width: 8%; }
+        .collection-table thead tr th:nth-child(3) { width: 8%; }
+        .collection-table thead tr th:nth-child(4) { width: 7%; }
+        .collection-table thead tr th:nth-child(5) { width: 8%; }
+        .collection-table thead tr th:nth-child(6) { width: 12%; }
+        .collection-table thead tr th:nth-child(7) { width: 12%; }
+        .collection-table thead tr th:nth-child(8) { width: 12%; }
+        .collection-table thead tr th:nth-child(9) { width: 8%; }
+        .collection-table thead tr th:nth-child(10) { width: 13%; }
+        .collection-table thead tr th:nth-child(11) { width: 14%; }
+
+        .collection-table tfoot tr td:nth-child(1) { width: 10%; min-width: 100px; }
+        .collection-table tfoot tr td:nth-child(2) { width: 8%; }
+        .collection-table tfoot tr td:nth-child(3) { width: 8%; }
+        .collection-table tfoot tr td:nth-child(4) { width: 7%; }
+        .collection-table tfoot tr td:nth-child(5) { width: 8%; }
+        .collection-table tfoot tr td:nth-child(6) { width: 12%; }
+        .collection-table tfoot tr td:nth-child(7) { width: 12%; }
+        .collection-table tfoot tr td:nth-child(8) { width: 12%; }
+        .collection-table tfoot tr td:nth-child(9) { width: 8%; }
+        .collection-table tfoot tr td:nth-child(10) { width: 13%; }
+        .collection-table tfoot tr td:nth-child(11) { width: 14%; }
+
+        .collection-table tbody {
+            display: block;
+            overflow-y: auto;
+            max-height: calc(600px - 120px);
+            scrollbar-width: thin;
+            scrollbar-color: #888 #f1f1f1;
+            padding-bottom: 8px;
+        }
+
+        .collection-table thead, .collection-table tfoot {
+            display: table;
+            width: 100%;
+            table-layout: fixed;
+        }
+
+        .collection-table tbody td {
+            padding: 8px;
+            text-align: right;
+            border-bottom: 1px solid var(--border-color);
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+        }
+
+        .collection-table tbody td:first-child {
+            text-align: left;
+            font-weight: 500;
+        }
+
+        .collection-table tbody tr:hover {
+            background: #EBF8FF;
+        }
+
+        .collection-table tfoot {
+            background: #EDF2F7;
+            position: sticky;
+            bottom: 0;
+            z-index: 10;
+        }
+
+        .collection-table tfoot td {
+            background: #EDF2F7;
+            font-weight: 700;
+            font-size: 13px;
+            padding: 12px 8px;
+            text-align: right;
+            border-top: 2px solid var(--border-color);
+            border-bottom: 2px solid var(--border-color);
+        }
+
+        .collection-table tfoot td:first-child {
+            text-align: left;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .negative-value {
+            color: #C53030;
+            font-weight: 600;
+        }
+
+        .positive-value {
+            color: #38A169;
+            font-weight: 600;
+        }
+
+        .summary-row {
+            background: #F0FFF4 !important;
+            font-weight: 600;
+        }
+
+        .summary-date {
+            color: #2F855A !important;
+            font-weight: 700;
+        }
     </style>
 </head>
 <body>
@@ -465,6 +676,45 @@
                     </thead>
                     <tbody id="productTableBody">
                     </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- 收款看板模块 -->
+        <div class="card">
+            <div class="card-title">💰 收款看板</div>
+            <div class="filter-section">
+                <div class="filter-group">
+                    <label>月份范围：</label>
+                    <div id="monthRangePicker" style="width: 300px; display: inline-block;"></div>
+                </div>
+                <button class="btn btn-primary" onclick="queryCollectionData()">🔎 查询</button>
+            </div>
+            <div class="collection-table-wrapper">
+                <table id="collectionTable" class="collection-table">
+                    <thead id="collectionTableHead">
+                        <tr>
+                            <th colspan="7" class="subsection-header">总结</th>
+                            <th colspan="4" class="subsection-header highlight-header">收款进度 N42</th>
+                        </tr>
+                        <tr>
+                            <th>PO DATE</th>
+                            <th title="MelodySusie PC180E Cordless Rechargeable Nail Drill">0506588010134</th>
+                            <th title="MelodySusie PC650E Cordless Rechargeable Pedicure Drill">0506001010168</th>
+                            <th>TTL<br/>Cases</th>
+                            <th>TTL Units</th>
+                            <th>PO 金额<br/>(US$)</th>
+                            <th>应收款<br/>(US$)</th>
+                            <th class="highlight-col">已收款<br/>(US$)</th>
+                            <th class="highlight-col">回款%</th>
+                            <th class="highlight-col negative-col">扣款金额<br/>(US$)</th>
+                            <th class="highlight-col negative-col">扣款比例%</th>
+                        </tr>
+                    </thead>
+                    <tbody id="collectionTableBody">
+                    </tbody>
+                    <tfoot id="collectionTableFoot">
+                    </tfoot>
                 </table>
             </div>
         </div>
@@ -579,6 +829,32 @@
                 { sale_date: "2026-02-26", product_code: "679067591", product_id: "17195806375", category: "NAILCARE", quantity: 242, sales_amount: 7202.44 },
                 { sale_date: "2026-02-27", product_code: "679067591", product_id: "17195806375", category: "NAILCARE", quantity: 321, sales_amount: 9636.33 },
                 { sale_date: "2026-02-27", product_code: "678994713", product_id: "17180907118", category: "NAILCARE", quantity: 428, sales_amount: 8540.8 }
+            ],
+            collectionRecords: [
+                { poDate: "2025/12/22", msNailDrill: 160, msPediDrill: 200, ttlCases: 18, ttlUnits: 360, poAmount: 4296.40, receivable: 4068.69, received: 4068.69, collectionRate: 100, deductionAmount: null, deductionRate: null },
+                { poDate: "2025/12/29", msNailDrill: 1680, msPediDrill: 1700, ttlCases: 164, ttlUnits: 3280, poAmount: 38717.20, receivable: 36665.19, received: 36665.19, collectionRate: 100, deductionAmount: null, deductionRate: null },
+                { poDate: "汇总202512", msNailDrill: 1840, msPediDrill: 1900, ttlCases: 182, ttlUnits: 3640, poAmount: 43013.60, receivable: 40733.88, received: 40733.87, collectionRate: 100, deductionAmount: null, deductionRate: null },
+                { poDate: "2026/1/5", msNailDrill: 6960, msPediDrill: 8240, ttlCases: 760, ttlUnits: 15200, poAmount: 180888.00, receivable: 171111.54, received: 166330.33, collectionRate: 97, deductionAmount: -4781.20, deductionRate: -2.79 },
+                { poDate: "2026/1/12", msNailDrill: 1720, msPediDrill: 1880, ttlCases: 180, ttlUnits: 3600, poAmount: 39728.40, receivable: 37620.90, received: 37607.94, collectionRate: 100, deductionAmount: -12.95, deductionRate: -0.03 },
+                { poDate: "2026/1/19", msNailDrill: 2740, msPediDrill: 2820, ttlCases: 278, ttlUnits: 5560, poAmount: 65414.40, receivable: 61947.44, received: 60483.11, collectionRate: 98, deductionAmount: -1464.29, deductionRate: -2.36 },
+                { poDate: "2026/1/26", msNailDrill: 580, msPediDrill: 680, ttlCases: 63, ttlUnits: 1260, poAmount: 14967.40, receivable: 14174.13, received: 14181.15, collectionRate: 100, deductionAmount: null, deductionRate: null },
+                { poDate: "汇总202601", msNailDrill: 12000, msPediDrill: 13620, ttlCases: 1281, ttlUnits: 25620, poAmount: 300796.20, receivable: 284854.00, received: 278582.53, collectionRate: 98, deductionAmount: -6271.47, deductionRate: -2.20 },
+                { poDate: "2026/2/2", msNailDrill: 820, msPediDrill: 720, ttlCases: 77, ttlUnits: 1540, poAmount: 17904.60, receivable: 16955.66, received: 16955.59, collectionRate: 100, deductionAmount: null, deductionRate: null },
+                { poDate: "2026/2/9", msNailDrill: 1880, msPediDrill: 1760, ttlCases: 182, ttlUnits: 3640, poAmount: 42523.60, receivable: 40265.85, received: 38235.48, collectionRate: 95, deductionAmount: -2030.31, deductionRate: -5.04 },
+                { poDate: "2026/2/16", msNailDrill: 2360, msPediDrill: 1460, ttlCases: 191, ttlUnits: 3820, poAmount: 43271.80, receivable: 40978.39, received: 37724.11, collectionRate: 92, deductionAmount: -1040.31, deductionRate: -2.54 },
+                { poDate: "2026/2/23", msNailDrill: 2800, msPediDrill: 1500, ttlCases: 215, ttlUnits: 4300, poAmount: 48207.00, receivable: 45652.03, received: 16359.03, collectionRate: 36, deductionAmount: null, deductionRate: null },
+                { poDate: "汇总202602", msNailDrill: 7860, msPediDrill: 5440, ttlCases: 665, ttlUnits: 13300, poAmount: 151907.00, receivable: 143855.93, received: 109274.21, collectionRate: 76, deductionAmount: null, deductionRate: null },
+                { poDate: "2026/3/2", msNailDrill: 2540, msPediDrill: 1860, ttlCases: 220, ttlUnits: 4400, poAmount: 50468.00, receivable: 47791.30, received: 0, collectionRate: 0, deductionAmount: null, deductionRate: null },
+                { poDate: "2026/3/9", msNailDrill: 13800, msPediDrill: 6440, ttlCases: 1002, ttlUnits: 20040, poAmount: 222739.00, receivable: 210934.40, received: 0, collectionRate: 0, deductionAmount: null, deductionRate: null },
+                { poDate: "2026/3/16", msNailDrill: 1960, msPediDrill: 2960, ttlCases: 246, ttlUnits: 4920, poAmount: 59510.80, receivable: 56356.73, received: 0, collectionRate: 0, deductionAmount: null, deductionRate: null },
+                { poDate: "2026/3/23", msNailDrill: 620, msPediDrill: 1120, ttlCases: 87, ttlUnits: 1740, poAmount: 21302.80, receivable: 20173.56, received: 0, collectionRate: 0, deductionAmount: null, deductionRate: null },
+                { poDate: "2026/3/30", msNailDrill: 4680, msPediDrill: 1460, ttlCases: 307, ttlUnits: 6140, poAmount: 66448.60, receivable: 62926.82, received: 0, collectionRate: 0, deductionAmount: null, deductionRate: null },
+                { poDate: "汇总202603", msNailDrill: 23400, msPediDrill: 13840, ttlCases: 1862, ttlUnits: 37240, poAmount: 420467.60, receivable: 398182.82, received: 0, collectionRate: 0, deductionAmount: null, deductionRate: null },
+                { poDate: "2026/4/6", msNailDrill: 3580, msPediDrill: 1460, ttlCases: 252, ttlUnits: 5040, poAmount: 55459.00, receivable: 52520.24, received: 0, collectionRate: 0, deductionAmount: null, deductionRate: null },
+                { poDate: "2026/4/13", msNailDrill: 3820, msPediDrill: 2080, ttlCases: 295, ttlUnits: 5900, poAmount: 66221.00, receivable: 62711.29, received: 0, collectionRate: 0, deductionAmount: null, deductionRate: null },
+                { poDate: "2026/4/20", msNailDrill: 6080, msPediDrill: 9580, ttlCases: 783, ttlUnits: 15660, poAmount: 189973.40, receivable: 179904.81, received: 0, collectionRate: 0, deductionAmount: null, deductionRate: null },
+                { poDate: "2026/4/27", msNailDrill: 5220, msPediDrill: 2020, ttlCases: 362, ttlUnits: 7240, poAmount: 79397.60, receivable: 75189.53, received: 0, collectionRate: 0, deductionAmount: null, deductionRate: null },
+                { poDate: "汇总202604", msNailDrill: 18700, msPediDrill: 15140, ttlCases: 1692, ttlUnits: 33840, poAmount: 391051.60, receivable: 370325.87, received: 0, collectionRate: 0, deductionAmount: null, deductionRate: null }
             ]
         };
 
@@ -586,10 +862,17 @@
         let filteredData = [];
         let salesTrendChart = null;
         let productDetailChart = null;
+        let collectionData = [];
+        let filteredCollectionData = [];
+        window.selectedMonthRange = { start: '2025-12', end: '2026-04' };
 
         // ==================== 工具函数 ====================
         function formatMoney(amount) {
             return '$' + amount.toLocaleString('zh-CN', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+        }
+
+        function formatNumber(num) {
+            return num.toLocaleString('zh-CN', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
         }
 
         // ==================== 初始化 ====================
@@ -606,6 +889,8 @@
             // 加载模拟数据
             salesData = JSON.parse(JSON.stringify(mockData.salesRecords));
             filteredData = filterDataByDateRange(salesData, startDate, endDate);
+            collectionData = JSON.parse(JSON.stringify(mockData.collectionRecords));
+            filteredCollectionData = collectionData;
             
             renderAll();
             bindEvents();
@@ -708,11 +993,54 @@
             renderAll();
         }
 
+        function queryCollectionData() {
+            const startMonth = window.selectedMonthRange ? window.selectedMonthRange.start : '2025-12';
+            const endMonth = window.selectedMonthRange ? window.selectedMonthRange.end : '2026-04';
+            
+            if (!startMonth || !endMonth) {
+                alert('请选择月份范围！');
+                return;
+            }
+            
+            if (startMonth > endMonth) {
+                alert('开始月份不能大于结束月份！');
+                return;
+            }
+            
+            filteredCollectionData = filterCollectionByMonthRange(collectionData, startMonth, endMonth);
+            renderCollectionDashboard();
+        }
+
+        function filterCollectionByMonthRange(data, startMonth, endMonth) {
+            return data.filter(record => {
+                const recordMonth = extractMonthFromPoDate(record.poDate);
+                return recordMonth >= startMonth && recordMonth <= endMonth;
+            });
+        }
+
+        function extractMonthFromPoDate(poDate) {
+            if (poDate.includes('汇总')) {
+                const match = poDate.match(/(\d{4})(\d{2})/);
+                if (match) {
+                    return `${match[1]}-${match[2]}`;
+                }
+            } else {
+                const parts = poDate.split('/');
+                if (parts.length >= 2) {
+                    const year = parts[0];
+                    const month = parts[1].padStart(2, '0');
+                    return `${year}-${month}`;
+                }
+            }
+            return '';
+        }
+
         // ==================== 渲染函数 ====================
         function renderAll() {
             renderStatsCards();
             renderSalesTrendChart();
             renderProductTable();
+            renderCollectionDashboard();
         }
 
         function renderStatsCards() {
@@ -834,6 +1162,120 @@
                     </td>
                 </tr>
             `).join('');
+        }
+
+        // ==================== 收款看板渲染函数 ====================
+        function renderCollectionDashboard() {
+            renderCollectionTable();
+            renderCollectionFoot();
+            syncCollectionTableColumns();
+        }
+
+        function syncCollectionTableColumns() {
+            const table = document.getElementById('collectionTable');
+            if (!table) return;
+            
+            const thead = table.querySelector('thead tr:last-child');
+            const tbody = table.querySelector('tbody tr:first-child');
+            const tfoot = table.querySelector('tfoot tr:first-child');
+            
+            if (!thead || !tbody) return;
+            
+            setTimeout(() => {
+                const headerCells = thead.querySelectorAll('th');
+                const bodyCells = tbody.querySelectorAll('td');
+                
+                headerCells.forEach((th, index) => {
+                    if (bodyCells[index]) {
+                        const width = th.offsetWidth;
+                        bodyCells[index].style.width = width + 'px';
+                        bodyCells[index].style.minWidth = width + 'px';
+                        bodyCells[index].style.maxWidth = width + 'px';
+                    }
+                });
+                
+                if (tfoot) {
+                    const footCells = tfoot.querySelectorAll('td');
+                    headerCells.forEach((th, index) => {
+                        if (footCells[index]) {
+                            const width = th.offsetWidth;
+                            footCells[index].style.width = width + 'px';
+                            footCells[index].style.minWidth = width + 'px';
+                            footCells[index].style.maxWidth = width + 'px';
+                        }
+                    });
+                }
+            }, 0);
+        }
+
+        function renderCollectionTable() {
+            const tbody = document.getElementById('collectionTableBody');
+            const dataToRender = filteredCollectionData.length > 0 ? filteredCollectionData : collectionData;
+            
+            if (dataToRender.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="11" class="empty-state">暂无数据</td></tr>';
+                return;
+            }
+            
+            tbody.innerHTML = dataToRender.map(record => {
+                const isSummaryRow = record.poDate.includes('汇总');
+                const rowClass = isSummaryRow ? 'summary-row' : '';
+                const dateClass = isSummaryRow ? 'summary-date' : '';
+                
+                return `
+                    <tr class="${rowClass}">
+                        <td class="${dateClass}">${record.poDate}</td>
+                        <td>${formatNumber(record.msNailDrill)}</td>
+                        <td>${formatNumber(record.msPediDrill)}</td>
+                        <td>${formatNumber(record.ttlCases)}</td>
+                        <td>${formatNumber(record.ttlUnits)}</td>
+                        <td>${formatMoney(record.poAmount)}</td>
+                        <td>${formatMoney(record.receivable)}</td>
+                        <td class="highlight-col">${formatMoney(record.received)}</td>
+                        <td class="highlight-col">${record.collectionRate}%</td>
+                        <td class="highlight-col negative-col">${record.deductionAmount !== null && record.deductionAmount !== undefined ? '(' + formatMoney(Math.abs(record.deductionAmount)) + ')' : ''}</td>
+                        <td class="highlight-col negative-col">${record.deductionRate !== null && record.deductionRate !== undefined ? record.deductionRate.toFixed(2) + '%' : ''}</td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function renderCollectionFoot() {
+            const tfoot = document.getElementById('collectionTableFoot');
+            const dataToRender = filteredCollectionData.length > 0 ? filteredCollectionData : collectionData;
+            
+            const totals = {
+                msNailDrill: dataToRender.reduce((sum, r) => sum + r.msNailDrill, 0),
+                msPediDrill: dataToRender.reduce((sum, r) => sum + r.msPediDrill, 0),
+                ttlCases: dataToRender.reduce((sum, r) => sum + r.ttlCases, 0),
+                ttlUnits: dataToRender.reduce((sum, r) => sum + r.ttlUnits, 0),
+                poAmount: dataToRender.reduce((sum, r) => sum + r.poAmount, 0),
+                receivable: dataToRender.reduce((sum, r) => sum + r.receivable, 0),
+                received: dataToRender.reduce((sum, r) => sum + r.received, 0)
+            };
+            
+            const totalDeduction = dataToRender
+                .filter(r => r.deductionAmount !== null && r.deductionAmount !== undefined)
+                .reduce((sum, r) => sum + r.deductionAmount, 0);
+            
+            const overallRate = totals.receivable > 0 ? ((totals.received / totals.receivable) * 100).toFixed(1) : 0;
+            const deductionRate = totals.receivable > 0 ? ((totalDeduction / totals.receivable) * 100).toFixed(2) : 0;
+            
+            tfoot.innerHTML = `
+                <tr>
+                    <td>总计</td>
+                    <td>${formatNumber(totals.msNailDrill)}</td>
+                    <td>${formatNumber(totals.msPediDrill)}</td>
+                    <td>${formatNumber(totals.ttlCases)}</td>
+                    <td>${formatNumber(totals.ttlUnits)}</td>
+                    <td>${formatMoney(totals.poAmount)}</td>
+                    <td>${formatMoney(totals.receivable)}</td>
+                    <td class="highlight-col">${formatMoney(totals.received)}</td>
+                    <td class="highlight-col">${overallRate}%</td>
+                    <td class="highlight-col negative-col">(${formatMoney(Math.abs(totalDeduction))})</td>
+                    <td class="highlight-col negative-col">${deductionRate}%</td>
+                </tr>
+            `;
         }
 
         // ==================== 导入弹窗功能 ====================
@@ -987,11 +1429,52 @@
                 if (productDetailChart) {
                     productDetailChart.resize();
                 }
+                syncCollectionTableColumns();
             });
         }
 
         // 页面加载完成后初始化
         window.addEventListener('load', init);
+    </script>
+    
+    <!-- React 组件（需要 Babel 转译） -->
+    <script type="text/babel">
+        const { DatePicker } = antd;
+        const { useState, useEffect } = React;
+        
+        function MonthRangePicker() {
+            const [dates, setDates] = useState([
+                dayjs('2025-12', 'YYYY-MM'),
+                dayjs('2026-04', 'YYYY-MM')
+            ]);
+            
+            useEffect(() => {
+                if (dates && dates[0] && dates[1]) {
+                    window.selectedMonthRange.start = dates[0].format('YYYY-MM');
+                    window.selectedMonthRange.end = dates[1].format('YYYY-MM');
+                }
+            }, [dates]);
+            
+            return (
+                <DatePicker.RangePicker
+                    picker="month"
+                    value={dates}
+                    onChange={(dates) => {
+                        if (dates) {
+                            setDates(dates);
+                        }
+                    }}
+                    format="YYYY年MM月"
+                    placeholder={['开始月份', '结束月份']}
+                    style={{ width: '100%' }}
+                />
+            );
+        }
+        
+        ReactDOM.render(
+            <MonthRangePicker />,
+            document.getElementById('monthRangePicker')
+        );
     </script>
 </body>
 </html>
