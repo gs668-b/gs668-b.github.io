@@ -605,6 +605,22 @@
             color: #2F855A !important;
             font-weight: 700;
         }
+
+        /* 产品列表样式 */
+        .product-name-cell {
+            max-width: 280px;
+            font-size: 13px;
+            color: var(--text-primary);
+            line-height: 1.4;
+        }
+
+        .product-image {
+            width: 60px;
+            height: 60px;
+            object-fit: cover;
+            border-radius: 6px;
+            border: 1px solid var(--border-color);
+        }
     </style>
 </head>
 <body>
@@ -667,11 +683,13 @@
                 <table id="productTable">
                     <thead>
                         <tr>
-                            <th style="text-align: center; width: 80px;">排名</th>
-                            <th>商品编号</th>
-                            <th style="text-align: right;">总销量</th>
-                            <th style="text-align: right;">总销售额</th>
-                            <th style="text-align: center; width: 160px;">操作</th>
+                            <th style="text-align: center; width: 60px;">排名</th>
+                            <th style="width: 100px;">商品编号</th>
+                            <th>产品名</th>
+                            <th style="width: 80px;">图片</th>
+                            <th style="text-align: right; width: 80px;">总销量</th>
+                            <th style="text-align: right; width: 120px;">总销售额</th>
+                            <th style="text-align: center; width: 140px;">操作</th>
                         </tr>
                     </thead>
                     <tbody id="productTableBody">
@@ -699,8 +717,8 @@
                         </tr>
                         <tr>
                             <th>PO DATE</th>
-                            <th title="MelodySusie PC180E Cordless Rechargeable Nail Drill">0506588010134</th>
-                            <th title="MelodySusie PC650E Cordless Rechargeable Pedicure Drill">0506001010168</th>
+                            <th title="MelodySusie PC180E Cordless Rechargeable Nail Drill">678994713</th>
+                            <th title="MelodySusie PC650E Cordless Rechargeable Pedicure Drill">679067591</th>
                             <th>TTL<br/>Cases</th>
                             <th>TTL Units</th>
                             <th>PO 金额<br/>(US$)</th>
@@ -1144,24 +1162,43 @@
             const productData = getProductSalesData(filteredData);
             const tbody = document.getElementById('productTableBody');
             
+            const productInfoMap = {
+                '678994713': {
+                    name: 'MelodySusie PC180E Cordless Rechargeable Nail Drill',
+                    image: 'https://i5.walmartimages.com/asr/7f0671da-a7e3-4d94-bfaa-e0f020afcbae.1cc68a108cb3bf6dcaefe398d8541e38.jpeg'
+                },
+                '679067591': {
+                    name: 'MelodySusie PC650E Cordless Rechargeable Pedicure Drill',
+                    image: 'https://i5.walmartimages.com/asr/9a4e7be4-557b-4d26-94b8-ecb87682c8e2.0fd0d6d6e78a778dbe3934e15728dd9e.jpeg'
+                }
+            };
+            
             if (productData.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="5" class="empty-state">暂无数据</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="7" class="empty-state">暂无数据</td></tr>';
                 return;
             }
             
-            tbody.innerHTML = productData.map((p, index) => `
-                <tr>
-                    <td class="rank rank-${index + 1}">${index + 1}</td>
-                    <td>${p.product_code}</td>
-                    <td class="amount">${p.quantity.toLocaleString()}</td>
-                    <td class="amount">${formatMoney(p.sales_amount)}</td>
-                    <td style="text-align: center;">
-                        <button class="btn btn-info" onclick="showProductDetail('${p.product_code}')">
-                            📊 详细数据
-                        </button>
-                    </td>
-                </tr>
-            `).join('');
+            tbody.innerHTML = productData.map((p, index) => {
+                const info = productInfoMap[p.product_code] || { name: '未知产品', image: '' };
+                
+                return `
+                    <tr>
+                        <td class="rank rank-${index + 1}">${index + 1}</td>
+                        <td>${p.product_code}</td>
+                        <td class="product-name-cell">${info.name}</td>
+                        <td style="text-align: center;">
+                            ${info.image ? `<img src="${info.image}" alt="${info.name}" class="product-image" onerror="this.style.display='none'">` : '-'}
+                        </td>
+                        <td class="amount">${p.quantity.toLocaleString()}</td>
+                        <td class="amount">${formatMoney(p.sales_amount)}</td>
+                        <td style="text-align: center;">
+                            <button class="btn btn-info" onclick="showProductDetail('${p.product_code}')">
+                                📊 详细数据
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
         }
 
         // ==================== 收款看板渲染函数 ====================
