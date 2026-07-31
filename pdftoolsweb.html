@@ -108,6 +108,16 @@
   .empty-tip { text-align: center; color: #bbb; padding: 30px; }
 
   .tip { font-size: 12px; color: #999; }
+
+  /* ===== 批量填充 ===== */
+  .batch-area { margin-bottom: 14px; }
+  .batch-panel { margin-top: 10px; }
+  .batch-panel textarea {
+    width: 100%; height: 120px; padding: 8px; border: 1px solid #d9d9d9;
+    border-radius: 4px; font-size: 13px; resize: vertical; font-family: inherit;
+  }
+  .batch-panel textarea:focus { outline: none; border-color: #4a90d9; }
+  .batch-actions { margin-top: 8px; display: flex; gap: 8px; align-items: center; }
 </style>
 </head>
 <body>
@@ -157,6 +167,17 @@
     <div class="step-title">
       <span class="step-num">3</span> 填写备注并填充回 PDF
       <span class="sub">前两列只读，仅在“备注”列输入内容</span>
+    </div>
+    <div class="batch-area">
+      <button class="btn btn-default" id="btn-batch-toggle">📋 批量填充备注（从 Excel 粘贴一列）</button>
+      <div id="batch-panel" class="batch-panel" style="display:none">
+        <textarea id="batch-input" placeholder="从 Excel 复制一列备注内容，粘贴到此处（每行对应一个页码的备注）"></textarea>
+        <div class="batch-actions">
+          <button class="btn btn-primary" id="btn-batch-fill">填充到备注</button>
+          <button class="btn btn-default" id="btn-batch-cancel">取消</button>
+          <span class="tip" id="batch-tip"></span>
+        </div>
+      </div>
     </div>
     <div class="table-wrap">
       <div class="table-scroll">
@@ -547,6 +568,49 @@ function syncCjkCheckbox() {
   document.getElementById('use-cjk').checked = hasChinese;
 }
 
+/**
+ * 切换批量填充面板的显示状态
+ */
+function toggleBatchPanel() {
+  const panel = document.getElementById('batch-panel');
+  panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+  if (panel.style.display === 'block') {
+    document.getElementById('batch-input').focus();
+  }
+}
+
+/**
+ * 将文本框中按行分隔的内容批量填充到备注列
+ */
+function batchFillRemarks() {
+  const inputs = document.querySelectorAll('#result-tbody .col-remark input');
+  if (inputs.length === 0) {
+    alert('请先完成识别，生成备注表格');
+    return;
+  }
+  const text = document.getElementById('batch-input').value;
+  // 统一换行符并按行分割
+  const lines = text.replace(/\r\n/g, '\n').replace(/\r/g, '\n').split('\n');
+  // 去除末尾多余空行（Excel 复制时常带）
+  while (lines.length > 0 && lines[lines.length - 1] === '') lines.pop();
+
+  // 按行对应填充（第 i 行内容填入第 i 个备注格）
+  const count = Math.min(lines.length, inputs.length);
+  for (let i = 0; i < count; i++) {
+    inputs[i].value = lines[i];
+  }
+  // 更新中文勾选状态
+  syncCjkCheckbox();
+
+  const tip = document.getElementById('batch-tip');
+  if (lines.length > inputs.length) {
+    tip.textContent = `已填充 ${inputs.length} 条（粘贴内容共 ${lines.length} 行，超出部分已忽略）`;
+  } else {
+    tip.textContent = `已填充 ${count} 条（表格共 ${inputs.length} 行）`;
+  }
+  setTimeout(() => { tip.textContent = ''; }, 4000);
+}
+
 /* ============ 导出 Excel ============ */
 
 /**
@@ -699,6 +763,12 @@ function init() {
   document.getElementById('btn-fill').addEventListener('click', fillRemarks);
   // 备注输入时实时检测中文，自动勾选/取消"备注包含中文"
   document.getElementById('result-tbody').addEventListener('input', syncCjkCheckbox);
+  // 批量填充
+  document.getElementById('btn-batch-toggle').addEventListener('click', toggleBatchPanel);
+  document.getElementById('btn-batch-fill').addEventListener('click', batchFillRemarks);
+  document.getElementById('btn-batch-cancel').addEventListener('click', () => {
+    document.getElementById('batch-panel').style.display = 'none';
+  });
 
   appendLog('id-log', '就绪，请先导入 PDF 文件', 'info');
   appendLog('fill-log', '就绪，请先完成步骤 1、2', 'info');
