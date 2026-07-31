@@ -1,0 +1,710 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PDF 物流单号识别与备注工具</title>
+<style>
+  /* ===== 全局样式 ===== */
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Microsoft YaHei UI', 'Segoe UI', sans-serif;
+    background: #f0f2f5; color: #333; min-height: 100vh; line-height: 1.6;
+  }
+  .header {
+    background: linear-gradient(135deg, #4a90d9, #357abd); color: #fff;
+    padding: 22px 20px; text-align: center; box-shadow: 0 2px 10px rgba(0,0,0,0.15);
+  }
+  .header h1 { font-size: 24px; margin-bottom: 4px; }
+  .header p { font-size: 13px; opacity: 0.9; }
+
+  .container { max-width: 1100px; margin: 20px auto; padding: 0 15px 40px; }
+
+  /* ===== 步骤卡片 ===== */
+  .step-card {
+    background: #fff; border-radius: 8px; padding: 22px 25px; margin-bottom: 18px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  }
+  .step-title {
+    display: flex; align-items: center; gap: 10px; font-size: 17px; font-weight: 600;
+    color: #357abd; margin-bottom: 16px; padding-bottom: 10px; border-bottom: 2px solid #e8eef5;
+  }
+  .step-num {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 28px; height: 28px; border-radius: 50%; background: #357abd; color: #fff;
+    font-size: 15px; font-weight: 700;
+  }
+  .step-title .sub { font-size: 13px; color: #999; font-weight: normal; margin-left: auto; }
+
+  /* ===== 上传区 ===== */
+  .upload-area {
+    border: 2px dashed #b8c4d4; border-radius: 8px; padding: 30px; text-align: center;
+    background: #fafbfc; transition: 0.2s; cursor: pointer;
+  }
+  .upload-area:hover { border-color: #4a90d9; background: #f0f6ff; }
+  .upload-area.has-file { border-color: #52c41a; background: #f6ffed; }
+  .upload-area p { color: #888; font-size: 14px; }
+  .upload-area .filename { color: #52c41a; font-weight: 600; font-size: 15px; margin-top: 6px; }
+  .upload-area .meta { color: #1890ff; font-size: 13px; margin-top: 4px; }
+
+  /* ===== 按钮 ===== */
+  .btn {
+    padding: 10px 22px; border: none; border-radius: 6px; cursor: pointer;
+    font-size: 14px; font-weight: 600; transition: 0.2s;
+  }
+  .btn-primary { background: #357abd; color: #fff; }
+  .btn-primary:hover { background: #2c6ba8; }
+  .btn-primary:disabled { background: #a0b8d0; cursor: not-allowed; }
+  .btn-success { background: #52c41a; color: #fff; }
+  .btn-success:hover { background: #46a818; }
+  .btn-success:disabled { background: #b5e0a0; cursor: not-allowd; }
+  .btn-default { background: #f0f2f5; color: #555; border: 1px solid #d9d9d9; }
+  .btn-default:hover { background: #e0e3e8; }
+  .btn-row { margin: 14px 0; display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+
+  /* ===== 选项 ===== */
+  .options { background: #fafbfc; padding: 12px 15px; border-radius: 6px; margin: 12px 0; font-size: 13px; }
+  .options label { display: flex; align-items: center; gap: 6px; margin: 6px 0; cursor: pointer; }
+  .options .hint { color: #999; font-size: 12px; margin-left: 22px; }
+
+  /* ===== 进度与日志 ===== */
+  .progress-bar { height: 18px; background: #e8eef5; border-radius: 9px; overflow: hidden; }
+  .progress-fill {
+    height: 100%; background: linear-gradient(90deg, #4a90d9, #52c41a);
+    width: 0%; transition: width 0.3s; border-radius: 9px;
+  }
+  .progress-text { font-size: 13px; color: #666; margin-top: 4px; }
+  .log-box {
+    background: #1e1e1e; color: #d4d4d4; padding: 12px; border-radius: 6px;
+    font-family: Consolas, monospace; font-size: 13px; height: 150px;
+    overflow-y: auto; margin-top: 12px; white-space: pre-wrap;
+  }
+  .log-box .log-success { color: #52c41a; }
+  .log-box .log-error { color: #ff6b6b; }
+  .log-box .log-warn { color: #faad14; }
+  .log-box .log-info { color: #69b1ff; }
+
+  /* ===== 三列表格 ===== */
+  .table-wrap { border: 1px solid #e8eef5; border-radius: 6px; overflow: hidden; margin-top: 10px; }
+  .table-scroll { max-height: 420px; overflow-y: auto; }
+  table { width: 100%; border-collapse: collapse; }
+  thead th {
+    background: #f0f6ff; color: #357abd; font-weight: 600; padding: 10px;
+    position: sticky; top: 0; z-index: 1; border-bottom: 2px solid #d6e4f0;
+    text-align: center; font-size: 14px;
+  }
+  tbody td { padding: 6px 10px; border-bottom: 1px solid #f0f2f5; font-size: 14px; }
+  tbody tr:hover { background: #fafbfc; }
+  .col-page { width: 12%; text-align: center; color: #555; }
+  .col-track { width: 43%; text-align: center; }
+  .col-remark { width: 45%; }
+  .col-track .no-track { color: #bbb; }
+  .col-track .has-track { color: #1890ff; font-family: Consolas, monospace; font-weight: 600; }
+  .col-remark input {
+    width: 100%; padding: 6px 8px; border: 1px solid #e0e6ee; border-radius: 4px;
+    font-size: 14px; transition: 0.15s;
+  }
+  .col-remark input:focus { outline: none; border-color: #4a90d9; background: #f0f6ff; }
+  .empty-tip { text-align: center; color: #bbb; padding: 30px; }
+
+  .tip { font-size: 12px; color: #999; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>PDF 物流单号识别与备注工具</h1>
+  <p>导入 PDF → 识别每页物流单号 → 填写备注 → 备注填充回原 PDF（纯浏览器端运行，文件不上传）</p>
+</div>
+
+<div class="container">
+
+  <!-- ========== 步骤1：导入 PDF ========== -->
+  <div class="step-card">
+    <div class="step-title">
+      <span class="step-num">1</span> 导入 PDF 文件
+    </div>
+    <div id="upload-area" class="upload-area">
+      <p>📎 点击此处选择 PDF 文件（或拖拽到此）</p>
+      <div class="filename" id="file-name"></div>
+      <div class="meta" id="file-meta"></div>
+      <input type="file" id="file-input" accept=".pdf" hidden>
+    </div>
+  </div>
+
+  <!-- ========== 步骤2：识别物流单号 ========== -->
+  <div class="step-card">
+    <div class="step-title">
+      <span class="step-num">2</span> 识别每页物流单号
+      <span class="sub">支持 GFUS 18位单号、USPS 22位数字单号</span>
+    </div>
+    <div class="options">
+      <label><input type="checkbox" id="use-ocr" checked> 启用 OCR 识别（针对扫描件，速度较慢；若PDF中仅包含GOFO面单可以取消勾选提高速度）</label>
+      <div class="hint">默认仅从 PDF 文本层提取；勾选后对未命中页面用 Tesseract OCR 识别条码下方区域</div>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-primary" id="btn-identify" disabled>开始识别</button>
+      <button class="btn btn-default" id="btn-export" disabled>导出 Excel</button>
+      <span class="tip">识别完成后可在下方表格填写备注，并可导出含单号与备注的 Excel</span>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" id="id-progress"></div></div>
+    <div class="progress-text" id="id-progress-text">就绪</div>
+    <div class="log-box" id="id-log"></div>
+  </div>
+
+  <!-- ========== 步骤3：填写备注并生成 PDF ========== -->
+  <div class="step-card">
+    <div class="step-title">
+      <span class="step-num">3</span> 填写备注并填充回 PDF
+      <span class="sub">前两列只读，仅在“备注”列输入内容</span>
+    </div>
+    <div class="table-wrap">
+      <div class="table-scroll">
+        <table>
+          <thead>
+            <tr>
+              <th class="col-page">页码</th>
+              <th class="col-track">物流单号</th>
+              <th class="col-remark">备注（可编辑）</th>
+            </tr>
+          </thead>
+          <tbody id="result-tbody">
+            <tr><td colspan="3" class="empty-tip">请先完成步骤 1、2，识别结果将显示在此</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="options">
+      <label><input type="checkbox" id="use-cjk"> 备注包含中文（自动加载中文字体，约 5MB，根据备注内容自动勾选）</label>
+      <div class="hint">勾选后若备注含中文将嵌入 SimHei（黑体）；不勾选则使用 Helvetica（仅英文/数字）</div>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-success" id="btn-fill" disabled>添加备注到 PDF</button>
+      <span class="tip">将根据表格中填写的备注，在原 PDF 对应页左下角添加文字，生成带 _with_note 后缀的新文件</span>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" id="fill-progress"></div></div>
+    <div class="progress-text" id="fill-progress-text">就绪</div>
+    <div class="log-box" id="fill-log"></div>
+  </div>
+
+</div>
+
+<!-- ===== 外部库 CDN ===== -->
+<script src="https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
+<script src="https://unpkg.com/@pdf-lib/fontkit@1.1.1/dist/fontkit.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/tesseract.js@5.0.4/dist/tesseract.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script>
+/* ============================================================
+ * PDF 物流单号识别与备注工具（统一工作流）
+ * 1. 导入 PDF
+ * 2. pdf.js 文本层提取 + tesseract.js OCR 识别每页物流单号
+ * 3. 用户在表格填写备注（前两列只读）
+ * 4. pdf-lib 将备注填充回原 PDF
+ * ============================================================ */
+
+// pdf.js worker 配置
+pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+
+// 全局状态
+const state = {
+  pdfBytes: null,     // 原始 PDF 的 ArrayBuffer
+  pdfFileName: '',    // PDF 文件名
+  results: []         // 识别结果 [{page, tracking}]
+};
+
+/* ============ 通用工具函数 ============ */
+
+/**
+ * 向日志框追加一条日志
+ * @param {string} boxId - 日志容器元素 id
+ * @param {string} msg - 日志内容
+ * @param {string} type - 日志类型：info/success/error/warn
+ */
+function appendLog(boxId, msg, type = 'info') {
+  const box = document.getElementById(boxId);
+  const span = document.createElement('span');
+  span.className = 'log-' + type;
+  span.textContent = `[${new Date().toLocaleTimeString()}] ${msg}\n`;
+  box.appendChild(span);
+  box.scrollTop = box.scrollHeight;
+}
+
+/**
+ * 设置进度条
+ * @param {string} fillId - 进度填充元素 id
+ * @param {string} textId - 进度文本元素 id
+ * @param {number} percent - 百分比 0-100
+ * @param {string} text - 显示文字
+ */
+function setProgress(fillId, textId, percent, text) {
+  document.getElementById(fillId).style.width = percent + '%';
+  document.getElementById(textId).textContent = text;
+}
+
+/**
+ * 触发浏览器下载二进制文件
+ * @param {ArrayBuffer|Uint8Array} bytes - 文件二进制内容
+ * @param {string} filename - 下载文件名
+ * @param {string} mime - MIME 类型
+ */
+function downloadBytes(bytes, filename, mime = 'application/pdf') {
+  const blob = new Blob([bytes], { type: mime });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = filename;
+  document.body.appendChild(a); a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+/**
+ * 判断字符串是否包含中文字符
+ * @param {string} str
+ * @returns {boolean}
+ */
+function containsChinese(str) {
+  return /[\u4e00-\u9fa5]/.test(str);
+}
+
+/* ============ 物流单号提取（含校验位验证） ============ */
+
+/**
+ * 清理文本：去除多余空白与噪声字符
+ * @param {string} text
+ * @returns {string}
+ */
+function cleanText(text) {
+  text = text.replace(/\s+/g, ' ');
+  text = text.replace(/[^A-Za-z0-9\s]/g, '');
+  return text.trim();
+}
+
+/**
+ * USPS IMpb MOD10 校验位验证（22位数字，最后1位为校验位）
+ * 用于排除邮编、地址等数字粘连产生的假单号
+ * @param {string} num22 - 22位数字字符串
+ * @returns {boolean}
+ */
+function uspsChecksumValid(num22) {
+  if (!/^\d{22}$/.test(num22)) return false;
+  let sum = 0;
+  for (let i = 0; i < 21; i++) {
+    const d = parseInt(num22[i], 10);
+    sum += (i % 2 === 0) ? d * 3 : d;  // 位1(索引0)为奇数位×3
+  }
+  const check = (10 - (sum % 10)) % 10;
+  return check === parseInt(num22[21], 10);
+}
+
+/**
+ * 从文本中提取物流单号
+ * 优先 GFUS 开头 18 位单号，其次 USPS 22 位数字单号（含 MOD10 校验位验证）
+ * @param {string} text
+ * @returns {string|null}
+ */
+function extractTrackingNumber(text) {
+  // GFUS 开头 18 位单号
+  const gfus = text.match(/GFUS\w{14}/);
+  if (gfus) return gfus[0];
+
+  // USPS 带空格格式，需校验通过
+  const uspsSpaced = text.match(/9[2-5]\d{2}\s\d{4}\s\d{4}\s\d{4}\s\d{4}\s\d{2}/);
+  if (uspsSpaced) {
+    const num = uspsSpaced[0].replace(/\s/g, '');
+    if (uspsChecksumValid(num)) return uspsSpaced[0];
+  }
+
+  // 去空格后遍历所有起始位置，用校验位验证真实单号（避免邮编等数字粘连导致误匹配）
+  const noSpace = text.replace(/\s/g, '');
+  for (let i = 0; i <= noSpace.length - 22; i++) {
+    if (noSpace[i] === '9' && /[2-5]/.test(noSpace[i + 1])) {
+      const cand = noSpace.slice(i, i + 22);
+      if (uspsChecksumValid(cand)) {
+        return cand.match(/.{1,4}/g).join(' ').replace(/(\d{4}) (\d{2})$/, '$1 $2');
+      }
+    }
+  }
+  return null;
+}
+
+/* ============ 步骤1：导入 PDF ============ */
+
+/**
+ * 初始化 PDF 上传区（点击 + 拖拽）
+ */
+function setupUpload() {
+  const area = document.getElementById('upload-area');
+  const input = document.getElementById('file-input');
+
+  area.addEventListener('click', () => input.click());
+  input.addEventListener('change', (e) => handleFile(e.target.files[0]));
+
+  area.addEventListener('dragover', (e) => { e.preventDefault(); area.style.borderColor = '#4a90d9'; });
+  area.addEventListener('dragleave', () => { area.style.borderColor = ''; });
+  area.addEventListener('drop', (e) => {
+    e.preventDefault();
+    area.style.borderColor = '';
+    if (e.dataTransfer.files.length) handleFile(e.dataTransfer.files[0]);
+  });
+
+  /**
+   * 处理选中的 PDF 文件
+   * @param {File} file
+   */
+  function handleFile(file) {
+    if (!file) return;
+    if (!file.name.toLowerCase().endsWith('.pdf')) {
+      alert('请选择 PDF 文件');
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      state.pdfBytes = e.target.result;
+      state.pdfFileName = file.name;
+      state.results = [];
+      area.classList.add('has-file');
+      document.getElementById('file-name').textContent = '✅ ' + file.name;
+      document.getElementById('file-meta').textContent = '已加载，请进入步骤 2 开始识别';
+      // 重置后续步骤
+      renderTable();
+      document.getElementById('btn-identify').disabled = false;
+      document.getElementById('btn-export').disabled = true;
+      document.getElementById('btn-fill').disabled = true;
+      appendLog('id-log', `已导入 PDF：${file.name}`, 'info');
+      appendLog('fill-log', `已导入 PDF：${file.name}，请先完成识别`, 'info');
+    };
+    reader.readAsArrayBuffer(file);
+  }
+}
+
+/* ============ 步骤2：识别物流单号 ============ */
+
+/**
+ * 执行物流单号识别主流程
+ */
+async function identifyTracking() {
+  if (!state.pdfBytes) {
+    alert('请先导入 PDF 文件');
+    return;
+  }
+  const useOcr = document.getElementById('use-ocr').checked;
+  const btn = document.getElementById('btn-identify');
+  btn.disabled = true;
+  document.getElementById('btn-export').disabled = true;
+  document.getElementById('btn-fill').disabled = true;
+  state.results = [];
+  setProgress('id-progress', 'id-progress-text', 0, '处理中...');
+
+  let worker = null;
+  try {
+    appendLog('id-log', `开始识别：${state.pdfFileName}`, 'info');
+    if (useOcr) {
+      appendLog('id-log', '正在初始化 Tesseract OCR 引擎...', 'warn');
+      worker = await Tesseract.createWorker('eng', 1, {
+        logger: m => {
+          if (m.status === 'recognizing text') {
+            appendLog('id-log', `OCR 识别中... ${Math.round(m.progress * 100)}%`, 'info');
+          }
+        }
+      });
+      appendLog('id-log', 'OCR 引擎就绪', 'success');
+    }
+
+    // pdf.js 会消耗 ArrayBuffer，传入副本以保留原始数据供步骤3使用
+    const pdf = await pdfjsLib.getDocument({ data: state.pdfBytes.slice(0) }).promise;
+    const total = pdf.numPages;
+    appendLog('id-log', `PDF 共 ${total} 页，开始逐页识别`, 'info');
+
+    for (let i = 1; i <= total; i++) {
+      const pct = Math.round((i / total) * 100);
+      setProgress('id-progress', 'id-progress-text', pct, `识别第 ${i}/${total} 页`);
+
+      const page = await pdf.getPage(i);
+      let result = null;
+
+      // 策略1：从文本层提取
+      const textContent = await page.getTextContent();
+      const pageText = textContent.items.map(it => it.str).join(' ');
+      result = extractTrackingNumber(cleanText(pageText));
+
+      if (result) {
+        appendLog('id-log', `第 ${i} 页（文本层）：${result}`, 'success');
+      } else if (useOcr) {
+        // 策略2：OCR 识别页面下半部分
+        appendLog('id-log', `第 ${i} 页文本层未命中，启用 OCR...`, 'info');
+        const viewport = page.getViewport({ scale: 4 }); // 约 288dpi，提升小字清晰度
+        const canvas = document.createElement('canvas');
+        canvas.width = viewport.width;
+        canvas.height = viewport.height;
+        const ctx = canvas.getContext('2d');
+        await page.render({ canvasContext: ctx, viewport }).promise;
+
+        // 截取下半部分（条形码通常在下方）
+        const halfH = Math.floor(canvas.height / 2);
+        const crop = document.createElement('canvas');
+        crop.width = canvas.width;
+        crop.height = halfH;
+        crop.getContext('2d').drawImage(canvas, 0, halfH, canvas.width, halfH, 0, 0, canvas.width, halfH);
+
+        // 多策略重试：默认参数兼容含字母单号；数字白名单+PSM11 解决数字行被干扰漏识别
+        const ocrStrategies = [
+          { name: '默认', params: {} },
+          { name: '数字白名单+PSM11', params: { tessedit_char_whitelist: '0123456789 ', tessedit_pageseg_mode: '11' } }
+        ];
+        for (const s of ocrStrategies) {
+          await worker.setParameters(s.params);
+          const { data: { text } } = await worker.recognize(crop);
+          const num = extractTrackingNumber(cleanText(text));
+          if (num) {
+            result = num;
+            appendLog('id-log', `第 ${i} 页（OCR-${s.name}）：${result}`, 'success');
+            break;
+          }
+        }
+        if (!result) {
+          appendLog('id-log', `第 ${i} 页未识别到物流单号`, 'warn');
+        }
+      } else {
+        appendLog('id-log', `第 ${i} 页未识别到（如需识别扫描件请勾选 OCR）`, 'warn');
+      }
+
+      state.results.push({ page: i, tracking: result });
+      renderTable();
+    }
+
+    const found = state.results.filter(r => r.tracking).length;
+    setProgress('id-progress', 'id-progress-text', 100, `完成：识别 ${found}/${total} 个单号`);
+    appendLog('id-log', `识别完成！共识别 ${found} 个物流单号，可在下方表格填写备注`, 'success');
+    document.getElementById('btn-export').disabled = false;
+    document.getElementById('btn-fill').disabled = false;
+    appendLog('fill-log', '识别完成，请在表格“备注”列填写内容后点击“添加备注到 PDF”', 'info');
+  } catch (e) {
+    appendLog('id-log', '识别出错：' + e.message, 'error');
+    alert('识别出错：' + e.message);
+  } finally {
+    if (worker) await worker.terminate();
+    btn.disabled = false;
+  }
+}
+
+/* ============ 表格渲染 ============ */
+
+/**
+ * 渲染识别结果三列表格（页码、物流单号只读；备注可编辑）
+ */
+function renderTable() {
+  const tbody = document.getElementById('result-tbody');
+  tbody.innerHTML = '';
+  if (state.results.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="3" class="empty-tip">请先完成步骤 1、2，识别结果将显示在此</td></tr>';
+    return;
+  }
+  state.results.forEach(r => {
+    const tr = document.createElement('tr');
+    const trackHtml = r.tracking
+      ? `<span class="has-track">${r.tracking}</span>`
+      : `<span class="no-track">未识别</span>`;
+    tr.innerHTML = `
+      <td class="col-page">${r.page}</td>
+      <td class="col-track">${trackHtml}</td>
+      <td class="col-remark"><input type="text" placeholder="输入备注内容" data-page="${r.page}"></td>
+    `;
+    tbody.appendChild(tr);
+  });
+  // 表格重渲染后重置中文勾选状态（空备注默认不勾选）
+  syncCjkCheckbox();
+}
+
+/**
+ * 从表格收集用户填写的备注
+ * @returns {Array<{page:number, remark:string}>} 有备注内容的记录
+ */
+function collectRemarksFromTable() {
+  const remarks = [];
+  document.querySelectorAll('#result-tbody .col-remark input').forEach(input => {
+    const remark = input.value.trim();
+    if (remark) {
+      remarks.push({ page: parseInt(input.dataset.page, 10), remark });
+    }
+  });
+  return remarks;
+}
+
+/**
+ * 实时检测表格中所有备注内容是否含中文，自动勾选/取消"备注包含中文"复选框
+ */
+function syncCjkCheckbox() {
+  const inputs = document.querySelectorAll('#result-tbody .col-remark input');
+  let hasChinese = false;
+  for (const input of inputs) {
+    if (containsChinese(input.value)) {
+      hasChinese = true;
+      break;
+    }
+  }
+  document.getElementById('use-cjk').checked = hasChinese;
+}
+
+/* ============ 导出 Excel ============ */
+
+/**
+ * 导出识别结果与备注为 Excel（页码、物流单号、备注）
+ */
+function exportExcel() {
+  if (state.results.length === 0) {
+    alert('请先识别物流单号');
+    return;
+  }
+  const remarks = collectRemarksFromTable();
+  const remarkMap = {};
+  remarks.forEach(r => { remarkMap[r.page] = r.remark; });
+
+  const data = state.results.map(r => ({
+    '页码': r.page,
+    '物流单号': r.tracking || '',
+    '备注': remarkMap[r.page] || ''
+  }));
+  const ws = XLSX.utils.json_to_sheet(data);
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, '物流单号与备注');
+  const outName = state.pdfFileName.replace(/\.pdf$/i, '_物流单号备注.xlsx');
+  XLSX.writeFile(wb, outName);
+  appendLog('id-log', `已导出：${outName}`, 'success');
+}
+
+/* ============ 步骤3：备注填充回 PDF ============ */
+
+let cjkFontBytes = null;
+
+/**
+ * 加载中文字体（思源黑体 SC），带缓存
+ * @returns {Promise<ArrayBuffer>}
+ */
+async function loadCjkFont() {
+  if (cjkFontBytes) return cjkFontBytes;
+  const url = 'https://cdn.jsdelivr.net/gh/StellarCN/scp_zh/fonts/SimHei.ttf';
+  const resp = await fetch(url);
+  if (!resp.ok) throw new Error('中文字体下载失败，请检查网络连接');
+  cjkFontBytes = await resp.arrayBuffer();
+  return cjkFontBytes;
+}
+
+/**
+ * 执行备注填充回 PDF 主流程
+ */
+async function fillRemarks() {
+  const logBox = 'fill-log';
+  if (!state.pdfBytes) {
+    alert('请先导入 PDF 文件');
+    return;
+  }
+  const remarks = collectRemarksFromTable();
+  if (remarks.length === 0) {
+    alert('请至少在一行中填写备注内容');
+    return;
+  }
+
+  // 判断是否需要中文字体
+  const needCjk = document.getElementById('use-cjk').checked &&
+    remarks.some(r => containsChinese(r.remark));
+
+  const btn = document.getElementById('btn-fill');
+  btn.disabled = true;
+  setProgress('fill-progress', 'fill-progress-text', 0, '处理中...');
+
+  try {
+    appendLog(logBox, `开始处理，共 ${remarks.length} 条备注`, 'info');
+    const { PDFDocument, StandardFonts, rgb } = PDFLib;
+    // pdf-lib 会消耗 ArrayBuffer，传入副本以保留原始数据
+    const pdfDoc = await PDFDocument.load(state.pdfBytes.slice(0));
+    pdfDoc.registerFontkit(fontkit);  // 注册 fontkit，以支持嵌入中文字体
+    const pages = pdfDoc.getPages();
+    appendLog(logBox, `PDF 已加载，共 ${pages.length} 页`, 'info');
+
+    // 嵌入字体
+    let font;
+    if (needCjk) {
+      appendLog(logBox, '检测到中文备注，正在加载中文字体（首次约 5MB，请稍候）...', 'warn');
+      setProgress('fill-progress', 'fill-progress-text', 10, '加载中文字体...');
+      try {
+        font = await pdfDoc.embedFont(await loadCjkFont());
+        appendLog(logBox, '中文字体加载完成', 'success');
+      } catch (e) {
+        appendLog(logBox, '中文字体加载失败：' + e.message + '，回退到 Helvetica', 'warn');
+        font = await pdfDoc.embedFont(StandardFonts.Helvetica);
+      }
+    } else {
+      font = await pdfDoc.embedFont(StandardFonts.Helvetica);
+    }
+
+    // 位置参数：距左 1cm，距底 1.5cm（1cm ≈ 28.3465 点）
+    const xMargin = 28.3465;
+    const yMargin = 42.5198;
+    let success = 0, fail = 0;
+
+    for (let i = 0; i < remarks.length; i++) {
+      const { page, remark } = remarks[i];
+      const pageIndex = page - 1;
+      const pct = 20 + Math.round((i / remarks.length) * 70);
+      setProgress('fill-progress', 'fill-progress-text', pct, `处理第 ${i + 1}/${remarks.length} 条`);
+
+      if (pageIndex >= pages.length || pageIndex < 0) {
+        appendLog(logBox, `页码超出范围：第 ${page} 页（PDF 共 ${pages.length} 页）`, 'warn');
+        fail++; continue;
+      }
+      try {
+        pages[pageIndex].drawText(remark, {
+          x: xMargin,
+          y: yMargin,            // pdf-lib 中 y 从底部计算，距底 1.5cm
+          size: 9,
+          font: font,
+          color: rgb(0, 0, 0)
+        });
+        success++;
+        appendLog(logBox, `✅ 第 ${page} 页添加备注：${remark}`, 'success');
+      } catch (e) {
+        appendLog(logBox, `❌ 第 ${page} 页添加失败：${e.message}`, 'error');
+        fail++;
+      }
+    }
+
+    // 保存并下载
+    setProgress('fill-progress', 'fill-progress-text', 95, '保存文件...');
+    const outBytes = await pdfDoc.save();
+    const outName = state.pdfFileName.replace(/\.pdf$/i, '_with_note.pdf');
+    downloadBytes(outBytes, outName);
+
+    setProgress('fill-progress', 'fill-progress-text', 100, '处理完成');
+    appendLog(logBox, `处理完成！成功 ${success} 条，失败 ${fail} 条，已下载：${outName}`, 'success');
+    alert(`处理完成！\n成功：${success} 条\n失败：${fail} 条\n已生成：${outName}`);
+  } catch (e) {
+    appendLog(logBox, '处理出错：' + e.message, 'error');
+    alert('处理出错：' + e.message);
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+/* ============ 初始化 ============ */
+
+/**
+ * 页面加载完成后初始化所有事件绑定
+ */
+function init() {
+  setupUpload();
+  document.getElementById('btn-identify').addEventListener('click', identifyTracking);
+  document.getElementById('btn-export').addEventListener('click', exportExcel);
+  document.getElementById('btn-fill').addEventListener('click', fillRemarks);
+  // 备注输入时实时检测中文，自动勾选/取消"备注包含中文"
+  document.getElementById('result-tbody').addEventListener('input', syncCjkCheckbox);
+
+  appendLog('id-log', '就绪，请先导入 PDF 文件', 'info');
+  appendLog('fill-log', '就绪，请先完成步骤 1、2', 'info');
+}
+
+document.addEventListener('DOMContentLoaded', init);
+</script>
+</body>
+</html>
