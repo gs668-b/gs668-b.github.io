@@ -1,0 +1,1609 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Copilot / 智能客服工作台 - 原型</title>
+<style>
+  /* ========== 基础重置 ========== */
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif; font-size: 13px; color: #1f2937; background: #f3f4f6; overflow: hidden; }
+  button { cursor: pointer; font-family: inherit; }
+  input, select, textarea { font-family: inherit; font-size: 13px; }
+
+  /* ========== 顶部导航 ========== */
+  .top-bar {
+    height: 44px; background: #fff; border-bottom: 1px solid #e5e7eb;
+    display: flex; align-items: center; padding: 0 16px; justify-content: space-between;
+  }
+  .top-bar .left { display: flex; align-items: center; gap: 12px; }
+  .top-bar .logo { font-weight: 600; color: #374151; font-size: 13px; }
+  .top-bar .right { display: flex; align-items: center; gap: 16px; }
+  .top-bar .icon-btn { width: 28px; height: 28px; border-radius: 6px; border: none; background: transparent; color: #6b7280; display: flex; align-items: center; justify-content: center; }
+  .top-bar .icon-btn:hover { background: #f3f4f6; }
+  .avatar { width: 28px; height: 28px; border-radius: 50%; background: linear-gradient(135deg, #f59e0b, #ef4444); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600; }
+
+  /* ========== 主体布局 ========== */
+  .main-container { display: flex; height: calc(100vh - 44px); }
+
+  /* 左侧导航 */
+  .side-nav {
+    width: 48px; background: #fff; border-right: 1px solid #e5e7eb;
+    display: flex; flex-direction: column; align-items: center; padding: 12px 0; gap: 4px;
+  }
+  .side-nav .nav-item {
+    width: 36px; height: 36px; border-radius: 8px; display: flex; align-items: center; justify-content: center;
+    color: #6b7280; cursor: pointer; font-size: 16px;
+  }
+  .side-nav .nav-item:hover { background: #f3f4f6; }
+  .side-nav .nav-item.active { background: #eff6ff; color: #2563eb; }
+  .side-nav .spacer { flex: 1; }
+
+  /* 内容区 */
+  .content-area { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+
+  /* 标签页 */
+  .tab-bar {
+    height: 36px; background: #fff; border-bottom: 1px solid #e5e7eb;
+    display: flex; align-items: flex-end; padding: 0 12px;
+  }
+  .tab {
+    padding: 0 14px; height: 32px; display: flex; align-items: center; gap: 8px;
+    border: 1px solid #e5e7eb; border-bottom: none; border-radius: 6px 6px 0 0;
+    background: #f9fafb; color: #6b7280; font-size: 12px; margin-right: 4px; cursor: pointer;
+  }
+  .tab.active { background: #fff; color: #1f2937; font-weight: 500; }
+  .tab .close { width: 16px; height: 16px; border-radius: 3px; display: flex; align-items: center; justify-content: center; font-size: 14px; }
+  .tab .close:hover { background: #e5e7eb; }
+
+  /* 筛选栏 */
+  .filter-bar {
+    background: #fff; border-bottom: 1px solid #e5e7eb; padding: 12px 16px;
+    display: flex; flex-wrap: wrap; gap: 10px; align-items: center;
+  }
+  .filter-bar select, .filter-bar input {
+    height: 30px; padding: 0 10px; border: 1px solid #d1d5db; border-radius: 6px; background: #fff;
+  }
+  .filter-bar .search-input { width: 200px; }
+  .filter-bar .date-range { display: flex; align-items: center; gap: 6px; }
+  .filter-bar .date-range input { width: 110px; }
+  .filter-bar .reset-btn {
+    height: 30px; padding: 0 14px; border: 1px solid #d1d5db; border-radius: 6px; background: #fff; color: #374151;
+  }
+  .filter-bar .reset-btn:hover { background: #f9fafb; }
+
+  /* 只看我负责的 - 开关样式 */
+  .my-tickets-switch {
+    display: flex; align-items: center; gap: 8px; height: 30px; cursor: pointer; user-select: none;
+  }
+  .my-tickets-switch .switch-icon {
+    width: 36px; height: 20px; border-radius: 10px; background: #d1d5db;
+    position: relative; transition: background 0.2s; flex-shrink: 0;
+  }
+  .my-tickets-switch .switch-icon::after {
+    content: ''; position: absolute; top: 2px; left: 2px;
+    width: 16px; height: 16px; border-radius: 50%; background: #fff;
+    transition: left 0.2s; box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+  }
+  .my-tickets-switch.active .switch-icon { background: #2563eb; }
+  .my-tickets-switch.active .switch-icon::after { left: 18px; }
+  .my-tickets-switch .switch-label {
+    font-size: 12px; color: #374151;
+  }
+  .my-tickets-switch.active .switch-label { color: #2563eb; font-weight: 500; }
+
+  /* 会话类型多选筛选器 */
+  .multi-filter {
+    display: flex; align-items: center; height: 30px;
+    border: 1px solid #d1d5db; border-radius: 6px; background: #fff;
+    padding: 0 4px 0 8px; gap: 4px;
+  }
+  .multi-filter .filter-tag {
+    display: inline-flex; align-items: center; gap: 4px;
+    padding: 1px 6px; background: #eff6ff; border-radius: 4px;
+    font-size: 11px; color: #1d4ed8; font-weight: 500;
+  }
+  .multi-filter .filter-tag .remove {
+    cursor: pointer; color: #60a5fa; font-size: 12px; line-height: 1;
+  }
+  .multi-filter .filter-more {
+    font-size: 11px; color: #6b7280; padding: 0 2px;
+  }
+  .multi-filter .filter-dropdown {
+    width: 20px; height: 20px; display: flex; align-items: center; justify-content: center;
+    color: #6b7280; cursor: pointer; border-left: 1px solid #e5e7eb; padding-left: 4px; margin-left: 2px;
+  }
+
+  /* 三栏工作区 */
+  .workspace { flex: 1; display: flex; overflow: hidden; }
+
+  /* 工单列表 */
+  .ticket-list {
+    width: 280px; background: #fff; border-right: 1px solid #e5e7eb;
+    display: flex; flex-direction: column;
+  }
+  .ticket-list-header {
+    padding: 10px 14px; border-bottom: 1px solid #f3f4f6;
+    display: flex; justify-content: space-between; align-items: center; font-weight: 600; font-size: 13px;
+  }
+  .ticket-list-header .count { color: #6b7280; font-weight: 400; font-size: 12px; }
+  .ticket-items { flex: 1; overflow-y: auto; }
+  .ticket-item {
+    padding: 10px 14px; border-bottom: 1px solid #f3f4f6; cursor: pointer; position: relative;
+  }
+  .ticket-item:hover { background: #f9fafb; }
+  .ticket-item.active { background: #eff6ff; border-left: 3px solid #2563eb; padding-left: 11px; }
+  .ticket-item .shop { font-size: 12px; color: #2563eb; font-weight: 600; margin-bottom: 2px; }
+  .ticket-item .customer { font-size: 12px; color: #374151; margin-bottom: 3px; }
+  .ticket-item .subject { font-size: 12px; color: #6b7280; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 6px; }
+  .ticket-item .meta { display: flex; justify-content: space-between; align-items: center; }
+  .ticket-item .tags { display: flex; gap: 4px; flex-wrap: wrap; }
+  .tag {
+    display: inline-block; padding: 1px 6px; border-radius: 4px; font-size: 11px; font-weight: 500;
+  }
+  .tag-new { background: #dbeafe; color: #1d4ed8; }
+  .tag-pending { background: #fef3c7; color: #b45309; }
+  .tag-pre { background: #e0e7ff; color: #4338ca; }
+  .tag-post { background: #fee2e2; color: #b91c1c; }
+  .ticket-item .time { font-size: 11px; color: #9ca3af; white-space: nowrap; }
+  .ticket-item .assignee {
+    position: absolute; top: 10px; right: 14px;
+    width: 20px; height: 20px; border-radius: 50%; font-size: 10px; color: #fff;
+    display: flex; align-items: center; justify-content: center; font-weight: 600;
+  }
+
+  /* 指派弹窗 */
+  .assign-menu {
+    position: absolute; top: 30px; right: 10px; background: #fff; border: 1px solid #e5e7eb;
+    border-radius: 8px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); padding: 6px; z-index: 100; width: 180px; display: none;
+  }
+  .assign-menu.show { display: block; }
+  .assign-menu .assign-title { padding: 6px 10px; font-size: 11px; color: #6b7280; font-weight: 600; text-transform: uppercase; }
+  .assign-menu .assign-item {
+    display: flex; align-items: center; gap: 8px; padding: 6px 10px; border-radius: 6px; cursor: pointer;
+  }
+  .assign-menu .assign-item:hover { background: #f3f4f6; }
+  .assign-menu .assign-item .mini-avatar {
+    width: 22px; height: 22px; border-radius: 50%; color: #fff; font-size: 10px;
+    display: flex; align-items: center; justify-content: center; font-weight: 600;
+  }
+  .assign-menu .assign-item .name { font-size: 12px; flex: 1; }
+  .assign-menu .assign-item .check { color: #2563eb; font-size: 12px; }
+  .assign-menu .divider { height: 1px; background: #f3f4f6; margin: 4px 0; }
+
+  /* 邮件区 */
+  .email-area {
+    flex: 1; display: flex; flex-direction: column; overflow: hidden; background: #f9fafb;
+  }
+  .email-header {
+    background: #fff; border-bottom: 1px solid #e5e7eb; padding: 14px 20px;
+  }
+  .email-header .subject { font-size: 15px; font-weight: 600; margin-bottom: 8px; display: flex; align-items: center; gap: 8px; }
+  .email-header .subject .edit-btn {
+    width: 24px; height: 24px; border-radius: 4px; border: none; background: transparent; color: #6b7280;
+  }
+  .email-header .subject .edit-btn:hover { background: #f3f4f6; }
+  .email-header .meta-row { display: flex; gap: 8px; margin-bottom: 6px; }
+  .email-header .from-info { display: flex; align-items: center; gap: 10px; font-size: 12px; color: #6b7280; }
+  .email-header .from-avatar {
+    width: 32px; height: 32px; border-radius: 50%; background: #9ca3af; color: #fff;
+    display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 12px;
+  }
+  .email-header .channel-tags { display: flex; gap: 6px; }
+  .channel-tag {
+    padding: 2px 8px; border-radius: 12px; font-size: 11px; font-weight: 500;
+  }
+  .channel-regular { background: #dbeafe; color: #1d4ed8; }
+  .channel-confirm { background: #dcfce7; color: #15803d; }
+  .channel-quality { background: #fee2e2; color: #b91c1c; }
+
+  /* 邮件内容区 */
+  .email-thread { flex: 1; overflow-y: auto; padding: 20px; }
+  .email-bubble {
+    max-width: 85%; margin-bottom: 16px; display: flex; gap: 10px;
+  }
+  .email-bubble.customer { justify-content: flex-start; }
+  .email-bubble.agent { justify-content: flex-end; margin-left: auto; }
+  .bubble-avatar {
+    width: 28px; height: 28px; border-radius: 50%; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 600; font-size: 11px;
+  }
+  .bubble-avatar.customer { background: #9ca3af; }
+  .bubble-avatar.agent { background: #22c55e; }
+  .bubble-content {
+    background: #fff; border-radius: 10px; padding: 12px 14px;
+    border: 1px solid #e5e7eb; font-size: 12.5px; line-height: 1.6; color: #374151;
+  }
+  .email-bubble.agent .bubble-content { background: #2563eb; color: #fff; border-color: #2563eb; }
+  .bubble-meta { font-size: 11px; color: #9ca3af; margin-top: 4px; display: flex; gap: 8px; }
+  .email-bubble.agent .bubble-meta { justify-content: flex-end; }
+
+  /* 回复区 */
+  .reply-area {
+    background: #fff; border-top: 1px solid #e5e7eb; padding: 12px 20px 16px;
+  }
+  .reply-toolbar {
+    display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;
+  }
+  .reply-toolbar .left-tools { display: flex; gap: 6px; align-items: center; }
+  .reply-toolbar .right-tools { display: flex; gap: 6px; align-items: center; }
+  .tool-btn {
+    height: 28px; padding: 0 10px; border: 1px solid #d1d5db; border-radius: 6px; background: #fff;
+    font-size: 12px; color: #374151; display: flex; align-items: center; gap: 5px;
+  }
+  .tool-btn:hover { background: #f9fafb; }
+  .tool-btn.primary { background: #2563eb; border-color: #2563eb; color: #fff; }
+  .tool-btn.primary:hover { background: #1d4ed8; }
+  .tool-btn.secondary { background: #f3f4f6; border-color: #e5e7eb; color: #374151; }
+
+  /* 模板选择器弹窗 */
+  .tpl-modal-overlay {
+    position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.4);
+    z-index: 2000; display: none; align-items: center; justify-content: center;
+  }
+  .tpl-modal-overlay.show { display: flex; }
+  .tpl-modal {
+    width: 960px; max-width: 95vw; height: 640px; max-height: 90vh; background: #fff;
+    border-radius: 12px; box-shadow: 0 20px 60px rgba(0,0,0,0.3); display: flex; flex-direction: column; overflow: hidden;
+  }
+  .tpl-modal-header {
+    padding: 14px 20px; border-bottom: 1px solid #f3f4f6; display: flex; justify-content: space-between; align-items: center;
+  }
+  .tpl-modal-header h3 { font-size: 15px; font-weight: 600; }
+  .tpl-modal-header .close-tpl { background: none; border: none; color: #6b7280; font-size: 20px; cursor: pointer; }
+  .tpl-modal-search { padding: 10px 20px; border-bottom: 1px solid #f3f4f6; }
+  .tpl-modal-search input {
+    width: 100%; height: 34px; padding: 0 12px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 13px;
+  }
+  .tpl-modal-body { display: flex; flex: 1; overflow: hidden; }
+
+  /* 左栏：分类 */
+  .tpl-col-cat { width: 200px; border-right: 1px solid #f3f4f6; overflow-y: auto; background: #fafafa; }
+  .tpl-cat-item {
+    padding: 10px 16px; font-size: 13px; color: #374151; cursor: pointer; border-left: 3px solid transparent;
+  }
+  .tpl-cat-item:hover { background: #f3f4f6; }
+  .tpl-cat-item.active { background: #fff; border-left-color: #2563eb; color: #2563eb; font-weight: 500; }
+  .tpl-cat-item .cat-count { float: right; color: #9ca3af; font-size: 11px; }
+  .tpl-subcats { padding: 4px 0; }
+  .tpl-subcat-item {
+    padding: 8px 16px 8px 30px; font-size: 12px; color: #6b7280; cursor: pointer;
+  }
+  .tpl-subcat-item:hover { background: #f3f4f6; color: #374151; }
+  .tpl-subcat-item.active { color: #2563eb; font-weight: 500; background: #eff6ff; }
+
+  /* 中栏：模板列表 */
+  .tpl-col-list { width: 300px; border-right: 1px solid #f3f4f6; overflow-y: auto; padding: 10px; }
+  .tpl-list-item {
+    padding: 12px 14px; border: 1px solid #e5e7eb; border-radius: 8px; margin-bottom: 8px; cursor: pointer;
+    transition: all 0.15s;
+  }
+  .tpl-list-item:hover { border-color: #93c5fd; background: #f0f7ff; }
+  .tpl-list-item.selected { border-color: #2563eb; background: #eff6ff; }
+  .tpl-list-item .tpl-id { font-size: 10px; color: #9ca3af; font-weight: 600; }
+  .tpl-list-item .tpl-name { font-size: 13px; font-weight: 500; color: #1f2937; margin: 3px 0 5px; }
+  .tpl-list-item .tpl-badges { display: flex; gap: 4px; }
+  .tpl-badge { font-size: 10px; padding: 1px 6px; border-radius: 3px; font-weight: 500; }
+  .badge-g { background: #e0e7ff; color: #4338ca; }
+  .badge-ready { background: #dcfce7; color: #15803d; }
+  .badge-cond { background: #fef3c7; color: #b45309; }
+  .badge-prereq { background: #fef3c7; color: #b45309; }
+  .badge-amazon { background: #fce7f3; color: #be185d; }
+  .badge-official { background: #e0f2fe; color: #0369a1; }
+
+  /* 右栏：详情 */
+  .tpl-col-detail { flex: 1; overflow-y: auto; padding: 20px 24px; }
+  .tpl-detail-empty { display: flex; align-items: center; justify-content: center; height: 100%; color: #9ca3af; font-size: 13px; }
+  .tpl-detail-id { font-size: 11px; color: #9ca3af; font-weight: 600; margin-bottom: 4px; }
+  .tpl-detail-name { font-size: 16px; font-weight: 600; color: #1f2937; margin-bottom: 12px; }
+  .tpl-detail-meta { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 16px; }
+  .tpl-detail-section { margin-bottom: 16px; }
+  .tpl-detail-section h5 { font-size: 12px; font-weight: 600; color: #6b7280; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px; }
+  .tpl-detail-content { font-size: 13px; line-height: 1.7; color: #374151; background: #f9fafb; border-radius: 8px; padding: 14px 16px; white-space: pre-wrap; }
+  .tpl-modal-footer {
+    padding: 12px 20px; border-top: 1px solid #f3f4f6; display: flex; justify-content: space-between; align-items: center;
+  }
+
+  /* 回复编辑器 */
+  .reply-editor {
+    border: 1px solid #d1d5db; border-radius: 8px; min-height: 120px; padding: 10px 12px;
+    font-size: 12.5px; line-height: 1.6; color: #374151; background: #fff;
+    outline: none; margin-bottom: 10px;
+  }
+  .reply-editor:focus { border-color: #2563eb; box-shadow: 0 0 0 3px rgba(37,99,235,0.1); }
+  .reply-editor .placeholder { color: #9ca3af; }
+
+  .reply-actions { display: flex; justify-content: space-between; align-items: center; }
+  .reply-actions .left { display: flex; gap: 8px; }
+  .reply-actions .right { display: flex; gap: 8px; }
+
+  /* 复杂发信面板 */
+  .compose-panel {
+    background: #fff; border: 1px solid #e5e7eb; border-radius: 10px; margin-bottom: 10px;
+    display: none;
+  }
+  .compose-panel.show { display: block; }
+  .compose-header {
+    padding: 10px 14px; border-bottom: 1px solid #f3f4f6;
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .compose-header h4 { font-size: 13px; font-weight: 600; }
+  .compose-fields { padding: 8px 14px; }
+  .compose-field {
+    display: flex; align-items: center; padding: 6px 0; border-bottom: 1px solid #f9fafb;
+  }
+  .compose-field:last-child { border-bottom: none; }
+  .compose-field label {
+    width: 60px; font-size: 12px; color: #6b7280; flex-shrink: 0;
+  }
+  .compose-field input {
+    flex: 1; border: none; outline: none; padding: 4px 0; font-size: 12.5px;
+  }
+  .compose-field .identity-select {
+    padding: 4px 8px; border: 1px solid #d1d5db; border-radius: 4px; font-size: 12px; background: #fff;
+  }
+  .compose-field .chip {
+    display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; background: #eff6ff;
+    border: 1px solid #bfdbfe; border-radius: 12px; font-size: 11px; color: #1d4ed8; margin-right: 4px;
+  }
+  .compose-field .chip .remove { cursor: pointer; color: #60a5fa; }
+  .compose-advanced {
+    padding: 0 14px 10px; display: flex; gap: 12px; align-items: center; flex-wrap: wrap;
+  }
+  .compose-advanced label { font-size: 12px; color: #6b7280; display: flex; align-items: center; gap: 4px; cursor: pointer; }
+  .compose-advanced input[type="datetime-local"] {
+    padding: 3px 6px; border: 1px solid #d1d5db; border-radius: 4px; font-size: 11.5px;
+  }
+
+  /* 右侧面板 */
+  .right-panel {
+    width: 320px; background: #fff; border-left: 1px solid #e5e7eb;
+    display: flex; flex-direction: column; overflow: hidden;
+  }
+  /* 右侧面板顶部 Tab 栏 */
+  .right-tab-bar {
+    height: 44px; border-bottom: 1px solid #f3f4f6;
+    display: flex; align-items: center; justify-content: space-around;
+    padding: 0 8px; flex-shrink: 0;
+  }
+  .right-tab-item {
+    position: relative;
+    width: 36px; height: 36px; border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px; cursor: pointer; color: #6b7280;
+    transition: all 0.15s;
+  }
+  .right-tab-item:hover { background: #f3f4f6; color: #374151; }
+  .right-tab-item.active { background: #eff6ff; color: #2563eb; }
+  .right-tab-item .tooltip {
+    position: absolute; bottom: -30px; left: 50%; transform: translateX(-50%);
+    background: #1f2937; color: #fff; padding: 3px 10px; border-radius: 4px;
+    font-size: 11px; white-space: nowrap; opacity: 0; pointer-events: none;
+    transition: opacity 0.15s; z-index: 10;
+  }
+  .right-tab-item:hover .tooltip { opacity: 1; }
+  .right-tab-item .tooltip::before {
+    content: ''; position: absolute; top: -4px; left: 50%; transform: translateX(-50%);
+    border-left: 4px solid transparent; border-right: 4px solid transparent;
+    border-bottom: 4px solid #1f2937;
+  }
+  .right-panel-content {
+    flex: 1; overflow-y: auto;
+  }
+  .right-panel-page { display: none; padding: 12px 14px; }
+  .right-panel-page.active { display: block; }
+  .right-page-title {
+    font-size: 13px; font-weight: 600; margin-bottom: 12px;
+    padding-bottom: 8px; border-bottom: 1px solid #f3f4f6;
+  }
+  .panel-section {
+    border-bottom: 1px solid #f3f4f6;
+  }
+  .panel-section-header {
+    padding: 10px 14px; font-weight: 600; font-size: 13px;
+    display: flex; justify-content: space-between; align-items: center; cursor: pointer;
+  }
+  .panel-section-header .arrow { font-size: 10px; color: #9ca3af; transition: transform 0.2s; }
+  .panel-section.collapsed .arrow { transform: rotate(-90deg); }
+  .panel-section.collapsed .panel-section-body { display: none; }
+  .panel-section-body { padding: 0 14px 12px; }
+
+  /* AI 摘要 */
+  .ai-summary-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; }
+  .ai-summary-item { font-size: 12px; color: #374151; margin-bottom: 8px; line-height: 1.5; }
+  .ai-summary-item .label { color: #6b7280; font-size: 11px; margin-bottom: 2px; }
+
+  /* AI 回复方向建议 */
+  .direction-card {
+    background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 8px; padding: 10px 12px; margin-bottom: 8px;
+  }
+  .direction-card.warning { background: #fffbeb; border-color: #fde68a; }
+  .direction-card.danger { background: #fef2f2; border-color: #fecaca; }
+  .direction-card .dir-title {
+    font-size: 12px; font-weight: 600; margin-bottom: 6px; display: flex; align-items: center; gap: 6px;
+  }
+  .direction-card .dir-title .icon { font-size: 14px; }
+  .direction-card .dir-content { font-size: 11.5px; color: #374151; line-height: 1.5; }
+  .direction-card .dir-content ul { padding-left: 16px; margin-top: 4px; }
+  .direction-card .dir-content li { margin-bottom: 2px; }
+  .template-ref {
+    display: inline-block; padding: 1px 6px; background: #dbeafe; color: #1d4ed8;
+    border-radius: 4px; font-size: 10.5px; font-weight: 500; margin: 0 2px;
+  }
+
+  /* 订单信息 */
+  .order-info-card {
+    background: #f9fafb; border-radius: 8px; padding: 10px 12px; margin-bottom: 8px;
+  }
+  .order-info-row {
+    display: flex; justify-content: space-between; font-size: 12px; padding: 3px 0;
+  }
+  .order-info-row .k { color: #6b7280; }
+  .order-info-row .v { color: #1f2937; font-weight: 500; }
+  .order-tabs { display: flex; gap: 4px; margin-top: 8px; }
+  .order-tab {
+    flex: 1; text-align: center; padding: 4px 0; font-size: 11px; border-radius: 4px; cursor: pointer;
+    background: #f3f4f6; color: #6b7280;
+  }
+  .order-tab.active { background: #2563eb; color: #fff; }
+
+  /* 自由发信弹窗 */
+  .modal-overlay {
+    position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.4);
+    z-index: 1000; display: none; align-items: center; justify-content: center;
+  }
+  .modal-overlay.show { display: flex; }
+  .modal {
+    width: 720px; max-height: 85vh; background: #fff; border-radius: 12px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.3); display: flex; flex-direction: column; overflow: hidden;
+  }
+  .modal-header {
+    padding: 14px 20px; border-bottom: 1px solid #e5e7eb;
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .modal-header h3 { font-size: 15px; font-weight: 600; }
+  .modal-header .close-modal {
+    width: 28px; height: 28px; border: none; background: transparent; border-radius: 6px;
+    font-size: 18px; color: #6b7280; cursor: pointer;
+  }
+  .modal-header .close-modal:hover { background: #f3f4f6; }
+  .modal-body { flex: 1; overflow-y: auto; padding: 16px 20px; }
+  .modal-footer {
+    padding: 12px 20px; border-top: 1px solid #e5e7eb; display: flex; justify-content: space-between; align-items: center;
+  }
+  .modal-footer .left { display: flex; gap: 8px; }
+  .modal-footer .right { display: flex; gap: 8px; }
+
+  .free-compose-field {
+    display: flex; align-items: center; padding: 8px 0; border-bottom: 1px solid #f3f4f6;
+  }
+  .free-compose-field label {
+    width: 70px; font-size: 12.5px; color: #6b7280; flex-shrink: 0;
+  }
+  .free-compose-field .field-content { flex: 1; }
+  .free-compose-field input[type="text"], .free-compose-field select {
+    width: 100%; border: none; outline: none; padding: 4px 0; font-size: 13px; background: transparent;
+  }
+  .free-compose-subject {
+    padding: 10px 0; border-bottom: 1px solid #f3f4f6;
+  }
+  .free-compose-subject input {
+    width: 100%; border: none; outline: none; font-size: 14px; font-weight: 500; padding: 4px 0;
+  }
+  .free-compose-body {
+    padding: 12px 0; min-height: 240px;
+  }
+  .free-compose-body textarea {
+    width: 100%; min-height: 240px; border: none; outline: none; resize: none;
+    font-size: 13px; line-height: 1.6; color: #374151;
+  }
+  .ai-compose-bar {
+    display: flex; gap: 8px; align-items: center; padding: 8px 12px;
+    background: #f0f9ff; border: 1px dashed #7dd3fc; border-radius: 8px; margin-bottom: 10px;
+  }
+  .ai-compose-bar .ai-icon { font-size: 16px; }
+  .ai-compose-bar .ai-text { font-size: 12px; color: #0369a1; flex: 1; }
+  .ai-compose-bar .ai-btn {
+    padding: 4px 10px; background: #0ea5e9; color: #fff; border: none; border-radius: 5px; font-size: 11.5px;
+  }
+
+  /* 滚动条 */
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover { background: #9ca3af; }
+
+  /* 小工具 */
+  .flex { display: flex; }
+  .gap-4 { gap: 4px; }
+  .gap-8 { gap: 8px; }
+  .mt-6 { margin-top: 6px; }
+  .mt-8 { margin-top: 8px; }
+  .text-gray { color: #6b7280; }
+  .text-sm { font-size: 11px; }
+  .font-bold { font-weight: 600; }
+</style>
+</head>
+<body>
+
+<!-- ========== 顶部导航 ========== -->
+<div class="top-bar">
+  <div class="left">
+    <div class="logo">AI Copilot / 智能客服工作台</div>
+  </div>
+  <div class="right">
+    <button class="icon-btn" title="通知">🔔</button>
+    <button class="icon-btn" title="主题模式">☀️</button>
+    <button class="icon-btn" title="全屏">⛶</button>
+    <div class="avatar">Z</div>
+  </div>
+</div>
+
+<div class="main-container">
+  <!-- 左侧导航 -->
+  <div class="side-nav">
+    <div class="nav-item" title="首页">🏠</div>
+    <div class="nav-item" title="新建">➕</div>
+    <div class="nav-item" title="工单">📋</div>
+    <div class="nav-item active" title="智能客服">🤖</div>
+    <div class="nav-item" title="话术库">📝</div>
+    <div class="nav-item" title="数据分析">📊</div>
+    <div class="spacer"></div>
+    <div class="nav-item" title="设置">⚙️</div>
+  </div>
+
+  <!-- 内容区 -->
+  <div class="content-area">
+    <!-- 标签页 -->
+    <div class="tab-bar">
+      <div class="tab">
+        <span>首页</span>
+      </div>
+      <div class="tab active">
+        <span>智能客服工作台</span>
+        <span class="close">×</span>
+      </div>
+    </div>
+
+    <!-- 筛选栏 -->
+    <div class="filter-bar">
+      <select style="width:120px;">
+        <option>Amazon</option>
+        <option>官网</option>
+        <option>全部渠道</option>
+      </select>
+      <select style="width:120px;">
+        <option>选择店铺</option>
+        <option>MelodySusie Direct</option>
+        <option>JUJIN SHOP亚马逊平台</option>
+      </select>
+      <select style="width:110px;">
+        <option>会话类型</option>
+        <option>普通邮件</option>
+        <option>待确认</option>
+        <option>售后-质量瑕疵</option>
+      </select>
+      <div class="multi-filter" title="会话类型（多选）">
+        <span class="filter-tag">新建 <span class="remove" onclick="event.stopPropagation(); this.parentElement.remove();">×</span></span>
+        <span class="filter-more">+3</span>
+        <span class="filter-dropdown">▼</span>
+      </div>
+      <select style="width:100px;">
+        <option>工单分类</option>
+        <option>售前</option>
+        <option>售中</option>
+        <option>售后</option>
+      </select>
+      <select style="width:110px;">
+        <option>问题类型</option>
+        <option>质量瑕疵</option>
+        <option>物流问题</option>
+        <option>退货退款</option>
+      </select>
+      <select style="width:100px;">
+        <option>回复状态</option>
+        <option>未标记</option>
+        <option>标记后新邮件</option>
+        <option>无新邮件</option>
+      </select>
+      <input type="text" class="search-input" placeholder="邮件标题">
+
+      <div style="flex:1;"></div>
+
+      <!-- 只看我负责的 -->
+      <div class="my-tickets-switch active" id="myTicketsToggle" onclick="toggleMyTickets()">
+        <div class="switch-icon"></div>
+        <span class="switch-label">只看我负责的</span>
+      </div>
+
+      <div class="date-range">
+        <input type="date" value="2026-08-01">
+        <span class="text-gray">~</span>
+        <input type="date" value="2026-08-25">
+        <span>📅</span>
+      </div>
+      <input type="text" class="search-input" placeholder="搜索客户邮箱/名称">
+      <button class="reset-btn">重置筛选</button>
+    </div>
+
+    <!-- 工作区 -->
+    <div class="workspace">
+      <!-- 工单列表 -->
+      <div class="ticket-list">
+        <div class="ticket-list-header">
+          <span>工单列表</span>
+          <span class="count">共 28 条</span>
+        </div>
+        <div class="ticket-items" id="ticketList">
+          <!-- 工单项由 JS 渲染 -->
+        </div>
+      </div>
+
+      <!-- 邮件区 -->
+      <div class="email-area">
+        <div class="email-header">
+          <div class="subject">
+            <span>Fw: Problem with lamp, etc.</span>
+            <button class="edit-btn" title="编辑主题">✏️</button>
+          </div>
+          <div class="meta-row">
+            <div class="channel-tags">
+              <span class="channel-tag channel-regular">普通邮件</span>
+              <span class="channel-tag channel-confirm">待确认</span>
+              <span class="channel-tag channel-quality">售后-质量瑕疵</span>
+            </div>
+          </div>
+          <div class="from-info">
+            <div class="from-avatar">G</div>
+            <div>
+              <div><strong>gtny29@gmail.com</strong></div>
+              <div class="text-sm text-gray">amazon | service.pro@melodysusie.com</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 邮件对话 -->
+        <div class="email-thread">
+          <!-- 客户来信 -->
+          <div class="email-bubble customer">
+            <div class="bubble-avatar customer">G</div>
+            <div>
+              <div class="bubble-content">
+                Hi, I' m very concerned. Each time I use your lamp, Nail Dryer, part No. P-ART01R, I have to move it further away from my finger, or it burns. I started at about 2" and now it' s at maximum distance the stand will accommodate. Has this occurred with others, At this rate, I won' t be able to use it again. I hope it' s not becoming dangerous. I bought it from Amazon. I' m a pro guitarist and my right hand nails are not strong, so I apply IBD Gel Builder and top Coat and cure it with the lamp. Please help. Matt Aschkynazo
+              </div>
+              <div class="bubble-meta">
+                <span>客户来信</span>
+                <span>·</span>
+                <span>2026/8/21 06:37:00</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- 客服回复 -->
+          <div class="email-bubble agent">
+            <div>
+              <div class="bubble-content">
+                Hi, Thank you for reaching out and sharing your concerns with us. I completely understand how worrying this must be. What you're describing sounds like the normal heat sensation that can occur during the curing process. When gel products (especially builder gels or top coats) cure under UV/LED light, they undergo a chemical reaction that can release heat. Certain formulas are more prone to this than others, and it's usually related to the gel itself rather than the lamp. This type of heat is not typically dangerous and doesn't mean the lamp is malfunctioning. However, it's absolutely understandable that it feels uncomfortable. We would recommend trying a different gel brand or a formula specifically labeled as "low heat" or "for sensitive nails," as some gels are designed to cure with less heat release. You might also try curing in shorter intervals or using a lower power setting if available. If you continue to experience discomfort, please don't hesitate to reach out again. We're always happy to help. Warm regards, MelodySusie Customer Service Team
+              </div>
+              <div class="bubble-meta">
+                <span>客服回复</span>
+                <span>·</span>
+                <span>2026/8/21 09:12:00</span>
+              </div>
+            </div>
+            <div class="bubble-avatar agent">S</div>
+          </div>
+
+          <!-- 客户二次来信 -->
+          <div class="email-bubble customer">
+            <div class="bubble-avatar customer">G</div>
+            <div>
+              <div class="bubble-content">
+                Hello, this is regarding order 113-1384316-4636255. We are sorry to hear your fingers are still hurting. Please stop using the original lamp immediately, and if the pain does not improve, consult a medical professional. Your replacement P-ART01G has been arranged and shipped. Tracking number: TBA328958896933, carrier: Amazon Logistics US. Tracking link: https://www.swiship.com/track/?id=TBA328958896933. Regarding the old lamp, please keep it in a safe place for now; if a return is required, we will notify you.
+              </div>
+              <div class="bubble-meta">
+                <span>客户二次来信（转发补发通知）</span>
+                <span>·</span>
+                <span>2026/8/23 14:22:00</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 回复区 -->
+        <div class="reply-area">
+          <!-- 复杂发信面板 -->
+          <div class="compose-panel" id="composePanel">
+            <div class="compose-header">
+              <h4>📧 复杂发信模式</h4>
+              <button class="tool-btn secondary" style="height:24px;padding:0 8px;font-size:11px;" onclick="toggleComposePanel()">收起</button>
+            </div>
+            <div class="compose-fields">
+              <div class="compose-field">
+                <label>发件身份</label>
+                <select class="identity-select">
+                  <option>service.pro@melodysusie.com (售后客服)</option>
+                  <option>support@melodysusie.com (客服支持)</option>
+                  <option>info@melodysusie.com (品牌通知)</option>
+                </select>
+              </div>
+              <div class="compose-field">
+                <label>收件人</label>
+                <div style="flex:1;display:flex;flex-wrap:wrap;gap:4px;align-items:center;">
+                  <span class="chip">gtny29@gmail.com <span class="remove" onclick="this.parentElement.remove()">×</span></span>
+                  <input type="text" placeholder="添加收件人..." style="flex:1;min-width:120px;border:none;outline:none;">
+                </div>
+                <button class="tool-btn secondary" style="height:24px;padding:0 8px;font-size:11px;">编辑</button>
+              </div>
+              <div class="compose-field">
+                <label>抄送</label>
+                <div style="flex:1;display:flex;flex-wrap:wrap;gap:4px;align-items:center;">
+                  <input type="text" placeholder="添加抄送..." style="flex:1;min-width:120px;border:none;outline:none;">
+                </div>
+              </div>
+              <div class="compose-field">
+                <label>密送</label>
+                <div style="flex:1;display:flex;flex-wrap:wrap;gap:4px;align-items:center;">
+                  <input type="text" placeholder="添加密送..." style="flex:1;min-width:120px;border:none;outline:none;">
+                </div>
+              </div>
+            </div>
+            <div class="compose-advanced">
+              <label><input type="checkbox"> 定时发送</label>
+              <input type="datetime-local" value="2026-08-26T09:00">
+
+            </div>
+          </div>
+
+          <!-- 工具栏 -->
+          <div class="reply-toolbar">
+            <div class="left-tools">
+              <button class="tool-btn" onclick="toggleComposePanel()">📧 发信功能</button>
+              <button class="tool-btn" onclick="openFreeCompose()">✉️ 自由发信</button>
+              <button class="tool-btn">📎 附件</button>
+              <button class="tool-btn">😊 表情</button>
+            </div>
+            <div class="right-tools">
+              <button class="tool-btn secondary" onclick="toggleTemplatePicker(this)">🔄 重新生成</button>
+            </div>
+          </div>
+
+          <!-- 编辑器 -->
+          <div class="reply-editor" id="replyEditor" contenteditable="true">
+            <div>Hello,</div>
+            <div><br></div>
+            <div>Thank you for your follow-up email. We're sorry to hear that you're still experiencing discomfort while using the lamp.</div>
+            <div><br></div>
+            <div>We've noted that a replacement P-ART01G has been arranged and shipped to you. The tracking number is TBA328958896933, shipped via Amazon Logistics US.</div>
+            <div><br></div>
+            <div>Please stop using the original lamp immediately for your safety. If the pain persists or worsens, we recommend consulting a medical professional promptly.</div>
+            <div><br></div>
+            <div>Regarding the old lamp, please keep it in a safe place for now. If a return is needed, we will notify you separately with return instructions.</div>
+            <div><br></div>
+            <div>If you have any other questions, please feel free to contact us.</div>
+            <div><br></div>
+            <div>Best regards,</div>
+            <div>MelodySusie Support Team</div>
+          </div>
+
+          <div class="reply-actions">
+            <div class="left">
+              <button class="tool-btn">💾 保存草稿</button>
+            </div>
+            <div class="right">
+              <button class="tool-btn secondary">📋 复制回复</button>
+              <button class="tool-btn primary">📤 发送邮件</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 右侧面板 -->
+      <div class="right-panel">
+        <!-- 顶部 Tab 栏 -->
+        <div class="right-tab-bar">
+          <div class="right-tab-item active" data-tab="summary" onclick="switchRightTab('summary')">
+            🤖
+            <span class="tooltip">AI 摘要</span>
+          </div>
+          <div class="right-tab-item" data-tab="suggestion" onclick="switchRightTab('suggestion')">
+            💡
+            <span class="tooltip">回复建议</span>
+          </div>
+          <div class="right-tab-item" data-tab="orders" onclick="switchRightTab('orders')">
+            📦
+            <span class="tooltip">客户历史订单信息</span>
+          </div>
+          <div class="right-tab-item" data-tab="logistics" onclick="switchRightTab('logistics')">
+            🚚
+            <span class="tooltip">物流查询工具</span>
+          </div>
+          <div class="right-tab-item" data-tab="resend" onclick="switchRightTab('resend')">
+            🔄
+            <span class="tooltip">补发工具</span>
+          </div>
+        </div>
+
+        <div class="right-panel-content">
+          <!-- Tab 1: AI 摘要 -->
+          <div class="right-panel-page active" id="page-summary">
+            <div class="right-page-title">🤖 AI 摘要</div>
+            <div class="ai-summary-tags">
+              <span class="tag tag-pending">待确认</span>
+              <span class="tag tag-post">售后-质量瑕疵</span>
+              <button class="tool-btn secondary" style="height:22px;padding:0 8px;font-size:11px;">标注</button>
+            </div>
+            <div class="ai-summary-item">
+              <div class="label">人工标记状态</div>
+              <div>未标记</div>
+            </div>
+            <div class="ai-summary-item">
+              <div class="label">标记后新邮件</div>
+              <div><span class="tag tag-new">无新邮件</span></div>
+            </div>
+            <div class="ai-summary-item">
+              <div class="label">对话摘要</div>
+              <div>客户反映美甲灯使用时有灼烧感，客服解释后同意更换。客户接受替代型号P-ART01G，客服已安排发货。客户再次询问旧灯是否需要退回，并提及手指仍有疼痛。</div>
+            </div>
+            <div class="ai-summary-item">
+              <div class="label">业务分类</div>
+              <div>售后 > 质量瑕疵 > 质量问题</div>
+            </div>
+            <div class="ai-summary-item">
+              <div class="label">工单分类</div>
+              <div><span class="tag tag-post">高风险</span></div>
+            </div>
+            <div class="ai-summary-item">
+              <div class="label">整体情绪强度</div>
+              <div><span style="display:inline-block;width:60px;height:6px;background:#fef3c7;border-radius:3px;vertical-align:middle;margin-right:6px;"></span>负面</div>
+            </div>
+            <div class="ai-summary-item">
+              <div class="label">情绪趋势</div>
+              <div class="text-sm text-gray">（图表占位）</div>
+            </div>
+          </div>
+
+          <!-- Tab 2: 回复建议 -->
+          <div class="right-panel-page" id="page-suggestion">
+            <div class="right-page-title">💡 AI 回复方向建议</div>
+            <!-- 为什么这样回复 -->
+            <div class="direction-card">
+              <div class="dir-title">
+                <span class="icon">🧠</span>
+                <span>为什么这样回复</span>
+              </div>
+              <div class="dir-content">
+                客户在第二封邮件中转发了补发通知，并隐含两个诉求：
+                <ul>
+                  <li>手指仍在疼痛（安全相关，需优先回应）</li>
+                  <li>旧灯是否需要退回（未明确表态）</li>
+                </ul>
+                因此回复结构为：安全提示 → 确认补发在途 → 旧灯暂存说明 → 开放后续联系。
+              </div>
+            </div>
+
+            <!-- 模板依据 -->
+            <div class="direction-card">
+              <div class="dir-title">
+                <span class="icon">📚</span>
+                <span>遵循的模板</span>
+              </div>
+              <div class="dir-content">
+                本次回复组合使用以下模板：
+                <ul>
+                  <li><span class="template-ref">G1</span> 确认收到视频或附件 — 确认收到本封转发内容</li>
+                  <li><span class="template-ref">T18</span> 打磨机发烫但未造成伤害 — 安全提示与停用建议（条件模板，已核实无重伤）</li>
+                  <li><span class="template-ref">T23</span> 无需退还故障产品 — 受阻模板，仅作内部参考，草稿中改为「如需退回将另行通知」的核实式表达</li>
+                </ul>
+                <div style="margin-top:6px;font-size:11px;color:#6b7280;">
+                  承诺强度：核实式（符合一期红线，未断言保修资格或补发动作）
+                </div>
+              </div>
+            </div>
+
+            <!-- 建议运营执行的动作 -->
+            <div class="direction-card warning">
+              <div class="dir-title">
+                <span class="icon">⚡</span>
+                <span>建议运营执行</span>
+              </div>
+              <div class="dir-content">
+                <ul>
+                  <li><strong>核实补发物流</strong>：确认 TBA328958896933 是否真实发出，当前草稿引用了客户转发的单号，需内部二次确认</li>
+                  <li><strong>安全事件登记</strong>：客户提及手指疼痛，属安全信号，建议登记安全事件单并跟进恢复情况</li>
+                  <li><strong>旧灯回收决策</strong>：需运营决定旧灯是否要求退回，当前草稿用了模糊表述「如需退回将通知」</li>
+                </ul>
+              </div>
+            </div>
+
+            <!-- 历史遗漏提醒 -->
+            <div class="direction-card danger">
+              <div class="dir-title">
+                <span class="icon">⚠️</span>
+                <span>历史上下文遗漏提醒</span>
+              </div>
+              <div class="dir-content">
+                <ul>
+                  <li>
+                    <strong>承诺未兑现风险：</strong>
+                    上封客服回复（8/21）中提到「可以尝试低功率模式或缩短固化时间」，但客户第二封来信（8/23）显示客服已直接安排了补发——中间<strong>没有告知客户补发申请已批准</strong>的过渡邮件，客户可能是从 Amazon 通知得知的。
+                    <div style="margin-top:4px;color:#b91c1c;">建议在本封中补充一句补发批准的确认，避免客户困惑。</div>
+                  </li>
+                  <li style="margin-top:6px;">
+                    <strong>未回复的问题：</strong>
+                    客户首封问了「Has this occurred with others」（其他人是否也有这个问题），上封回复中未直接回应。
+                    <div style="margin-top:4px;color:#b45309;">可考虑在本封补充一句「这是固化过程中的正常放热反应，并非产品故障」。</div>
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          <!-- Tab 3: 客户历史订单 -->
+          <div class="right-panel-page" id="page-orders">
+            <div class="right-page-title">📦 客户历史订单信息</div>
+            <div class="order-info-card">
+              <div style="font-size:12px;font-weight:600;margin-bottom:8px;">客户画像</div>
+              <div class="order-info-row"><span class="k">历史订单数量</span><span class="v">2</span></div>
+              <div class="order-info-row"><span class="k">总 GMV</span><span class="v">$24.97</span></div>
+              <div class="order-info-row"><span class="k">平均订单金额</span><span class="v">$12.48</span></div>
+              <div class="order-info-row"><span class="k">最近购买</span><span class="v">2026-04-09</span></div>
+              <div class="order-info-row"><span class="k">客户等级</span><span class="v" style="color:#f59e0b;">⭐ 普通客户</span></div>
+            </div>
+
+            <div style="margin-top:12px;">
+              <div style="font-size:12px;font-weight:600;margin-bottom:8px;">订单列表</div>
+              <div style="border:1px solid #e5e7eb;border-radius:8px;overflow:hidden;">
+                <div style="padding:8px 10px;background:#f9fafb;border-bottom:1px solid #e5e7eb;display:flex;justify-content:space-between;align-items:center;">
+                  <div>
+                    <div style="font-size:12px;font-weight:500;">#113-1384316-4636255</div>
+                    <div style="font-size:11px;color:#6b7280;margin-top:2px;">P-ART01R UV LED Nail Lamp</div>
+                  </div>
+                  <div style="text-align:right;">
+                    <div style="font-size:12px;font-weight:600;">$14.99</div>
+                    <div style="font-size:11px;color:#10b981;">已发货</div>
+                  </div>
+                </div>
+                <div style="padding:8px 10px;background:#fff;display:flex;justify-content:space-between;align-items:center;">
+                  <div>
+                    <div style="font-size:12px;font-weight:500;">#112-9981234-1122334</div>
+                    <div style="font-size:11px;color:#6b7280;margin-top:2px;">Gel Nail Polish Set (6 colors)</div>
+                  </div>
+                  <div style="text-align:right;">
+                    <div style="font-size:12px;font-weight:600;">$9.98</div>
+                    <div style="font-size:11px;color:#6b7280;">已完成</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="order-tabs" style="margin-top:12px;">
+              <div class="order-tab active">当前售后订单</div>
+              <div class="order-tab">全部订单</div>
+            </div>
+          </div>
+
+          <!-- Tab 4: 物流查询工具 -->
+          <div class="right-panel-page" id="page-logistics">
+            <div class="right-page-title">🚚 物流查询工具</div>
+
+            <div style="margin-bottom:12px;">
+              <div style="font-size:12px;color:#6b7280;margin-bottom:6px;">输入运单号查询</div>
+              <div style="display:flex;gap:6px;">
+                <input type="text" value="TBA328958896933" style="flex:1;height:30px;padding:0 10px;border:1px solid #d1d5db;border-radius:6px;">
+                <button class="tool-btn primary" style="height:30px;">查询</button>
+              </div>
+            </div>
+
+            <div style="margin-bottom:12px;">
+              <div style="font-size:12px;color:#6b7280;margin-bottom:6px;">承运商</div>
+              <select style="width:100%;height:30px;padding:0 10px;border:1px solid #d1d5db;border-radius:6px;">
+                <option>Amazon Logistics US</option>
+                <option>USPS</option>
+                <option>UPS</option>
+                <option>FedEx</option>
+                <option>China Post</option>
+                <option>Yanwen</option>
+              </select>
+            </div>
+
+            <!-- 物流轨迹 -->
+            <div style="background:#f9fafb;border:1px solid #e5e7eb;border-radius:8px;padding:12px;">
+              <div style="font-size:12px;font-weight:600;margin-bottom:10px;">物流轨迹</div>
+              <div style="position:relative;padding-left:20px;">
+                <div style="position:absolute;left:6px;top:4px;bottom:4px;width:2px;background:#e5e7eb;"></div>
+
+                <div style="position:relative;margin-bottom:14px;">
+                  <div style="position:absolute;left:-20px;top:2px;width:10px;height:10px;border-radius:50%;background:#22c55e;border:2px solid #fff;box-shadow:0 0 0 2px #22c55e;"></div>
+                  <div style="font-size:11.5px;font-weight:500;">已送达</div>
+                  <div style="font-size:11px;color:#6b7280;margin-top:2px;">2026-08-22 14:32 · 已由前台签收</div>
+                </div>
+
+                <div style="position:relative;margin-bottom:14px;">
+                  <div style="position:absolute;left:-20px;top:2px;width:10px;height:10px;border-radius:50%;background:#9ca3af;border:2px solid #fff;"></div>
+                  <div style="font-size:11.5px;">派送中</div>
+                  <div style="font-size:11px;color:#6b7280;margin-top:2px;">2026-08-22 08:15 · 当地配送站</div>
+                </div>
+
+                <div style="position:relative;margin-bottom:14px;">
+                  <div style="position:absolute;left:-20px;top:2px;width:10px;height:10px;border-radius:50%;background:#9ca3af;border:2px solid #fff;"></div>
+                  <div style="font-size:11.5px;">运输中</div>
+                  <div style="font-size:11px;color:#6b7280;margin-top:2px;">2026-08-21 16:40 · 洛杉矶转运中心</div>
+                </div>
+
+                <div style="position:relative;">
+                  <div style="position:absolute;left:-20px;top:2px;width:10px;height:10px;border-radius:50%;background:#9ca3af;border:2px solid #fff;"></div>
+                  <div style="font-size:11.5px;">已发货</div>
+                  <div style="font-size:11px;color:#6b7280;margin-top:2px;">2026-08-21 09:00 · 仓库出库</div>
+                </div>
+              </div>
+            </div>
+
+            <div style="margin-top:12px;display:flex;gap:6px;">
+              <button class="tool-btn secondary" style="flex:1;">📋 复制单号</button>
+              <button class="tool-btn secondary" style="flex:1;">🔗 打开官网</button>
+            </div>
+          </div>
+
+          <!-- Tab 5: 补发工具 -->
+          <div class="right-panel-page" id="page-resend">
+            <div class="right-page-title">🔄 补发工具</div>
+
+            <div style="background:#fef3c7;border:1px solid #fde68a;border-radius:8px;padding:10px 12px;margin-bottom:12px;">
+              <div style="font-size:12px;font-weight:600;color:#92400e;margin-bottom:4px;">⚠️ 补发属成本动作</div>
+              <div style="font-size:11.5px;color:#78350f;">请确认补发原因和物品后再提交，所有补发操作将记录在案。</div>
+            </div>
+
+            <div style="margin-bottom:10px;">
+              <div style="font-size:12px;color:#6b7280;margin-bottom:6px;">补发原因</div>
+              <select style="width:100%;height:30px;padding:0 10px;border:1px solid #d1d5db;border-radius:6px;">
+                <option>质量问题补发</option>
+                <option>运输破损补发</option>
+                <option>缺件补发</option>
+                <option>发错货补发</option>
+                <option>客户关怀补发</option>
+              </select>
+            </div>
+
+            <div style="margin-bottom:10px;">
+              <div style="font-size:12px;color:#6b7280;margin-bottom:6px;">补发商品</div>
+              <div style="border:1px solid #e5e7eb;border-radius:6px;padding:8px 10px;background:#f9fafb;">
+                <div style="font-size:12px;font-weight:500;">P-ART01G UV LED Nail Lamp (替代型号)</div>
+                <div style="font-size:11px;color:#6b7280;margin-top:2px;">数量：1 · 成本价：$8.50</div>
+              </div>
+              <button class="tool-btn secondary" style="margin-top:6px;height:26px;font-size:11px;">➕ 更换/添加商品</button>
+            </div>
+
+            <div style="margin-bottom:10px;">
+              <div style="font-size:12px;color:#6b7280;margin-bottom:6px;">补发仓库</div>
+              <select style="width:100%;height:30px;padding:0 10px;border:1px solid #d1d5db;border-radius:6px;">
+                <option>Amazon FBA（美国仓）</option>
+                <option>中国深圳仓（小包）</option>
+                <option>第三方海外仓</option>
+              </select>
+            </div>
+
+            <div style="margin-bottom:10px;">
+              <div style="font-size:12px;color:#6b7280;margin-bottom:6px;">收货地址</div>
+              <div style="border:1px solid #e5e7eb;border-radius:6px;padding:8px 10px;font-size:11.5px;line-height:1.5;">
+                Matt Aschkynazo<br>
+                1234 Sunset Blvd, Apt 5B<br>
+                Los Angeles, CA 90026<br>
+                United States<br>
+                <span style="color:#6b7280;">Tel: +1 213-555-0123</span>
+              </div>
+              <button class="tool-btn secondary" style="margin-top:6px;height:26px;font-size:11px;">✏️ 修改地址</button>
+            </div>
+
+            <div style="margin-bottom:12px;">
+              <div style="font-size:12px;color:#6b7280;margin-bottom:6px;">备注（内部）</div>
+              <textarea style="width:100%;height:60px;padding:8px 10px;border:1px solid #d1d5db;border-radius:6px;font-size:12px;resize:none;" placeholder="选填，仅内部可见...">客户反映原型号 P-ART01R 有灼烧感，更换为 P-ART01G 替代型号</textarea>
+            </div>
+
+            <div style="display:flex;gap:6px;">
+              <button class="tool-btn secondary" style="flex:1;">💾 保存草稿</button>
+              <button class="tool-btn primary" style="flex:1;">✅ 提交补发</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ========== 自由发信弹窗 ========== -->
+<div class="modal-overlay" id="freeComposeModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3>✉️ 自由发信</h3>
+      <button class="close-modal" onclick="closeFreeCompose()">×</button>
+    </div>
+    <div class="modal-body">
+      <!-- AI 辅助条 -->
+      <div class="ai-compose-bar">
+        <span class="ai-icon">🤖</span>
+        <span class="ai-text">输入收件人和主题后，AI 可自动调用模板生成邮件正文</span>
+        <button class="ai-btn" onclick="aiGenerateEmail()">AI 生成</button>
+      </div>
+
+      <!-- 发件身份 -->
+      <div class="free-compose-field">
+        <label>发件身份</label>
+        <div class="field-content">
+          <select>
+            <option>service.pro@melodysusie.com (售后客服)</option>
+            <option>support@melodysusie.com (客服支持)</option>
+            <option>info@melodysusie.com (品牌通知)</option>
+            <option>marketing@melodysusie.com (营销邮件)</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- 收件人 -->
+      <div class="free-compose-field">
+        <label>收件人</label>
+        <div class="field-content">
+          <div style="display:flex;flex-wrap:wrap;gap:4px;align-items:center;">
+            <input type="text" placeholder="输入收件人邮箱，回车添加..." style="flex:1;min-width:200px;border:none;outline:none;">
+          </div>
+        </div>
+      </div>
+
+      <!-- 抄送/密送 -->
+      <div class="free-compose-field">
+        <label>抄送 / 密送</label>
+        <div class="field-content">
+          <div style="display:flex;gap:12px;">
+            <div style="flex:1;">
+              <div class="text-sm text-gray" style="margin-bottom:2px;">抄送 CC</div>
+              <input type="text" placeholder="添加抄送..." style="width:100%;border:none;outline:none;border-bottom:1px solid #e5e7eb;padding:2px 0;">
+            </div>
+            <div style="flex:1;">
+              <div class="text-sm text-gray" style="margin-bottom:2px;">密送 BCC</div>
+              <input type="text" placeholder="添加密送..." style="width:100%;border:none;outline:none;border-bottom:1px solid #e5e7eb;padding:2px 0;">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 主题 -->
+      <div class="free-compose-subject">
+        <input type="text" placeholder="邮件主题">
+      </div>
+
+      <!-- 模板选择快捷入口 -->
+      <div style="margin-bottom:10px;">
+        <button class="tool-btn" onclick="toggleTemplatePicker(this)">📋 插入模板</button>
+        <button class="tool-btn">📎 添加附件</button>
+        <button class="tool-btn">⏰ 定时发送</button>
+      </div>
+
+      <!-- 正文 -->
+      <div class="free-compose-body">
+        <textarea placeholder="在此输入邮件正文，或点击上方「AI 生成」自动撰写..."></textarea>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <div class="left">
+        <button class="tool-btn secondary">💾 存为草稿</button>
+      </div>
+      <div class="right">
+        <button class="tool-btn secondary" onclick="closeFreeCompose()">取消</button>
+        <button class="tool-btn primary">📤 发送</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 模板选择器弹窗（居中模态框，三栏布局） -->
+<div class="tpl-modal-overlay" id="tplModalOverlay">
+  <div class="tpl-modal">
+    <div class="tpl-modal-header">
+      <h3>📚 话术模板库</h3>
+      <button class="close-tpl" onclick="toggleTemplatePicker()">×</button>
+    </div>
+    <div class="tpl-modal-search">
+      <input type="text" placeholder="搜索模板名称或关键词..." id="templateSearch" oninput="filterTemplates()">
+    </div>
+    <div class="tpl-modal-body">
+      <!-- 左栏：分类选择 -->
+      <div class="tpl-col-cat" id="tplColCat">
+        <div class="tpl-cat-item" onclick="selectCat('g')">
+          G 通用兜底 <span class="cat-count">4</span>
+        </div>
+        <div class="tpl-cat-item" onclick="selectCat('pre')">
+          售前 PRE <span class="cat-count">1</span>
+        </div>
+        <div class="tpl-cat-item" onclick="selectCat('mid')">
+          售中 MID <span class="cat-count">1</span>
+        </div>
+        <div class="tpl-cat-item active" onclick="selectCat('post')">
+          售后 POST <span class="cat-count">39</span>
+          <div class="tpl-subcats">
+            <div class="tpl-subcat-item active" onclick="selectSubcat(event,'post01')">POST-01 产品售后问题</div>
+            <div class="tpl-subcat-item" onclick="selectSubcat(event,'post02')">POST-02 破损/发错货</div>
+            <div class="tpl-subcat-item" onclick="selectSubcat(event,'post03')">POST-03 退货退款</div>
+            <div class="tpl-subcat-item" onclick="selectSubcat(event,'post04')">POST-04 妥投未收到</div>
+            <div class="tpl-subcat-item" onclick="selectSubcat(event,'post05')">POST-05 物流延迟</div>
+          </div>
+        </div>
+      </div>
+      <!-- 中栏：模板列表 -->
+      <div class="tpl-col-list" id="tplColList">
+        <!-- 由 JS 渲染 -->
+      </div>
+      <!-- 右栏：模板详情 -->
+      <div class="tpl-col-detail" id="tplColDetail">
+        <div class="tpl-detail-empty">← 请在左侧选择模板查看详情</div>
+      </div>
+    </div>
+    <div class="tpl-modal-footer">
+      <span style="font-size:12px;color:#9ca3af;" id="tplSelectedInfo">未选择模板</span>
+      <div style="display:flex;gap:8px;">
+        <button class="tool-btn secondary" onclick="toggleTemplatePicker()">取消</button>
+        <button class="tool-btn primary" onclick="applyTemplate()">应用模板</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // ========== 工单数据 ==========
+  const assignees = [
+    { name: '张小明', color: '#f59e0b', initial: '张' },
+    { name: '李华', color: '#3b82f6', initial: '李' },
+    { name: '王芳', color: '#10b981', initial: '王' },
+    { name: '赵雪', color: '#ec4899', initial: '赵' },
+    { name: '未分配', color: '#9ca3af', initial: '?' },
+  ];
+
+  const tickets = [
+    { shop: 'Namutso', customer: 'Kero', subject: 'Re: To Airsee Co/Inquiry 2026...', tags: [{text:'新建',cls:'tag-new'},{text:'售前-产品',cls:'tag-pre'}], time: '08-25 14:32', assignee: 1 },
+    { shop: 'MelodySusie Direct', customer: 'Gtny29', subject: 'Fw: Problem with lamp, etc.', tags: [{text:'待确认',cls:'tag-pending'},{text:'售后-质量瑕疵',cls:'tag-post'}], time: '08-25 11:08', assignee: 0, active: true },
+    { shop: 'MelodySusie Direct', customer: 'Autumn M Olsen', subject: 'Fw: Motor failure', tags: [{text:'新建',cls:'tag-new'},{text:'售后-质量瑕疵',cls:'tag-post'}], time: '08-25 10:15', assignee: 2 },
+    { shop: 'MelodySusie Direct', customer: 'Melissamoorejohnson', subject: 'Fw: Drill not working Order 11...', tags: [{text:'待确认',cls:'tag-pending'},{text:'售后-质量瑕疵',cls:'tag-post'}], time: '08-25 09:47', assignee: 0 },
+    { shop: 'MelodySusie Direct', customer: 'Londongabrielles', subject: 'Fw: New customer message o...', tags: [{text:'待确认',cls:'tag-pending'},{text:'售后-质量瑕疵',cls:'tag-post'}], time: '08-24 22:31', assignee: 3 },
+    { shop: 'JUJIN SHOP亚马逊平台', customer: 'A V Leszczewska', subject: 'Fw: New customer message o...', tags: [{text:'新建',cls:'tag-new'},{text:'售后-质量瑕疵',cls:'tag-post'}], time: '08-24 18:05', assignee: 4 },
+    { shop: 'JUJIN SHOP亚马逊平台', customer: 'Theresa Attenberger', subject: 'Re: Missing parts', tags: [{text:'新建',cls:'tag-new'},{text:'售后-发错货',cls:'tag-post'}], time: '08-24 15:20', assignee: 4 },
+    { shop: 'MelodySusie Direct', customer: 'Jessica Brown', subject: 'How to extend warranty?', tags: [{text:'新建',cls:'tag-new'},{text:'售前-延保',cls:'tag-pre'}], time: '08-24 11:00', assignee: 1 },
+    { shop: 'MelodySusie Direct', customer: 'David Miller', subject: 'Re: Refund request', tags: [{text:'待确认',cls:'tag-pending'},{text:'售后-退货退款',cls:'tag-post'}], time: '08-23 20:45', assignee: 2 },
+    { shop: 'Namutso', customer: 'Sarah Wilson', subject: 'Fw: Package not received', tags: [{text:'新建',cls:'tag-new'},{text:'售后-物流',cls:'tag-post'}], time: '08-23 16:30', assignee: 3 },
+  ];
+
+  // ========== 模板数据（按 08 话术库分类） ==========
+  const templateData = {
+    g: [
+      { id: 'G1', name: '确认收到视频或附件', level: 'g', channel: '通用', prereq: '无', content: "Thank you for sending the video. We've received the attachment and will review it together with the available order information.\n\nTo help us proceed more efficiently, could you also confirm the order number and the item that is having the issue?\n\nWe'll get back to you as soon as possible with a solution." },
+      { id: 'G2', name: '礼貌收尾', level: 'g', channel: '通用', prereq: '无', content: "You're very welcome, and thank you for the update. We're glad to know everything is working well now.\n\nIf you have any other questions, please feel free to contact us. We're always here to help." },
+      { id: 'G3', name: '退款请求审核中', level: 'g', channel: '通用', prereq: '客户已明确表示希望退款', content: "Thank you for clarifying that you would prefer a refund. We understand your request.\n\nWe need to review the order details and the issue you've described. Once we've checked everything, we'll get back to you with the result of the refund review.\n\nWe appreciate your patience while we process this." },
+      { id: 'G4', name: '缺件一次问齐', level: 'g', channel: '通用', prereq: '客户报告缺件', content: "We're sorry that your order appears to be incomplete. To help us check what happened, could you please send any of the following items that you have available:\n\n1. The order number (can be found in your order confirmation email or on the platform)\n2. A photo of the package as you received it\n3. A photo of the items that were inside the package\n\nWith this information, we'll be able to check with our warehouse and provide a solution." },
+    ],
+    pre: [
+      { id: 'T39', name: '延保注册引导', level: 'ready', channel: '通用', prereq: '客户询问保修', content: "MelodySusie offers an extended warranty service that you can activate by registering your device.\n\nTo register:\n1. Visit our website and go to the warranty registration page\n2. Enter your order number and product model\n3. Submit the form\n\nOnce registered, your extended warranty will be activated automatically." },
+    ],
+    mid: [
+      { id: 'T37', name: '告知 invoice 发票下载路径', level: 'ready', channel: '通用', prereq: '客户索要发票', content: "I'd be happy to guide you through downloading your invoice for record-keeping purposes.\n\nYou can download your invoice by following these steps:\n1. Log in to your account on the platform where you placed the order\n2. Go to 'My Orders' or 'Order History'\n3. Find this order and click 'View Order' or 'Invoice'\n4. Look for a 'Download Invoice' or 'Print Invoice' button\n\nIf you're unable to find it, please let us know and we'll help you further." },
+    ],
+    post01: [
+      { id: 'T1', name: '引导客户发送视频与订单到 Service 邮箱', level: 'ready', channel: '通用', prereq: '首封售后来信', content: "To help us check the issue and provide the right solution, could you please send the following information to our support email:\n\n1. Your order number\n2. A short video (10-30 seconds) showing the problem\n3. A clear photo of the product label or model number\n\nPlease send these to service@melodysusie.com with your order number as the subject line.\n\nOnce we receive the video, we'll review it and get back to you with a solution within 24 hours." },
+      { id: 'T2', name: '索要订单截图 / 老订单查不到', level: 'ready', channel: '通用', prereq: '系统中无法匹配订单', content: "We were unable to locate the order with the information currently available. Could you please send us a screenshot of your order confirmation page or email?\n\nThis will help us find the correct order and proceed with your request. You can also include:\n- The platform where you placed the order (Amazon, our website, etc.)\n- The approximate date of purchase\n- The name of the product" },
+      { id: 'T3', name: '索要视频 / 照片以确认问题', level: 'ready', channel: '通用', prereq: '问题尚未可视化确认', content: "Could you please send a short video showing the problem? If a video is not convenient, a few clear photos would also be helpful.\n\nPlease make sure the video shows:\n- The device being turned on\n- The specific issue or error occurring\n- Any sounds or lights that are abnormal\n\nThis will help our technical team identify the cause and provide the right solution." },
+      { id: 'T4', name: '确认是手柄/主机/其他部件问题', level: 'ready', channel: '通用', prereq: '客户描述模糊', content: "To make sure we send the correct replacement part, could you please help us confirm which part is not working as expected?\n\n- Is it the handpiece (the pen-shaped part you hold)?\n- Is it the main machine/control box?\n- Is it a specific accessory (like a bit, brush, or sanding band)?\n\nA quick video or photo showing the issue will also help us identify the correct part." },
+      { id: 'T5', name: '保修期内：补发配件/整机并索要地址', level: 'prereq', channel: '通用', prereq: '确认保修期内 + 问题已定性', content: "Based on the information provided, we can help arrange a replacement under the warranty.\n\nTo proceed, could you please confirm your shipping address? We'll arrange for the replacement to be sent as soon as possible.\n\nPlease note: this replacement is covered under our 12-month warranty, so there is no additional cost to you." },
+      { id: 'T6', name: '已安排 FBA/多渠道补发', level: 'prereq', channel: 'Amazon', prereq: '地址已确认 + 保修期内', content: "We have arranged a replacement package to be sent to the address you provided. The replacement will be shipped through Amazon's fulfillment network.\n\nYou will receive a tracking number once the package has been processed. Please allow 1-2 business days for the tracking information to appear.\n\nIf you have any questions about the shipment, please feel free to contact us." },
+      { id: 'T7', name: '已安排中国仓/CN 小包补发', level: 'prereq', channel: '通用', prereq: '地址已确认 + 保修期内', content: "We have arranged for the replacement package to be shipped from our China warehouse. It will be sent via standard international shipping.\n\nExpected delivery time: 7-15 business days.\nYou will receive a tracking number once the package has been shipped.\n\nPlease note that international shipping may take slightly longer than domestic delivery. We appreciate your patience." },
+      { id: 'T8', name: '订单超保修：$15 运费补发手柄', level: 'prereq', channel: '通用', prereq: '订单超 12 个月保修期', content: "The purchase is outside our 12-month warranty period. However, we'd still like to help.\n\nWe can provide a replacement handpiece at no product cost. A shipping fee of $15 would apply for delivery. If you'd like to proceed, please let us know and we'll send you a payment link for the shipping fee.\n\nOnce the payment is received, we'll arrange the shipment immediately." },
+      { id: 'T9', name: '订单超保修：$40 运费补发整机', level: 'prereq', channel: '通用', prereq: '订单超 12 个月保修期', content: "The purchase is outside our 12-month warranty period. However, we'd still like to help.\n\nWe can provide a replacement machine at no product cost. A shipping fee of $40 would apply for delivery. If you'd like to proceed, please let us know and we'll send you a payment link for the shipping fee.\n\nOnce the payment is received, we'll arrange the shipment immediately." },
+      { id: 'T10', name: '客户自行退款后仍想补发', level: 'prereq', channel: '通用', prereq: '订单已退款', content: "A full refund has already been requested and processed for this order. Since the order has been refunded, we're unable to arrange a separate replacement shipment.\n\nIf you'd still like to receive the product, we'd recommend placing a new order on our website or on Amazon. If you have any questions, we're happy to help." },
+      { id: 'T11', name: '客户原因/进水导致损坏', level: 'prereq', channel: '通用', prereq: '确认非产品本身质量问题', content: "Thank you for sending the video. After reviewing it, it appears that the product may have been exposed to water or moisture, which can cause damage to the internal components.\n\nUnfortunately, damage caused by liquid exposure or misuse is not covered under our warranty. However, we'd like to offer you a discount code for a new purchase if you're interested.\n\nPlease let us know how you'd like to proceed." },
+      { id: 'T12', name: '超 12 月保修：只提供折扣码', level: 'prereq', channel: '通用', prereq: '订单超 12 个月保修期', content: "The purchase is outside our 12-month warranty period. While we're unable to provide a free replacement, we would like to offer you a discount coupon that you can use for a new purchase on our website.\n\nThe coupon code is: [CODE] for [X]% off your next order.\n\nIf you have any questions, please feel free to contact us." },
+      { id: 'T13', name: '视频没收到 / 打不开 / 无权限', level: 'ready', channel: '通用', prereq: '客户表示已发视频但未收到', content: "We are sorry, but it looks like we did not receive the video or we are unable to open the link you shared.\n\nCould you please try one of the following:\n1. Re-send the video as an email attachment directly to service@melodysusie.com\n2. If the file is too large, you can upload it to Google Drive or Dropbox and share the link (please make sure the sharing permissions are set to 'Anyone with the link')\n\nWe'll check again as soon as we receive it." },
+      { id: 'T16', name: '安全/烫伤类投诉首封回复', level: 'prereq', channel: '通用', prereq: '涉及人身安全（仅人工）', content: "We are sorry to hear about what happened and hope you are feeling better.\n\nPlease stop using the product immediately. Your safety is our top priority.\n\nTo help us investigate this thoroughly, could you please:\n1. Send us a photo of any injury or damage\n2. Send the order number and purchase date\n3. Keep the product, charger, accessories, and all packaging for inspection\n\nWe will escalate this case to our safety team for a full investigation." },
+      { id: 'T17', name: '安全/烫伤类投诉：需进一步验证', level: 'prereq', channel: '通用', prereq: '安全事件已立案（仅人工）', content: "Please stop using the product immediately and keep the product, charger, accessories, and packaging for inspection.\n\nWe're currently working with our safety team to investigate the cause. In the meantime, if you have any medical expenses related to this incident, please keep all receipts and documentation.\n\nWe'll be in touch with you again within 48 hours with an update." },
+      { id: 'T18', name: '打磨机发烫但未造成伤害', level: 'cond', channel: '通用', prereq: '客户报告发烫', content: "Some warmth during use can be normal depending on the speed setting, usage time, and grinding load. However, if the device becomes uncomfortably hot to touch or emits a burning smell, please stop using it immediately.\n\nCould you please let us know:\n- How long you typically use the device in one session?\n- What speed setting do you use?\n- Does the heat occur after a few minutes or after extended use?\n\nThis will help us determine if the device is functioning normally or if a replacement is needed." },
+      { id: 'T19', name: '打磨笔噪音变大', level: 'cond', channel: '通用', prereq: '客户报告噪音变大', content: "A louder noise can be caused by several factors, such as dust buildup, normal wear over time, or a loose component.\n\nCould you please try the following:\n1. Clean the handpiece by removing the bit and blowing out any dust\n2. Tighten the bit securely and test again\n3. Check if the noise changes with different speed settings\n\nIf the noise persists after cleaning, please send us a short video so we can check further." },
+      { id: 'T20', name: '屏幕黑点不影响正常使用', level: 'cond', channel: '通用', prereq: '客户报告屏幕黑点', content: "Could you please confirm whether the black spot affects the speed display or the normal use of the machine? If the display is still readable and the machine functions normally otherwise, this may be a cosmetic issue that doesn't affect performance.\n\nHowever, if you'd prefer a replacement, we'd be happy to arrange that under warranty. Please let us know your preference." },
+      { id: 'T21', name: '非 MelodySusie 产品 / 其他品牌', level: 'cond', channel: '通用', prereq: '确认非本品牌产品', content: "After checking the product shown in the video, it appears that the item may not be a MelodySusie product. Our products have the MelodySusie logo on the device and packaging.\n\nCould you please check if there's a brand name or logo on your device? If you believe this is a MelodySusie product, please send us a photo of the label or logo so we can verify.\n\nIf it's from another brand, we'd recommend reaching out to that brand's customer support for assistance." },
+      { id: 'T23', name: '告知顾客无需退还故障产品', level: 'prereq', channel: '通用', prereq: '已安排补发', content: "There is no need to return the defective item for this case. You may keep it or dispose of it as you see fit.\n\nThe replacement has been arranged and will be shipped to your address. Once it's shipped, you'll receive a tracking number.\n\nIf you have any questions, please feel free to contact us." },
+      { id: 'T25', name: 'PC760G 磨头不兼容 / 无替换磨头', level: 'cond', channel: '通用', prereq: '客户询问磨头兼容性', content: "The PC760G is designed to work with its included sanding heads and is not compatible with standard 3/32\" drill bits.\n\nFor replacement sanding heads, you can purchase them on our website or on Amazon by searching for 'PC760G sanding bands' or the specific model number.\n\nIf you need help finding the right replacement, please let us know and we'll send you a link." },
+      { id: 'T26', name: '甲油胶无法固化', level: 'cond', channel: '通用', prereq: '客户报告凝胶不固化', content: "Curing results can vary depending on the lamp type, wattage, application thickness, and curing time.\n\nCould you please check:\n1. How many seconds are you curing each layer?\n2. Are you applying thin, even layers?\n3. What is the wattage of your lamp?\n\nIf the gel still doesn't cure after adjusting these factors, please send us a short video so we can check further." },
+      { id: 'T27', name: '刷子毛脱落', level: 'cond', channel: '通用', prereq: '客户报告刷毛脱落', content: "To help protect the bristles, we recommend cleaning the brush gently with brush cleaner or nail polish remover after each use. Avoid pulling or pressing too hard.\n\nIf the bristles are shedding significantly from the first use, this may be a quality issue. Could you please send us a photo so we can check?\n\nIf it's a quality issue, we'll arrange a replacement." },
+      { id: 'T28', name: '甲油胶颜色不同/色差', level: 'cond', channel: '通用', prereq: '客户报告色差', content: "Please note that gel polish colors may appear slightly different due to screen settings, lighting, nail base color, and application thickness. The actual color may also look different in natural daylight versus indoor lighting.\n\nIf you feel the color is significantly different from what was shown on our website, please send us a comparison photo. We'd be happy to check and offer a solution if needed." },
+      { id: 'T29', name: '缺件：MM400D 没有砂圈/配件', level: 'prereq', channel: '通用', prereq: '客户报告缺件', content: "The package should include: Nail drill × 1, Nail drill bits × 8 pcs, 180-grit sanding bands × 50 pcs, and other listed accessories.\n\nCould you please check the package contents and let us know which items are missing? A photo of the items you received will help us verify.\n\nOnce we confirm the missing items, we'll arrange for replacements to be sent to you." },
+      { id: 'T34', name: '配件有瑕疵：补发基础配件或退款', level: 'prereq', channel: '通用', prereq: '配件确认有瑕疵', content: "We're sorry about the issue with the accessory. We can process a $5 refund for you, or we can send you a replacement accessory at no cost.\n\nWhich option would you prefer? If you'd like the replacement, please confirm your shipping address." },
+    ],
+    post02: [
+      { id: 'T1', name: '引导客户发送视频与订单到 Service 邮箱', level: 'ready', channel: '通用', prereq: '首封售后来信', content: "To help us check the issue and provide the right solution, could you please send the following information to our support email:\n\n1. Your order number\n2. A short video (10-30 seconds) showing the problem\n3. A clear photo of the product label or model number\n\nPlease send these to service@melodysusie.com with your order number as the subject line." },
+      { id: 'T3', name: '索要视频 / 照片以确认问题', level: 'ready', channel: '通用', prereq: '问题尚未可视化确认', content: "Could you please send a short video showing the problem? If a video is not convenient, a few clear photos would also be helpful.\n\nPlease make sure the video shows the damage clearly so we can assess it." },
+      { id: 'T13', name: '视频没收到 / 打不开', level: 'ready', channel: '通用', prereq: '客户表示已发视频但未收到', content: "We are sorry, but it looks like we did not receive the video or we are unable to open the link you shared.\n\nCould you please try re-sending the video as an email attachment directly to service@melodysusie.com?" },
+      { id: 'T22', name: '客户说收到二手/被用过产品', level: 'cond', channel: '通用', prereq: '客户报告收到二手产品', content: "We are sorry to hear about your concern regarding the condition of the product you received. We take this very seriously.\n\nCould you please send us:\n1. Photos showing the signs of use (scratches, fingerprints, opened packaging, etc.)\n2. The order number\n\nWe'll investigate this with our warehouse and get back to you with a solution." },
+    ],
+    post03: [
+      { id: 'G3', name: '退款请求审核中', level: 'g', channel: '通用', prereq: '客户已明确表示希望退款', content: "Thank you for clarifying that you would prefer a refund. We understand your request.\n\nWe need to review the order details and the issue you've described. Once we've checked everything, we'll get back to you with the result of the refund review." },
+      { id: 'G4', name: '缺件一次问齐', level: 'g', channel: '通用', prereq: '客户报告缺件', content: "We're sorry that your order appears to be incomplete. To help us check what happened, could you please send any of the following items that you have available:\n\n1. The order number\n2. A photo of the package as you received it\n3. A photo of the items that were inside the package" },
+      { id: 'T15', name: '订单超 30 天想退货退款，提供 50% 退款', level: 'prereq', channel: '通用', prereq: '订单超 30 天退货期限', content: "The order was placed more than 30 days ago, which is beyond our standard return window. However, as a goodwill solution, we can offer a 50% refund of the purchase price.\n\nIf you'd like to proceed with the partial refund, please let us know and we'll arrange it for you.\n\nIf you have any questions, please feel free to contact us." },
+      { id: 'T32', name: '退款信息通知', level: 'prereq', channel: '通用', prereq: '退款已处理', content: "I have arranged for a full refund to be issued to you. The refund will be processed back to your original payment method.\n\nPlease allow 3-5 business days for the refund to appear on your account, depending on your bank's processing time.\n\nIf you have any questions about the refund, please feel free to contact us." },
+      { id: 'T33', name: '超 12 月保修协商部分退款', level: 'prereq', channel: '通用', prereq: '订单超保修期', content: "Your product is just beyond the 12-month warranty period. While we're unable to provide a full free replacement, we would like to offer you a partial refund as a goodwill solution.\n\nWe can process a [X]% refund of your purchase price. If you'd like to proceed, please let us know and we'll arrange it." },
+      { id: 'T36', name: '客户想换产品，但我们提供退款', level: 'prereq', channel: 'Amazon', prereq: 'Amazon 渠道无法直接换货', content: "We are unable to arrange a direct replacement for a different product through the Amazon platform. However, we can process a full refund for your current order so you can place a new order for the product you'd like.\n\nPlease let us know if you'd like to proceed with the refund." },
+    ],
+    post04: [
+      { id: 'T2', name: '索要订单截图 / 老订单查不到', level: 'ready', channel: '通用', prereq: '系统中无法匹配订单', content: "We were unable to locate the order with the information currently available. Could you please send us a screenshot of your order confirmation page or email?" },
+      { id: 'T14', name: '物流显示 Delivered 但客户未收到', level: 'cond', channel: '通用', prereq: '物流显示已妥投', content: "We understand how frustrating it can be when a package is marked as delivered but cannot be found.\n\nCould you please check:\n1. Was the package left with a neighbor or at a front desk?\n2. Is there a safe location where the carrier might have left it?\n3. Check your mailbox and any delivery notices\n\nWe'll also contact the carrier to investigate. If the package still cannot be found, we'll arrange a solution for you." },
+    ],
+    post05: [
+      { id: 'G1', name: '确认收到（核实式）', level: 'g', channel: '通用', prereq: '无', content: "Thank you for reaching out. We've received your message and will check the logistics status of your order right away.\n\nWe'll contact the carrier to get more information and get back to you as soon as possible." },
+    ],
+  };
+
+  let currentCat = 'post';
+  let currentSubcat = 'post01';
+  let selectedTemplate = null;
+  let showMyTicketsOnly = true;
+
+  // ========== 渲染工单列表 ==========
+  function renderTickets() {
+    const list = document.getElementById('ticketList');
+    const filtered = showMyTicketsOnly ? tickets.filter(t => assignees[t.assignee].name === '张小明') : tickets;
+    list.innerHTML = filtered.map((t, i) => `
+      <div class="ticket-item ${t.active ? 'active' : ''}" onclick="selectTicket(${i})">
+        <div class="assignee" style="background:${assignees[t.assignee].color};" onclick="event.stopPropagation(); showAssignMenu(event, ${i})" title="点击指派">
+          ${assignees[t.assignee].initial}
+        </div>
+        <div class="shop">${t.shop}</div>
+        <div class="customer">${t.customer}</div>
+        <div class="subject">${t.subject}</div>
+        <div class="meta">
+          <div class="tags">
+            ${t.tags.map(tag => `<span class="tag ${tag.cls}">${tag.text}</span>`).join('')}
+          </div>
+          <div class="time">${t.time}</div>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  function selectTicket(i) {
+    document.querySelectorAll('.ticket-item').forEach(el => el.classList.remove('active'));
+    event.currentTarget.classList.add('active');
+  }
+
+  // ========== 指派菜单 ==========
+  let currentAssignIndex = null;
+
+  function showAssignMenu(e, ticketIndex) {
+    // 移除已有菜单
+    const existing = document.querySelector('.assign-menu');
+    if (existing) existing.remove();
+
+    currentAssignIndex = ticketIndex;
+    const menu = document.createElement('div');
+    menu.className = 'assign-menu show';
+    menu.innerHTML = `
+      <div class="assign-title">指派给</div>
+      ${assignees.map((a, idx) => `
+        <div class="assign-item" onclick="assignTicket(${idx})">
+          <div class="mini-avatar" style="background:${a.color}">${a.initial}</div>
+          <div class="name">${a.name}</div>
+          ${tickets[ticketIndex].assignee === idx ? '<div class="check">✓</div>' : ''}
+        </div>
+      `).join('')}
+    `;
+    e.currentTarget.parentElement.appendChild(menu);
+    e.stopPropagation();
+  }
+
+  function assignTicket(assigneeIdx) {
+    if (currentAssignIndex !== null) {
+      tickets[currentAssignIndex].assignee = assigneeIdx;
+      renderTickets();
+    }
+    const menu = document.querySelector('.assign-menu');
+    if (menu) menu.remove();
+  }
+
+  // 点击其他地方关闭指派菜单
+  document.addEventListener('click', () => {
+    const menu = document.querySelector('.assign-menu');
+    if (menu) menu.remove();
+  });
+
+  // ========== 只看我负责的 ==========
+  function toggleMyTickets() {
+    showMyTicketsOnly = !showMyTicketsOnly;
+    const btn = document.getElementById('myTicketsToggle');
+    btn.classList.toggle('active', showMyTicketsOnly);
+    renderTickets();
+  }
+
+  // ========== 模板选择器 ==========
+  /** 切换模板选择弹窗的显示/隐藏 */
+  function toggleTemplatePicker(triggerEl) {
+    const overlay = document.getElementById('tplModalOverlay');
+    overlay.classList.toggle('show');
+    if (overlay.classList.contains('show')) {
+      renderTemplateList();
+    }
+  }
+
+  /** 左栏分类点击，切换激活状态并渲染中栏模板列表 */
+  function selectCat(cat) {
+    currentCat = cat;
+    document.querySelectorAll('.tpl-cat-item').forEach(el => el.classList.remove('active'));
+    event.currentTarget.classList.add('active');
+    if (cat === 'post') {
+      currentSubcat = 'post01';
+      document.querySelectorAll('.tpl-subcat-item').forEach(el => el.classList.remove('active'));
+      document.querySelector('.tpl-subcat-item').classList.add('active');
+    }
+    selectedTemplate = null;
+    renderTemplateList();
+    renderTemplateDetail();
+  }
+
+  /** 左栏子分类点击 */
+  function selectSubcat(e, subcat) {
+    e.stopPropagation();
+    currentSubcat = subcat;
+    document.querySelectorAll('.tpl-subcat-item').forEach(el => el.classList.remove('active'));
+    e.currentTarget.classList.add('active');
+    selectedTemplate = null;
+    renderTemplateList();
+    renderTemplateDetail();
+  }
+
+  /** 渲染中栏模板列表 */
+  function renderTemplateList() {
+    const listEl = document.getElementById('tplColList');
+    let templates = [];
+
+    if (currentCat === 'g') templates = templateData.g;
+    else if (currentCat === 'pre') templates = templateData.pre;
+    else if (currentCat === 'mid') templates = templateData.mid;
+    else if (currentCat === 'post') templates = templateData[currentSubcat] || [];
+
+    const levelBadge = {
+      g: { cls: 'badge-g', text: '通用' },
+      ready: { cls: 'badge-ready', text: '即用' },
+      cond: { cls: 'badge-cond', text: '条件' },
+      prereq: { cls: 'badge-prereq', text: '前置条件' },
+    };
+
+    listEl.innerHTML = templates.map((t, i) => `
+      <div class="tpl-list-item ${selectedTemplate === t.id ? 'selected' : ''}" onclick="selectTemplateCard('${t.id}', ${i})">
+        <div class="tpl-id">${t.id}</div>
+        <div class="tpl-name">${t.name}</div>
+        <div class="tpl-badges">
+          <span class="tpl-badge ${levelBadge[t.level].cls}">${levelBadge[t.level].text}</span>
+          ${t.channel !== '通用' ? `<span class="tpl-badge badge-${t.channel === 'Amazon' ? 'amazon' : 'official'}">${t.channel}</span>` : ''}
+        </div>
+      </div>
+    `).join('');
+  }
+
+  /** 选中模板卡片，渲染右栏详情 */
+  function selectTemplateCard(id, index) {
+    selectedTemplate = id;
+    let templates = [];
+    if (currentCat === 'g') templates = templateData.g;
+    else if (currentCat === 'pre') templates = templateData.pre;
+    else if (currentCat === 'mid') templates = templateData.mid;
+    else if (currentCat === 'post') templates = templateData[currentSubcat] || [];
+    const tpl = templates[index];
+    if (!tpl) return;
+
+    renderTemplateList();
+    renderTemplateDetail(tpl);
+
+    // 更新底部选中信息
+    document.getElementById('tplSelectedInfo').textContent = `已选择：${tpl.id} ${tpl.name}`;
+  }
+
+  /** 渲染右栏模板详情 */
+  function renderTemplateDetail(tpl) {
+    const detailEl = document.getElementById('tplColDetail');
+    if (!tpl) {
+      detailEl.innerHTML = '<div class="tpl-detail-empty">← 请在左侧选择模板查看详情</div>';
+      return;
+    }
+
+    const levelBadge = {
+      g: { cls: 'badge-g', text: '通用' },
+      ready: { cls: 'badge-ready', text: '即用' },
+      cond: { cls: 'badge-cond', text: '条件' },
+      prereq: { cls: 'badge-prereq', text: '前置条件' },
+    };
+
+    detailEl.innerHTML = `
+      <div class="tpl-detail-id">${tpl.id}</div>
+      <div class="tpl-detail-name">${tpl.name}</div>
+      <div class="tpl-detail-meta">
+        <span class="tpl-badge ${levelBadge[tpl.level].cls}">${levelBadge[tpl.level].text}</span>
+        <span class="tpl-badge badge-${tpl.channel === 'Amazon' ? 'amazon' : 'official'}">${tpl.channel}</span>
+      </div>
+      <div class="tpl-detail-section">
+        <h5>前置条件</h5>
+        <div class="tpl-detail-content">${tpl.prereq}</div>
+      </div>
+      <div class="tpl-detail-section">
+        <h5>模板正文</h5>
+        <div class="tpl-detail-content">${tpl.content}</div>
+      </div>
+    `;
+  }
+
+  /** 搜索过滤模板列表 */
+  function filterTemplates() {
+    const keyword = document.getElementById('templateSearch').value.toLowerCase();
+    const items = document.querySelectorAll('.tpl-list-item');
+    items.forEach(item => {
+      const text = item.textContent.toLowerCase();
+      item.style.display = text.includes(keyword) ? '' : 'none';
+    });
+  }
+
+  /** 应用选中的模板到编辑器 */
+  function applyTemplate() {
+    if (!selectedTemplate) {
+      alert('请先选择一个模板');
+      return;
+    }
+    // 查找当前选中模板的完整内容
+    let templates = [];
+    if (currentCat === 'g') templates = templateData.g;
+    else if (currentCat === 'pre') templates = templateData.pre;
+    else if (currentCat === 'mid') templates = templateData.mid;
+    else if (currentCat === 'post') templates = templateData[currentSubcat] || [];
+    const tpl = templates.find(t => t.id === selectedTemplate);
+    if (tpl) {
+      const editor = document.getElementById('replyEditor');
+      editor.innerHTML = `<div>${tpl.content.replace(/\n/g, '</div><div>')}</div>`;
+    }
+    toggleTemplatePicker();
+  }
+
+  // ========== 复杂发信面板 ==========
+  function toggleComposePanel() {
+    const panel = document.getElementById('composePanel');
+    panel.classList.toggle('show');
+  }
+
+  // ========== 自由发信弹窗 ==========
+  function openFreeCompose() {
+    document.getElementById('freeComposeModal').classList.add('show');
+  }
+
+  function closeFreeCompose() {
+    document.getElementById('freeComposeModal').classList.remove('show');
+  }
+
+  function aiGenerateEmail() {
+    alert('🤖 AI 将根据收件人和主题自动调用话术模板生成邮件正文');
+  }
+
+  // ========== 右侧面板折叠 ==========
+  function toggleSection(header) {
+    header.parentElement.classList.toggle('collapsed');
+  }
+
+  // ========== 右侧面板 Tab 切换 ==========
+  /**
+   * 切换右侧面板的功能 Tab
+   * @param {string} tabName - tab 名称：summary / suggestion / orders / logistics / resend
+   */
+  function switchRightTab(tabName) {
+    // 切换 tab 图标高亮
+    document.querySelectorAll('.right-tab-item').forEach(item => {
+      item.classList.toggle('active', item.dataset.tab === tabName);
+    });
+    // 切换页面显示
+    document.querySelectorAll('.right-panel-page').forEach(page => {
+      page.classList.toggle('active', page.id === 'page-' + tabName);
+    });
+  }
+
+  // ========== 初始化 ==========
+  renderTickets();
+</script>
+
+</body>
+</html>
