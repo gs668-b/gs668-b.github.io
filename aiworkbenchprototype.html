@@ -1203,6 +1203,28 @@
         </div>
       </div>
 
+      <!-- 附件 -->
+      <div class="free-compose-field">
+        <label>附件</label>
+        <div class="field-content">
+          <button class="tool-btn" style="font-size:12px;padding:4px 10px;">📎 添加附件</button>
+        </div>
+      </div>
+
+      <!-- 定时发送 -->
+      <div class="free-compose-field">
+        <label>定时发送</label>
+        <div class="field-content">
+          <div style="display:flex;align-items:center;gap:8px;flex-wrap:nowrap;">
+            <label style="display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer;white-space:nowrap;">
+              <input type="checkbox" id="freeScheduleCheck" onchange="document.getElementById('freeScheduleTime').style.display=this.checked?'inline-block':'none'">
+              <span>启用定时发送</span>
+            </label>
+            <input type="datetime-local" id="freeScheduleTime" style="display:none;border:1px solid #e5e7eb;border-radius:4px;padding:4px 8px;font-size:12px;flex-shrink:0;">
+          </div>
+        </div>
+      </div>
+
       <!-- 主题 -->
       <div class="free-compose-subject">
         <input type="text" placeholder="邮件主题">
@@ -1216,8 +1238,6 @@
     <div class="modal-footer">
       <div class="left">
         <button class="tool-btn" onclick="toggleTemplatePicker(this)">📋 插入模板</button>
-        <button class="tool-btn">📎 添加附件</button>
-        <button class="tool-btn">⏰ 定时发送</button>
       </div>
       <div class="right">
         <button class="tool-btn secondary">💾 存为草稿</button>
@@ -1480,7 +1500,12 @@
   /** 左栏子分类点击 */
   function selectSubcat(e, subcat) {
     e.stopPropagation();
+    // 子分类点击时自动选中父级 POST
+    currentCat = 'post';
     currentSubcat = subcat;
+    document.querySelectorAll('.tpl-cat-item').forEach(el => el.classList.remove('active'));
+    const postItem = document.querySelector('.tpl-cat-item[onclick*="post"]');
+    if (postItem) postItem.classList.add('active');
     document.querySelectorAll('.tpl-subcat-item').forEach(el => el.classList.remove('active'));
     e.currentTarget.classList.add('active');
     selectedTemplate = null;
