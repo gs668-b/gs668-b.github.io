@@ -1440,9 +1440,13 @@
     document.querySelectorAll('.tpl-cat-item').forEach(el => el.classList.remove('active'));
     event.currentTarget.classList.add('active');
     if (cat === 'post') {
+      // 切到售后时，默认高亮第一个子分类
       currentSubcat = 'post01';
       document.querySelectorAll('.tpl-subcat-item').forEach(el => el.classList.remove('active'));
       document.querySelector('.tpl-subcat-item').classList.add('active');
+    } else {
+      // 切到其他分类时，清除子分类高亮，避免一二级同时选中
+      document.querySelectorAll('.tpl-subcat-item').forEach(el => el.classList.remove('active'));
     }
     selectedTemplate = null;
     renderTemplateList();
