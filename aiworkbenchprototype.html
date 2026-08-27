@@ -663,7 +663,7 @@
         </div>
 
         <!-- 邮件对话 -->
-        <div class="email-thread">
+        <div class="email-thread" id="emailThread">
           <!-- 客户来信 -->
           <div class="email-bubble customer">
             <div class="bubble-avatar customer">G</div>
@@ -731,9 +731,8 @@
                 <label>收件人</label>
                 <div style="flex:1;display:flex;flex-wrap:wrap;gap:4px;align-items:center;">
                   <span class="chip">gtny29@gmail.com <span class="remove" onclick="this.parentElement.remove()">×</span></span>
-                  <input type="text" placeholder="添加收件人..." style="flex:1;min-width:120px;border:none;outline:none;">
+                  <input type="text" placeholder="输入邮箱后回车添加..." style="flex:1;min-width:120px;border:none;outline:none;" onkeydown="if(event.key==='Enter'&&this.value.trim()){addRecipientChip(this,'收件人');}">
                 </div>
-                <button class="tool-btn secondary" style="height:24px;padding:0 8px;font-size:11px;">编辑</button>
               </div>
               <div class="compose-field">
                 <label>抄送</label>
@@ -953,7 +952,25 @@
 
             <div style="margin-top:12px;">
               <div style="font-size:12px;font-weight:600;margin-bottom:8px;">订单列表</div>
-              <div style="border:1px solid #e5e7eb;border-radius:8px;overflow:hidden;">
+              <div class="order-tabs" style="margin-bottom:8px;">
+                <div class="order-tab" onclick="switchOrderTab('current', this)">当前售后订单</div>
+                <div class="order-tab active" onclick="switchOrderTab('all', this)">全部订单</div>
+              </div>
+              <!-- 当前售后订单列表 -->
+              <div id="orderListCurrent" style="display:none;border:1px solid #e5e7eb;border-radius:8px;overflow:hidden;">
+                <div style="padding:8px 10px;background:#fff;display:flex;justify-content:space-between;align-items:center;">
+                  <div>
+                    <div style="font-size:12px;font-weight:500;">#113-1384316-4636255</div>
+                    <div style="font-size:11px;color:#6b7280;margin-top:2px;">P-ART01R UV LED Nail Lamp</div>
+                  </div>
+                  <div style="text-align:right;">
+                    <div style="font-size:12px;font-weight:600;">$14.99</div>
+                    <div style="font-size:11px;color:#10b981;">已发货</div>
+                  </div>
+                </div>
+              </div>
+              <!-- 全部订单列表 -->
+              <div id="orderListAll" style="border:1px solid #e5e7eb;border-radius:8px;overflow:hidden;">
                 <div style="padding:8px 10px;background:#f9fafb;border-bottom:1px solid #e5e7eb;display:flex;justify-content:space-between;align-items:center;">
                   <div>
                     <div style="font-size:12px;font-weight:500;">#113-1384316-4636255</div>
@@ -975,11 +992,6 @@
                   </div>
                 </div>
               </div>
-            </div>
-
-            <div class="order-tabs" style="margin-top:12px;">
-              <div class="order-tab active">当前售后订单</div>
-              <div class="order-tab">全部订单</div>
             </div>
           </div>
 
@@ -1119,13 +1131,6 @@
       <button class="close-modal" onclick="closeFreeCompose()">×</button>
     </div>
     <div class="modal-body">
-      <!-- AI 辅助条 -->
-      <div class="ai-compose-bar">
-        <span class="ai-icon">🤖</span>
-        <span class="ai-text">输入收件人和主题后，AI 可自动调用模板生成邮件正文</span>
-        <button class="ai-btn" onclick="aiGenerateEmail()">AI 生成</button>
-      </div>
-
       <!-- 发件身份 -->
       <div class="free-compose-field">
         <label>发件身份</label>
@@ -1144,7 +1149,7 @@
         <label>收件人</label>
         <div class="field-content">
           <div style="display:flex;flex-wrap:wrap;gap:4px;align-items:center;">
-            <input type="text" placeholder="输入收件人邮箱，回车添加..." style="flex:1;min-width:200px;border:none;outline:none;">
+            <input type="text" placeholder="输入收件人邮箱，回车添加..." style="flex:1;min-width:200px;border:none;outline:none;" onkeydown="if(event.key==='Enter'&&this.value.trim()){addRecipientChip(this,'收件人');}">
           </div>
         </div>
       </div>
@@ -1171,23 +1176,19 @@
         <input type="text" placeholder="邮件主题">
       </div>
 
-      <!-- 模板选择快捷入口 -->
-      <div style="margin-bottom:10px;">
-        <button class="tool-btn" onclick="toggleTemplatePicker(this)">📋 插入模板</button>
-        <button class="tool-btn">📎 添加附件</button>
-        <button class="tool-btn">⏰ 定时发送</button>
-      </div>
-
       <!-- 正文 -->
       <div class="free-compose-body">
-        <textarea placeholder="在此输入邮件正文，或点击上方「AI 生成」自动撰写..."></textarea>
+        <textarea placeholder="在此输入邮件正文，或从下方插入话术模板..."></textarea>
       </div>
     </div>
     <div class="modal-footer">
       <div class="left">
-        <button class="tool-btn secondary">💾 存为草稿</button>
+        <button class="tool-btn" onclick="toggleTemplatePicker(this)">📋 插入模板</button>
+        <button class="tool-btn">📎 添加附件</button>
+        <button class="tool-btn">⏰ 定时发送</button>
       </div>
       <div class="right">
+        <button class="tool-btn secondary">💾 存为草稿</button>
         <button class="tool-btn secondary" onclick="closeFreeCompose()">取消</button>
         <button class="tool-btn primary">📤 发送</button>
       </div>
@@ -1576,8 +1577,30 @@
     document.getElementById('freeComposeModal').classList.remove('show');
   }
 
-  function aiGenerateEmail() {
-    alert('🤖 AI 将根据收件人和主题自动调用话术模板生成邮件正文');
+  /** 回车添加收件人 chip：在输入框前插入邮箱标签并清空输入 */
+  function addRecipientChip(input, label) {
+    const email = input.value.trim();
+    if (!email) return;
+    // 简单邮箱格式校验
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      alert('请输入有效的邮箱地址');
+      return;
+    }
+    const chip = document.createElement('span');
+    chip.className = 'chip';
+    chip.innerHTML = `${email} <span class="remove" onclick="this.parentElement.remove()">×</span>`;
+    input.parentElement.insertBefore(chip, input);
+    input.value = '';
+  }
+
+  /** 切换订单列表 Tab：当前售后订单 / 全部订单 */
+  function switchOrderTab(tab, el) {
+    // 切换 tab 激活态
+    el.parentElement.querySelectorAll('.order-tab').forEach(t => t.classList.remove('active'));
+    el.classList.add('active');
+    // 切换列表显示
+    document.getElementById('orderListCurrent').style.display = tab === 'current' ? 'block' : 'none';
+    document.getElementById('orderListAll').style.display = tab === 'all' ? 'block' : 'none';
   }
 
   // ========== 右侧面板折叠 ==========
@@ -1603,6 +1626,9 @@
 
   // ========== 初始化 ==========
   renderTickets();
+  // 对话区默认滚动到最底部（最新消息）
+  const threadEl = document.getElementById('emailThread');
+  threadEl.scrollTop = threadEl.scrollHeight;
 </script>
 
 </body>
