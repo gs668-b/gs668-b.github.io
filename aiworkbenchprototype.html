@@ -453,6 +453,34 @@
   }
   .order-tab.active { background: #2563eb; color: #fff; }
 
+  /* 订单卡片 */
+  .order-card { border: 1px solid #e5e7eb; border-radius: 8px; margin-bottom: 8px; overflow: hidden; }
+  .order-card-header {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 10px 12px; cursor: pointer; background: #f9fafb;
+  }
+  .order-card-header:hover { background: #f3f4f6; }
+  .order-card-header .order-no { font-size: 12px; font-weight: 500; display: flex; align-items: center; gap: 6px; }
+  .order-card-header .order-date { font-size: 11px; color: #9ca3af; }
+  .order-card-header .order-amount { font-size: 12px; font-weight: 600; }
+  .order-card-header .order-status { font-size: 11px; }
+  .order-card-header .expand-arrow { font-size: 11px; color: #6b7280; transition: transform 0.2s; }
+  .order-card.expanded .expand-arrow { transform: rotate(90deg); }
+  .order-card-detail { display: none; padding: 10px 12px; border-top: 1px solid #f3f4f6; background: #fff; }
+  .order-card.expanded .order-card-detail { display: block; }
+  .order-detail-row { display: flex; font-size: 11.5px; padding: 3px 0; gap: 6px; align-items: center; }
+  .order-detail-row .label { color: #6b7280; width: 70px; flex-shrink: 0; }
+  .order-detail-row .value { color: #1f2937; flex: 1; display: flex; align-items: center; gap: 6px; }
+  .order-product-item { display: flex; gap: 8px; padding: 8px 0; border-top: 1px solid #f9fafb; align-items: center; }
+  .order-product-item:first-child { border-top: none; }
+  .order-product-item img { width: 40px; height: 40px; border-radius: 4px; object-fit: cover; flex-shrink: 0; }
+  .order-product-item .prod-info { flex: 1; }
+  .order-product-item .prod-name { font-size: 11.5px; font-weight: 500; color: #1f2937; }
+  .order-product-item .prod-meta { font-size: 11px; color: #6b7280; margin-top: 2px; }
+  .copy-icon { cursor: pointer; color: #9ca3af; font-size: 12px; }
+  .copy-icon:hover { color: #2563eb; }
+  .set-current-btn { margin-top: 8px; }
+
   /* 自由发信弹窗 */
   .modal-overlay {
     position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.4);
@@ -766,7 +794,6 @@
               <button class="tool-btn" onclick="toggleComposePanel()">📧 发信功能</button>
               <button class="tool-btn" onclick="openFreeCompose()">✉️ 自由发信</button>
               <button class="tool-btn">📎 附件</button>
-              <button class="tool-btn">😊 表情</button>
             </div>
             <div class="right-tools">
               <button class="tool-btn secondary" onclick="toggleTemplatePicker(this)">🔄 重新生成</button>
@@ -961,45 +988,13 @@
             <div style="margin-top:12px;">
               <div style="font-size:12px;font-weight:600;margin-bottom:8px;">订单列表</div>
               <div class="order-tabs" style="margin-bottom:8px;">
-                <div class="order-tab" onclick="switchOrderTab('current', this)">当前售后订单</div>
-                <div class="order-tab active" onclick="switchOrderTab('all', this)">全部订单</div>
+                <div class="order-tab active" onclick="switchOrderTab('current', this)">当前售后订单</div>
+                <div class="order-tab" onclick="switchOrderTab('all', this)">全部订单</div>
               </div>
               <!-- 当前售后订单列表 -->
-              <div id="orderListCurrent" style="display:none;border:1px solid #e5e7eb;border-radius:8px;overflow:hidden;">
-                <div style="padding:8px 10px;background:#fff;display:flex;justify-content:space-between;align-items:center;">
-                  <div>
-                    <div style="font-size:12px;font-weight:500;">#113-1384316-4636255</div>
-                    <div style="font-size:11px;color:#6b7280;margin-top:2px;">P-ART01R UV LED Nail Lamp</div>
-                  </div>
-                  <div style="text-align:right;">
-                    <div style="font-size:12px;font-weight:600;">$14.99</div>
-                    <div style="font-size:11px;color:#10b981;">已发货</div>
-                  </div>
-                </div>
-              </div>
+              <div id="orderListCurrent"></div>
               <!-- 全部订单列表 -->
-              <div id="orderListAll" style="border:1px solid #e5e7eb;border-radius:8px;overflow:hidden;">
-                <div style="padding:8px 10px;background:#f9fafb;border-bottom:1px solid #e5e7eb;display:flex;justify-content:space-between;align-items:center;">
-                  <div>
-                    <div style="font-size:12px;font-weight:500;">#113-1384316-4636255</div>
-                    <div style="font-size:11px;color:#6b7280;margin-top:2px;">P-ART01R UV LED Nail Lamp</div>
-                  </div>
-                  <div style="text-align:right;">
-                    <div style="font-size:12px;font-weight:600;">$14.99</div>
-                    <div style="font-size:11px;color:#10b981;">已发货</div>
-                  </div>
-                </div>
-                <div style="padding:8px 10px;background:#fff;display:flex;justify-content:space-between;align-items:center;">
-                  <div>
-                    <div style="font-size:12px;font-weight:500;">#112-9981234-1122334</div>
-                    <div style="font-size:11px;color:#6b7280;margin-top:2px;">Gel Nail Polish Set (6 colors)</div>
-                  </div>
-                  <div style="text-align:right;">
-                    <div style="font-size:12px;font-weight:600;">$9.98</div>
-                    <div style="font-size:11px;color:#6b7280;">已完成</div>
-                  </div>
-                </div>
-              </div>
+              <div id="orderListAll" style="display:none;"></div>
             </div>
           </div>
 
@@ -1605,14 +1600,142 @@
     input.value = '';
   }
 
-  /** 切换订单列表 Tab：当前售后订单 / 全部订单 */
+  /** 订单数据 */
+  const orderData = [
+    {
+      id: '113-1384316-4636255', date: '2026-04-09', time: '2026-04-09 14:32:00',
+      amount: '$14.99', status: '已发货', statusColor: '#10b981',
+      tracking: 'TBA328958896933', carrier: 'Amazon Logistics US',
+      products: [
+        { img: 'https://m.media-amazon.com/images/I/41VO38h5-0L.jpg', name: 'P-ART01R UV LED Nail Lamp', price: '$14.99', qty: 1 },
+      ],
+      isCurrent: true,
+    },
+    {
+      id: '112-9981234-1122334', date: '2026-01-15', time: '2026-01-15 10:20:00',
+      amount: '$9.98', status: '已完成', statusColor: '#6b7280',
+      tracking: '', carrier: '',
+      products: [
+        { img: 'https://m.media-amazon.com/images/I/41UQzON8ErL.jpg', name: 'Gel Nail Polish Set (6 colors)', price: '$9.98', qty: 1 },
+      ],
+      isCurrent: false,
+    },
+    {
+      id: '111-7765432-9988776', date: '2025-11-22', time: '2025-11-22 09:15:00',
+      amount: '$39.99', status: '已完成', statusColor: '#6b7280',
+      tracking: '', carrier: '',
+      products: [
+        { img: 'https://m.media-amazon.com/images/I/31+ZflhzIfL.jpg', name: 'PC760G Electric Nail Drill', price: '$39.99', qty: 1 },
+      ],
+      isCurrent: false,
+    },
+  ];
+
+  /** 渲染单个订单卡片的详情区域 */
+  function renderOrderDetail(order) {
+    const trackingHtml = order.tracking
+      ? `<div class="order-detail-row"><span class="label">物流单号</span><span class="value">${order.tracking} <span class="copy-icon" onclick="copyText('${order.tracking}', this)" title="复制单号">📋</span> <span class="copy-icon" onclick="jumpToLogistics('${order.tracking}', '${order.carrier}')" title="查询物流" style="font-size:11px;color:#2563eb;">🔍查询</span></span></div>
+         <div class="order-detail-row"><span class="label">承运商</span><span class="value">${order.carrier}</span></div>`
+      : '<div class="order-detail-row"><span class="label">物流单号</span><span class="value" style="color:#9ca3af;">无</span></div>';
+
+    const productsHtml = order.products.map(p => `
+      <div class="order-product-item">
+        <img src="${p.img}" alt="${p.name}" onerror="this.style.display='none'">
+        <div class="prod-info">
+          <div class="prod-name">${p.name}</div>
+          <div class="prod-meta">${p.price} × ${p.qty}</div>
+        </div>
+      </div>
+    `).join('');
+
+    return `
+      <div class="order-detail-row"><span class="label">下单时间</span><span class="value">${order.time}</span></div>
+      ${trackingHtml}
+      <div style="margin-top:6px;font-size:11px;font-weight:600;color:#6b7280;">商品信息</div>
+      ${productsHtml}
+    `;
+  }
+
+  /** 渲染订单卡片（header + detail） */
+  function renderOrderCard(order, isCurrentTab) {
+    const expanded = isCurrentTab ? 'expanded' : '';
+    const setBtn = !isCurrentTab && !order.isCurrent
+      ? `<div class="set-current-btn"><button class="tool-btn primary" style="height:24px;padding:0 10px;font-size:11px;" onclick="setAsCurrentOrder('${order.id}')">设为当前售后订单</button></div>`
+      : (!isCurrentTab && order.isCurrent ? '<div style="margin-top:6px;font-size:11px;color:#10b981;font-weight:500;">✓ 已设为当前售后订单</div>' : '');
+
+    return `
+      <div class="order-card ${expanded}" id="orderCard_${order.id}" onclick="toggleOrderCard('${order.id}')">
+        <div class="order-card-header">
+          <div class="order-no">
+            #${order.id}
+            <span class="copy-icon" onclick="event.stopPropagation(); copyText('${order.id}', this)" title="复制订单号">📋</span>
+          </div>
+          <div class="order-date">${order.date}</div>
+          <div style="text-align:right;">
+            <span class="order-amount">${order.amount}</span>
+            <span class="order-status" style="color:${order.statusColor};">${order.status}</span>
+          </div>
+          <span class="expand-arrow">▶</span>
+        </div>
+        <div class="order-card-detail" onclick="event.stopPropagation()">
+          ${renderOrderDetail(order)}
+          ${setBtn}
+        </div>
+      </div>
+    `;
+  }
+
+  /** 渲染当前售后订单列表（自动展开） */
+  function renderCurrentOrders() {
+    const current = orderData.find(o => o.isCurrent);
+    document.getElementById('orderListCurrent').innerHTML = current
+      ? renderOrderCard(current, true)
+      : '<div style="padding:16px;text-align:center;color:#9ca3af;font-size:12px;">暂无当前售后订单</div>';
+  }
+
+  /** 渲染全部订单列表（默认折叠） */
+  function renderAllOrders() {
+    document.getElementById('orderListAll').innerHTML =
+      orderData.map(o => renderOrderCard(o, false)).join('');
+  }
+
+  /** 切换订单 Tab */
   function switchOrderTab(tab, el) {
-    // 切换 tab 激活态
     el.parentElement.querySelectorAll('.order-tab').forEach(t => t.classList.remove('active'));
     el.classList.add('active');
-    // 切换列表显示
     document.getElementById('orderListCurrent').style.display = tab === 'current' ? 'block' : 'none';
     document.getElementById('orderListAll').style.display = tab === 'all' ? 'block' : 'none';
+  }
+
+  /** 展开/折叠订单卡片 */
+  function toggleOrderCard(orderId) {
+    const card = document.getElementById('orderCard_' + orderId);
+    if (card) card.classList.toggle('expanded');
+  }
+
+  /** 复制文本到剪贴板 */
+  function copyText(text, el) {
+    navigator.clipboard.writeText(text).then(() => {
+      const orig = el.textContent;
+      el.textContent = '✓';
+      setTimeout(() => { el.textContent = orig; }, 1500);
+    });
+  }
+
+  /** 跳转到物流查询工具 Tab 并填充单号 */
+  function jumpToLogistics(tracking, carrier) {
+    switchRightTab('logistics');
+    const input = document.querySelector('#page-logistics input[type="text"]');
+    if (input) input.value = tracking;
+    const select = document.querySelector('#page-logistics select');
+    if (select && carrier) select.value = carrier;
+  }
+
+  /** 将一笔订单设为当前售后订单 */
+  function setAsCurrentOrder(orderId) {
+    orderData.forEach(o => o.isCurrent = (o.id === orderId));
+    renderCurrentOrders();
+    renderAllOrders();
   }
 
   // ========== 右侧面板折叠 ==========
@@ -1638,6 +1761,8 @@
 
   // ========== 初始化 ==========
   renderTickets();
+  renderCurrentOrders();
+  renderAllOrders();
   // 对话区默认滚动到最底部（最新消息）
   const threadEl = document.getElementById('emailThread');
   threadEl.scrollTop = threadEl.scrollHeight;
