@@ -310,6 +310,71 @@
     padding: 12px 20px; border-top: 1px solid #f3f4f6; display: flex; justify-content: space-between; align-items: center;
   }
 
+  /* 平台切换器 */
+  .tpl-platform-tabs {
+    display: flex; gap: 4px; padding: 8px 20px 0; border-bottom: 1px solid #f3f4f6;
+  }
+  .tpl-platform-tab {
+    padding: 8px 14px; border: none; background: none; font-size: 13px; color: #6b7280;
+    cursor: pointer; border-bottom: 2px solid transparent; font-weight: 500; transition: all 0.15s;
+  }
+  .tpl-platform-tab:hover { color: #374151; }
+  .tpl-platform-tab.active {
+    color: #2563eb; border-bottom-color: #2563eb;
+  }
+  .tpl-platform-count {
+    font-size: 11px; color: #9ca3af; font-weight: 400; margin-left: 4px;
+  }
+  .tpl-platform-tab.active .tpl-platform-count { color: #60a5fa; }
+
+  /* 左栏两级分类：阶段（一级） */
+  .tpl-stage-item {
+    padding: 10px 16px; font-size: 13px; color: #374151; cursor: pointer;
+    border-left: 3px solid transparent; font-weight: 500;
+  }
+  .tpl-stage-item:hover { background: #f3f4f6; }
+  .tpl-stage-item.active { background: #fff; border-left-color: #2563eb; color: #2563eb; }
+  .tpl-stage-item .cat-count { float: right; color: #9ca3af; font-size: 11px; font-weight: 400; }
+  /* 左栏两级分类：子项（二级） */
+  .tpl-stage-children { padding: 2px 0 6px; }
+  .tpl-stage-subitem {
+    padding: 7px 16px 7px 28px; font-size: 12px; color: #6b7280; cursor: pointer;
+    border-left: 2px solid transparent; margin-left: 4px; line-height: 1.4;
+  }
+  .tpl-stage-subitem:hover { background: #f3f4f6; color: #374151; }
+  .tpl-stage-subitem.active {
+    color: #2563eb; background: #eff6ff; border-left-color: #2563eb; font-weight: 500;
+  }
+  .tpl-stage-note {
+    padding: 8px 16px 8px 28px; font-size: 11px; color: #9ca3af; font-style: italic; line-height: 1.5;
+  }
+
+  /* 参数高亮：{AI填充} 蓝色 */
+  .param-auto {
+    display: inline-block; padding: 1px 6px; background: #dbeafe; color: #1e40af;
+    border-radius: 4px; font-weight: 500; border: 1px solid #93c5fd; margin: 0 2px;
+  }
+  /* 参数高亮：[CONFIRM:运营确认] 橙色 */
+  .param-confirm {
+    display: inline-block; padding: 1px 6px; background: #fed7aa; color: #9a3412;
+    border-radius: 4px; font-weight: 500; border: 1px solid #fb923c; margin: 0 2px;
+  }
+
+  /* 参数说明表 */
+  .tpl-params-table {
+    width: 100%; border-collapse: collapse; font-size: 12px; margin-top: 8px; background: #fff;
+  }
+  .tpl-params-table th {
+    text-align: left; padding: 6px 10px; background: #f3f4f6; font-weight: 600;
+    color: #374151; border: 1px solid #e5e7eb; font-size: 11px;
+  }
+  .tpl-params-table td {
+    padding: 6px 10px; border: 1px solid #e5e7eb; color: #374151; vertical-align: top;
+  }
+  .tpl-params-table .param-cell-auto { background: #dbeafe; color: #1e40af; font-weight: 500; }
+  .tpl-params-table .param-cell-confirm { background: #fed7aa; color: #9a3412; font-weight: 500; }
+  .tpl-params-table .param-cell-placeholder { background: #f3f4f6; color: #374151; font-weight: 500; }
+
   /* 回复编辑器 */
   .reply-editor {
     border: 1px solid #d1d5db; border-radius: 8px; height: 140px; padding: 10px 12px;
@@ -1255,36 +1320,23 @@
       <h3>📚 话术模板库</h3>
       <button class="close-tpl" onclick="toggleTemplatePicker()">×</button>
     </div>
+    <!-- 平台切换器 -->
+    <div class="tpl-platform-tabs">
+      <button class="tpl-platform-tab active" data-platform="amazon" onclick="selectPlatform('amazon')">
+        🛒 Amazon <span class="tpl-platform-count">42条</span>
+      </button>
+      <button class="tpl-platform-tab" data-platform="website" onclick="selectPlatform('website')">
+        🌐 官网 Website <span class="tpl-platform-count">22条</span>
+      </button>
+    </div>
     <div class="tpl-modal-search">
-      <input type="text" placeholder="搜索模板名称或关键词..." id="templateSearch" oninput="filterTemplates()">
+      <input type="text" placeholder="搜索模板ID或名称..." id="templateSearch" oninput="filterTemplates()">
     </div>
     <div class="tpl-modal-body">
-      <!-- 左栏：分类选择 -->
-      <div class="tpl-col-cat" id="tplColCat">
-        <div class="tpl-cat-item" onclick="selectCat('g')">
-          G 通用兜底 <span class="cat-count">4</span>
-        </div>
-        <div class="tpl-cat-item" onclick="selectCat('pre')">
-          售前 PRE <span class="cat-count">1</span>
-        </div>
-        <div class="tpl-cat-item" onclick="selectCat('mid')">
-          售中 MID <span class="cat-count">1</span>
-        </div>
-        <div class="tpl-cat-item active" onclick="selectCat('post')">
-          售后 POST <span class="cat-count">39</span>
-          <div class="tpl-subcats">
-            <div class="tpl-subcat-item active" onclick="selectSubcat(event,'post01')">POST-01 产品售后问题</div>
-            <div class="tpl-subcat-item" onclick="selectSubcat(event,'post02')">POST-02 破损/发错货</div>
-            <div class="tpl-subcat-item" onclick="selectSubcat(event,'post03')">POST-03 退货退款</div>
-            <div class="tpl-subcat-item" onclick="selectSubcat(event,'post04')">POST-04 妥投未收到</div>
-            <div class="tpl-subcat-item" onclick="selectSubcat(event,'post05')">POST-05 物流延迟</div>
-          </div>
-        </div>
-      </div>
+      <!-- 左栏：分类选择（由 JS 渲染） -->
+      <div class="tpl-col-cat" id="tplColCat"></div>
       <!-- 中栏：模板列表 -->
-      <div class="tpl-col-list" id="tplColList">
-        <!-- 由 JS 渲染 -->
-      </div>
+      <div class="tpl-col-list" id="tplColList"></div>
       <!-- 右栏：模板详情 -->
       <div class="tpl-col-detail" id="tplColDetail">
         <div class="tpl-detail-empty">← 请在左侧选择模板查看详情</div>
@@ -1323,73 +1375,478 @@
     { shop: 'Namutso', customer: 'Sarah Wilson', subject: 'Fw: Package not received', tags: [{text:'新建',cls:'tag-new'},{text:'售后-物流',cls:'tag-post'}], time: '08-23 16:30', assignee: 3 },
   ];
 
-  // ========== 模板数据（按 08 话术库分类） ==========
+  // ========== 模板数据（按平台组织，Amazon / 官网 Website） ==========
   const templateData = {
-    g: [
-      { id: 'G1', name: '确认收到视频或附件', level: 'g', channel: '通用', prereq: '无', content: "Thank you for sending the video. We've received the attachment and will review it together with the available order information.\n\nTo help us proceed more efficiently, could you also confirm the order number and the item that is having the issue?\n\nWe'll get back to you as soon as possible with a solution." },
-      { id: 'G2', name: '礼貌收尾', level: 'g', channel: '通用', prereq: '无', content: "You're very welcome, and thank you for the update. We're glad to know everything is working well now.\n\nIf you have any other questions, please feel free to contact us. We're always here to help." },
-      { id: 'G3', name: '退款请求审核中', level: 'g', channel: '通用', prereq: '客户已明确表示希望退款', content: "Thank you for clarifying that you would prefer a refund. We understand your request.\n\nWe need to review the order details and the issue you've described. Once we've checked everything, we'll get back to you with the result of the refund review.\n\nWe appreciate your patience while we process this." },
-      { id: 'G4', name: '缺件一次问齐', level: 'g', channel: '通用', prereq: '客户报告缺件', content: "We're sorry that your order appears to be incomplete. To help us check what happened, could you please send any of the following items that you have available:\n\n1. The order number (can be found in your order confirmation email or on the platform)\n2. A photo of the package as you received it\n3. A photo of the items that were inside the package\n\nWith this information, we'll be able to check with our warehouse and provide a solution." },
-    ],
-    pre: [
-      { id: 'T39', name: '延保注册引导', level: 'ready', channel: '通用', prereq: '客户询问保修', content: "MelodySusie offers an extended warranty service that you can activate by registering your device.\n\nTo register:\n1. Visit our website and go to the warranty registration page\n2. Enter your order number and product model\n3. Submit the form\n\nOnce registered, your extended warranty will be activated automatically." },
-    ],
-    mid: [
-      { id: 'T37', name: '告知 invoice 发票下载路径', level: 'ready', channel: '通用', prereq: '客户索要发票', content: "I'd be happy to guide you through downloading your invoice for record-keeping purposes.\n\nYou can download your invoice by following these steps:\n1. Log in to your account on the platform where you placed the order\n2. Go to 'My Orders' or 'Order History'\n3. Find this order and click 'View Order' or 'Invoice'\n4. Look for a 'Download Invoice' or 'Print Invoice' button\n\nIf you're unable to find it, please let us know and we'll help you further." },
-    ],
-    post01: [
-      { id: 'T1', name: '引导客户发送视频与订单到 Service 邮箱', level: 'ready', channel: '通用', prereq: '首封售后来信', content: "To help us check the issue and provide the right solution, could you please send the following information to our support email:\n\n1. Your order number\n2. A short video (10-30 seconds) showing the problem\n3. A clear photo of the product label or model number\n\nPlease send these to service@melodysusie.com with your order number as the subject line.\n\nOnce we receive the video, we'll review it and get back to you with a solution within 24 hours." },
-      { id: 'T2', name: '索要订单截图 / 老订单查不到', level: 'ready', channel: '通用', prereq: '系统中无法匹配订单', content: "We were unable to locate the order with the information currently available. Could you please send us a screenshot of your order confirmation page or email?\n\nThis will help us find the correct order and proceed with your request. You can also include:\n- The platform where you placed the order (Amazon, our website, etc.)\n- The approximate date of purchase\n- The name of the product" },
-      { id: 'T3', name: '索要视频 / 照片以确认问题', level: 'ready', channel: '通用', prereq: '问题尚未可视化确认', content: "Could you please send a short video showing the problem? If a video is not convenient, a few clear photos would also be helpful.\n\nPlease make sure the video shows:\n- The device being turned on\n- The specific issue or error occurring\n- Any sounds or lights that are abnormal\n\nThis will help our technical team identify the cause and provide the right solution." },
-      { id: 'T4', name: '确认是手柄/主机/其他部件问题', level: 'ready', channel: '通用', prereq: '客户描述模糊', content: "To make sure we send the correct replacement part, could you please help us confirm which part is not working as expected?\n\n- Is it the handpiece (the pen-shaped part you hold)?\n- Is it the main machine/control box?\n- Is it a specific accessory (like a bit, brush, or sanding band)?\n\nA quick video or photo showing the issue will also help us identify the correct part." },
-      { id: 'T5', name: '保修期内：补发配件/整机并索要地址', level: 'prereq', channel: '通用', prereq: '确认保修期内 + 问题已定性', content: "Based on the information provided, we can help arrange a replacement under the warranty.\n\nTo proceed, could you please confirm your shipping address? We'll arrange for the replacement to be sent as soon as possible.\n\nPlease note: this replacement is covered under our 12-month warranty, so there is no additional cost to you." },
-      { id: 'T6', name: '已安排 FBA/多渠道补发', level: 'prereq', channel: 'Amazon', prereq: '地址已确认 + 保修期内', content: "We have arranged a replacement package to be sent to the address you provided. The replacement will be shipped through Amazon's fulfillment network.\n\nYou will receive a tracking number once the package has been processed. Please allow 1-2 business days for the tracking information to appear.\n\nIf you have any questions about the shipment, please feel free to contact us." },
-      { id: 'T7', name: '已安排中国仓/CN 小包补发', level: 'prereq', channel: '通用', prereq: '地址已确认 + 保修期内', content: "We have arranged for the replacement package to be shipped from our China warehouse. It will be sent via standard international shipping.\n\nExpected delivery time: 7-15 business days.\nYou will receive a tracking number once the package has been shipped.\n\nPlease note that international shipping may take slightly longer than domestic delivery. We appreciate your patience." },
-      { id: 'T8', name: '订单超保修：$15 运费补发手柄', level: 'prereq', channel: '通用', prereq: '订单超 12 个月保修期', content: "The purchase is outside our 12-month warranty period. However, we'd still like to help.\n\nWe can provide a replacement handpiece at no product cost. A shipping fee of $15 would apply for delivery. If you'd like to proceed, please let us know and we'll send you a payment link for the shipping fee.\n\nOnce the payment is received, we'll arrange the shipment immediately." },
-      { id: 'T9', name: '订单超保修：$40 运费补发整机', level: 'prereq', channel: '通用', prereq: '订单超 12 个月保修期', content: "The purchase is outside our 12-month warranty period. However, we'd still like to help.\n\nWe can provide a replacement machine at no product cost. A shipping fee of $40 would apply for delivery. If you'd like to proceed, please let us know and we'll send you a payment link for the shipping fee.\n\nOnce the payment is received, we'll arrange the shipment immediately." },
-      { id: 'T10', name: '客户自行退款后仍想补发', level: 'prereq', channel: '通用', prereq: '订单已退款', content: "A full refund has already been requested and processed for this order. Since the order has been refunded, we're unable to arrange a separate replacement shipment.\n\nIf you'd still like to receive the product, we'd recommend placing a new order on our website or on Amazon. If you have any questions, we're happy to help." },
-      { id: 'T11', name: '客户原因/进水导致损坏', level: 'prereq', channel: '通用', prereq: '确认非产品本身质量问题', content: "Thank you for sending the video. After reviewing it, it appears that the product may have been exposed to water or moisture, which can cause damage to the internal components.\n\nUnfortunately, damage caused by liquid exposure or misuse is not covered under our warranty. However, we'd like to offer you a discount code for a new purchase if you're interested.\n\nPlease let us know how you'd like to proceed." },
-      { id: 'T12', name: '超 12 月保修：只提供折扣码', level: 'prereq', channel: '通用', prereq: '订单超 12 个月保修期', content: "The purchase is outside our 12-month warranty period. While we're unable to provide a free replacement, we would like to offer you a discount coupon that you can use for a new purchase on our website.\n\nThe coupon code is: [CODE] for [X]% off your next order.\n\nIf you have any questions, please feel free to contact us." },
-      { id: 'T13', name: '视频没收到 / 打不开 / 无权限', level: 'ready', channel: '通用', prereq: '客户表示已发视频但未收到', content: "We are sorry, but it looks like we did not receive the video or we are unable to open the link you shared.\n\nCould you please try one of the following:\n1. Re-send the video as an email attachment directly to service@melodysusie.com\n2. If the file is too large, you can upload it to Google Drive or Dropbox and share the link (please make sure the sharing permissions are set to 'Anyone with the link')\n\nWe'll check again as soon as we receive it." },
-      { id: 'T16', name: '安全/烫伤类投诉首封回复', level: 'prereq', channel: '通用', prereq: '涉及人身安全（仅人工）', content: "We are sorry to hear about what happened and hope you are feeling better.\n\nPlease stop using the product immediately. Your safety is our top priority.\n\nTo help us investigate this thoroughly, could you please:\n1. Send us a photo of any injury or damage\n2. Send the order number and purchase date\n3. Keep the product, charger, accessories, and all packaging for inspection\n\nWe will escalate this case to our safety team for a full investigation." },
-      { id: 'T17', name: '安全/烫伤类投诉：需进一步验证', level: 'prereq', channel: '通用', prereq: '安全事件已立案（仅人工）', content: "Please stop using the product immediately and keep the product, charger, accessories, and packaging for inspection.\n\nWe're currently working with our safety team to investigate the cause. In the meantime, if you have any medical expenses related to this incident, please keep all receipts and documentation.\n\nWe'll be in touch with you again within 48 hours with an update." },
-      { id: 'T18', name: '打磨机发烫但未造成伤害', level: 'cond', channel: '通用', prereq: '客户报告发烫', content: "Some warmth during use can be normal depending on the speed setting, usage time, and grinding load. However, if the device becomes uncomfortably hot to touch or emits a burning smell, please stop using it immediately.\n\nCould you please let us know:\n- How long you typically use the device in one session?\n- What speed setting do you use?\n- Does the heat occur after a few minutes or after extended use?\n\nThis will help us determine if the device is functioning normally or if a replacement is needed." },
-      { id: 'T19', name: '打磨笔噪音变大', level: 'cond', channel: '通用', prereq: '客户报告噪音变大', content: "A louder noise can be caused by several factors, such as dust buildup, normal wear over time, or a loose component.\n\nCould you please try the following:\n1. Clean the handpiece by removing the bit and blowing out any dust\n2. Tighten the bit securely and test again\n3. Check if the noise changes with different speed settings\n\nIf the noise persists after cleaning, please send us a short video so we can check further." },
-      { id: 'T20', name: '屏幕黑点不影响正常使用', level: 'cond', channel: '通用', prereq: '客户报告屏幕黑点', content: "Could you please confirm whether the black spot affects the speed display or the normal use of the machine? If the display is still readable and the machine functions normally otherwise, this may be a cosmetic issue that doesn't affect performance.\n\nHowever, if you'd prefer a replacement, we'd be happy to arrange that under warranty. Please let us know your preference." },
-      { id: 'T21', name: '非 MelodySusie 产品 / 其他品牌', level: 'cond', channel: '通用', prereq: '确认非本品牌产品', content: "After checking the product shown in the video, it appears that the item may not be a MelodySusie product. Our products have the MelodySusie logo on the device and packaging.\n\nCould you please check if there's a brand name or logo on your device? If you believe this is a MelodySusie product, please send us a photo of the label or logo so we can verify.\n\nIf it's from another brand, we'd recommend reaching out to that brand's customer support for assistance." },
-      { id: 'T23', name: '告知顾客无需退还故障产品', level: 'prereq', channel: '通用', prereq: '已安排补发', content: "There is no need to return the defective item for this case. You may keep it or dispose of it as you see fit.\n\nThe replacement has been arranged and will be shipped to your address. Once it's shipped, you'll receive a tracking number.\n\nIf you have any questions, please feel free to contact us." },
-      { id: 'T25', name: 'PC760G 磨头不兼容 / 无替换磨头', level: 'cond', channel: '通用', prereq: '客户询问磨头兼容性', content: "The PC760G is designed to work with its included sanding heads and is not compatible with standard 3/32\" drill bits.\n\nFor replacement sanding heads, you can purchase them on our website or on Amazon by searching for 'PC760G sanding bands' or the specific model number.\n\nIf you need help finding the right replacement, please let us know and we'll send you a link." },
-      { id: 'T26', name: '甲油胶无法固化', level: 'cond', channel: '通用', prereq: '客户报告凝胶不固化', content: "Curing results can vary depending on the lamp type, wattage, application thickness, and curing time.\n\nCould you please check:\n1. How many seconds are you curing each layer?\n2. Are you applying thin, even layers?\n3. What is the wattage of your lamp?\n\nIf the gel still doesn't cure after adjusting these factors, please send us a short video so we can check further." },
-      { id: 'T27', name: '刷子毛脱落', level: 'cond', channel: '通用', prereq: '客户报告刷毛脱落', content: "To help protect the bristles, we recommend cleaning the brush gently with brush cleaner or nail polish remover after each use. Avoid pulling or pressing too hard.\n\nIf the bristles are shedding significantly from the first use, this may be a quality issue. Could you please send us a photo so we can check?\n\nIf it's a quality issue, we'll arrange a replacement." },
-      { id: 'T28', name: '甲油胶颜色不同/色差', level: 'cond', channel: '通用', prereq: '客户报告色差', content: "Please note that gel polish colors may appear slightly different due to screen settings, lighting, nail base color, and application thickness. The actual color may also look different in natural daylight versus indoor lighting.\n\nIf you feel the color is significantly different from what was shown on our website, please send us a comparison photo. We'd be happy to check and offer a solution if needed." },
-      { id: 'T29', name: '缺件：MM400D 没有砂圈/配件', level: 'prereq', channel: '通用', prereq: '客户报告缺件', content: "The package should include: Nail drill × 1, Nail drill bits × 8 pcs, 180-grit sanding bands × 50 pcs, and other listed accessories.\n\nCould you please check the package contents and let us know which items are missing? A photo of the items you received will help us verify.\n\nOnce we confirm the missing items, we'll arrange for replacements to be sent to you." },
-      { id: 'T34', name: '配件有瑕疵：补发基础配件或退款', level: 'prereq', channel: '通用', prereq: '配件确认有瑕疵', content: "We're sorry about the issue with the accessory. We can process a $5 refund for you, or we can send you a replacement accessory at no cost.\n\nWhich option would you prefer? If you'd like the replacement, please confirm your shipping address." },
-    ],
-    post02: [
-      { id: 'T1', name: '引导客户发送视频与订单到 Service 邮箱', level: 'ready', channel: '通用', prereq: '首封售后来信', content: "To help us check the issue and provide the right solution, could you please send the following information to our support email:\n\n1. Your order number\n2. A short video (10-30 seconds) showing the problem\n3. A clear photo of the product label or model number\n\nPlease send these to service@melodysusie.com with your order number as the subject line." },
-      { id: 'T3', name: '索要视频 / 照片以确认问题', level: 'ready', channel: '通用', prereq: '问题尚未可视化确认', content: "Could you please send a short video showing the problem? If a video is not convenient, a few clear photos would also be helpful.\n\nPlease make sure the video shows the damage clearly so we can assess it." },
-      { id: 'T13', name: '视频没收到 / 打不开', level: 'ready', channel: '通用', prereq: '客户表示已发视频但未收到', content: "We are sorry, but it looks like we did not receive the video or we are unable to open the link you shared.\n\nCould you please try re-sending the video as an email attachment directly to service@melodysusie.com?" },
-      { id: 'T22', name: '客户说收到二手/被用过产品', level: 'cond', channel: '通用', prereq: '客户报告收到二手产品', content: "We are sorry to hear about your concern regarding the condition of the product you received. We take this very seriously.\n\nCould you please send us:\n1. Photos showing the signs of use (scratches, fingerprints, opened packaging, etc.)\n2. The order number\n\nWe'll investigate this with our warehouse and get back to you with a solution." },
-    ],
-    post03: [
-      { id: 'G3', name: '退款请求审核中', level: 'g', channel: '通用', prereq: '客户已明确表示希望退款', content: "Thank you for clarifying that you would prefer a refund. We understand your request.\n\nWe need to review the order details and the issue you've described. Once we've checked everything, we'll get back to you with the result of the refund review." },
-      { id: 'G4', name: '缺件一次问齐', level: 'g', channel: '通用', prereq: '客户报告缺件', content: "We're sorry that your order appears to be incomplete. To help us check what happened, could you please send any of the following items that you have available:\n\n1. The order number\n2. A photo of the package as you received it\n3. A photo of the items that were inside the package" },
-      { id: 'T15', name: '订单超 30 天想退货退款，提供 50% 退款', level: 'prereq', channel: '通用', prereq: '订单超 30 天退货期限', content: "The order was placed more than 30 days ago, which is beyond our standard return window. However, as a goodwill solution, we can offer a 50% refund of the purchase price.\n\nIf you'd like to proceed with the partial refund, please let us know and we'll arrange it for you.\n\nIf you have any questions, please feel free to contact us." },
-      { id: 'T32', name: '退款信息通知', level: 'prereq', channel: '通用', prereq: '退款已处理', content: "I have arranged for a full refund to be issued to you. The refund will be processed back to your original payment method.\n\nPlease allow 3-5 business days for the refund to appear on your account, depending on your bank's processing time.\n\nIf you have any questions about the refund, please feel free to contact us." },
-      { id: 'T33', name: '超 12 月保修协商部分退款', level: 'prereq', channel: '通用', prereq: '订单超保修期', content: "Your product is just beyond the 12-month warranty period. While we're unable to provide a full free replacement, we would like to offer you a partial refund as a goodwill solution.\n\nWe can process a [X]% refund of your purchase price. If you'd like to proceed, please let us know and we'll arrange it." },
-      { id: 'T36', name: '客户想换产品，但我们提供退款', level: 'prereq', channel: 'Amazon', prereq: 'Amazon 渠道无法直接换货', content: "We are unable to arrange a direct replacement for a different product through the Amazon platform. However, we can process a full refund for your current order so you can place a new order for the product you'd like.\n\nPlease let us know if you'd like to proceed with the refund." },
-    ],
-    post04: [
-      { id: 'T2', name: '索要订单截图 / 老订单查不到', level: 'ready', channel: '通用', prereq: '系统中无法匹配订单', content: "We were unable to locate the order with the information currently available. Could you please send us a screenshot of your order confirmation page or email?" },
-      { id: 'T14', name: '物流显示 Delivered 但客户未收到', level: 'cond', channel: '通用', prereq: '物流显示已妥投', content: "We understand how frustrating it can be when a package is marked as delivered but cannot be found.\n\nCould you please check:\n1. Was the package left with a neighbor or at a front desk?\n2. Is there a safe location where the carrier might have left it?\n3. Check your mailbox and any delivery notices\n\nWe'll also contact the carrier to investigate. If the package still cannot be found, we'll arrange a solution for you." },
-    ],
-    post05: [
-      { id: 'G1', name: '确认收到（核实式）', level: 'g', channel: '通用', prereq: '无', content: "Thank you for reaching out. We've received your message and will check the logistics status of your order right away.\n\nWe'll contact the carrier to get more information and get back to you as soon as possible." },
-    ],
+    amazon: {
+      pre: [
+        { id: 'A-PRE-01', name: '延保注册引导', level: 'ready', channel: '全部', prereq: '无',
+          scenario: '客户询问如何延保',
+          content: "Hello,\n\nWe hope you're enjoying your MelodySusie device! MelodySusie offers an extended warranty service that you can activate by registering your device.\n\nTo activate the warranty, simply follow the steps below:\n1. Visit our warranty registration page at the link below:\n   https://www.melodysusie.com/pages/extend-warranty\n2. Fill out the form and submit it — that's all it takes. It's quick and easy!\n\nIf you run into any issues during the registration process, just reply to this email and we'll be happy to help you right away.\n\nBest regards,\nMelodySusie Support Team",
+          params: [] },
+        { id: 'A-PRE-02', name: '发票下载路径引导', level: 'ready', channel: '全部（仅Amazon订单）', prereq: '购买渠道=Amazon',
+          scenario: '客户询问发票如何下载',
+          content: "Hello,\n\nThank you for reaching out to us. I'd be happy to guide you through downloading your invoice for record-keeping purposes.\n\nPlease follow the simple steps below:\n1. Go to Your Orders on Amazon.\n2. Locate the order for which you need the invoice.\n   Tip: If the order isn't visible, try selecting a different time range from the \"Orders placed in\" menu.\n3. Click on Invoice, then choose to download or print it.\n\nThis invoice serves as a helpful reference for your purchase.\n\nIf you have any further questions or need additional assistance, please let us know. Thank you for trusting MelodySusie — we're always here to help.\n\nBest regards,\nMelodySusie Support Team",
+          params: [] },
+      ],
+      mid: [],
+      post: {
+        'post-01': [
+          { id: 'A-POST-01-01', name: '引导客户发送视频与订单到Service邮箱', level: 'ready', channel: '全部', prereq: '无（首封引导即可用）',
+            scenario: '客户在Amazon站内/后台反馈产品故障，需转Service邮箱统一处理',
+            content: "Hello [Customer Name],\n\nThank you for reaching out. This is the MelodySusie Support Team, and we'll be happy to assist you.\n\nTo help us check the issue and provide the right solution, could you please send the following information to the support email address listed in the attached note?\n\n1. A short video or photos showing the issue;\n2. Your Amazon order number (for example, 114-8100678-2703450), or a screenshot of your order details.\n\nOnce our after-sales team receives the information, we will check your case and get back to you within 24 hours.\n\nThank you for your cooperation.\n\nBest regards,\nMelodySusie Support Team",
+            params: [
+              {name:'[Customer Name]', type:'占位符', desc:'替换为中性称呼（Hello），不提取真名'},
+            ]},
+          { id: 'A-POST-01-02', name: '索要订单截图/老订单查不到', level: 'ready', channel: '全部', prereq: '无',
+            scenario: '后台无法定位订单，或订单时间较久',
+            content: "Hello [Customer Name],\n\nThank you for your message. We were unable to locate the order with the information currently available. Could you please send us a screenshot of your order details, including the order number, product name, and purchase date?\n\nIf the order was placed more than two years ago, please also send a photo of the model number on the product, if available. This will help us confirm the correct product and available support options.\n\nBest regards,\nMelodySusie Support Team",
+            params: [{name:'[Customer Name]', type:'占位符', desc:'中性称呼'}] },
+          { id: 'A-POST-01-03', name: '索要视频/照片以确认问题', level: 'ready', channel: '全部', prereq: '无',
+            scenario: '客户反馈功能异常，但没有提供可判断的证据',
+            content: "Hello [Customer Name],\n\nThank you for contacting us. I'm sorry to hear that you are experiencing an issue with your MelodySusie product.\n\nTo help us understand the issue and provide the most suitable solution, could you please send a short video showing the problem? If a video is not convenient, a few clear photos would also be helpful.\n\nOnce we check the video/photos and your order information, we will follow up with the next steps.\n\nBest regards,\nMelodySusie Support Team",
+            params: [{name:'[Customer Name]', type:'占位符', desc:'中性称呼'}] },
+          { id: 'A-POST-01-04', name: '确认是手柄/主机/其他部件问题', level: 'ready', channel: '全部', prereq: '已收到故障描述',
+            scenario: '客户描述不清，需判断是handpiece、machine还是附件问题',
+            content: "Hello [Customer Name],\n\nThank you for your message. I'm sorry for the inconvenience this has caused.\n\nTo make sure we send the correct replacement part, could you please help us confirm which part is not working as expected?\n\n- Is the issue with the handpiece?\n- Is the issue with the main machine/body?\n- Or is another accessory not working properly?\n\nA short video or a few photos would be very helpful.\n\nOnce we've confirmed the issue and reviewed your order details, we'll advise on the next step.\n\nBest regards,\nMelodySusie Support Team",
+            params: [{name:'[Customer Name]', type:'占位符', desc:'中性称呼'}] },
+          { id: 'A-POST-01-05', name: '保修期内：补发配件/整机并索要地址', level: 'prereq', channel: '全部', prereq: '需人工确认保修状态',
+            scenario: '已确认产品或部件存在问题且符合保修条件',
+            content: "Hello [Customer Name],\n\nThank you for sharing the details with us. Based on the information provided, we can help arrange a replacement {手柄/主机/配件} for you under the warranty.\n\nTo proceed, please reply with your full shipping address and phone number for delivery purposes.\n\nOnce we receive the information, we will arrange the replacement shipment and share the tracking details when available.\n\nThank you for your cooperation.\n\nBest regards,\nMelodySusie Support Team",
+            params: [
+              {name:'[Customer Name]', type:'占位符', desc:'中性称呼'},
+              {name:'{手柄/主机/配件}', type:'AI填充', desc:'根据已核实部件填写'},
+            ]},
+          { id: 'A-POST-01-06', name: '已安排FBA/多渠道补发', level: 'prereq', channel: '全部', prereq: '需人工确认补发已实际创建',
+            scenario: '补发已创建，等待物流单号',
+            content: "Hello [Customer Name],\n\nThank you for your patience. We have arranged a replacement package to be sent to the address you provided. We will follow up with the tracking number as soon as it becomes available so you can monitor the delivery progress.\n\nIf you have any questions while waiting, please contact us at once.\n\nBest regards,\nMelodySusie Support Team",
+            params: [{name:'[Customer Name]', type:'占位符', desc:'中性称呼'}] },
+          { id: 'A-POST-01-07', name: '已安排中国仓/CN小包补发', level: 'prereq', channel: '全部', prereq: '需人工确认补发已实际创建',
+            scenario: 'FBA缺货或需从中国仓补发',
+            content: "Hello [Customer Name],\n\nThank you for your patience. We have arranged for the replacement package to be shipped from our China warehouse to the address you provided.\n\nThe estimated delivery time is approximately [6-10] business days, depending on the destination and carrier schedule. We will send you the tracking number as soon as it is available.\n\nThank you for your understanding.\n\nBest regards,\nMelodySusie Support Team",
+            params: [
+              {name:'[Customer Name]', type:'占位符', desc:'中性称呼'},
+            ]},
+          { id: 'A-POST-01-08', name: '超保修：运费补发手柄/配件', level: 'prereq', channel: '仅Service邮箱', prereq: '需人工确认超保',
+            scenario: '订单超过12个月保修期，品牌愿意goodwill补发，客户支付运费',
+            content: "Hello [Customer Name],\n\nThank you for sharing the details with us. Based on the information provided, it appears that the handpiece may not be working as expected.\n\nAfter checking the order information, we found that the purchase is outside our 12-month warranty period, so it is not eligible for a standard warranty replacement. However, we would still like to help as a one-time goodwill solution. We can provide a replacement handpiece at no product cost. You would only need to cover a [CONFIRM:运费金额] shipping fee.\n\nTo proceed, please use the official MelodySusie payment link below to complete the shipping fee payment:\nhttps://www.melodysusie.com/products/shipping-fee\n\nPlease make sure the payment page URL begins with https://www.melodysusie.com/. You will be asked to complete the payment through the official checkout page. MelodySusie will never ask for your full card number, CVV, or account password by email.\n\nAfter completing the payment, please reply with:\n1. A screenshot of the payment confirmation page or order confirmation email;\n2. Your full shipping address;\n3. Your phone number for delivery purposes.\n\nFor security, you may cover or hide any sensitive payment details in the screenshot. We only need to confirm the order/payment reference and amount.\n\nOnce we receive the confirmation, we will arrange the replacement shipment.\n\nBest regards,\nMelodySusie Support Team",
+            params: [
+              {name:'[Customer Name]', type:'占位符', desc:'中性称呼'},
+              {name:'[CONFIRM:运费金额]', type:'运营确认', desc:'需确认具体运费金额（原文$15）'},
+            ]},
+          { id: 'A-POST-01-09', name: '超保修：运费补发整机', level: 'prereq', channel: '仅Service邮箱', prereq: '需人工确认超保',
+            scenario: '订单超过12个月保修期，问题需要整机补发',
+            content: "Hello [Customer Name],\n\nThank you for contacting MelodySusie Support. After checking the order information, we found that the purchase is outside our 12-month warranty period, so it is not eligible for a standard warranty replacement.\n\nHowever, we would still like to support you with a one-time goodwill replacement option. We can provide a replacement machine at no product cost. You would only need to cover a [CONFIRM:运费金额] shipping fee.\n\nTo proceed, please use the official MelodySusie payment link below to complete the shipping fee payment:\nhttps://www.melodysusie.com/products/shipping-fee\n\nPlease make sure the payment page URL begins with https://www.melodysusie.com/. If the page requires you to adjust the quantity to match the shipping fee amount, please set the quantity accordingly so the total reflects the shipping fee.\n\nAfter completing the payment, please reply with a screenshot of the payment confirmation page or order confirmation email, along with your full shipping address and phone number. For security, please cover or hide any sensitive payment details before sending the screenshot.\n\nOnce we receive the confirmation, we will arrange the replacement shipment.\n\nBest regards,\nMelodySusie Support Team",
+            params: [
+              {name:'[Customer Name]', type:'占位符', desc:'中性称呼'},
+              {name:'[CONFIRM:运费金额]', type:'运营确认', desc:'需确认具体运费金额（原文$40）'},
+            ]},
+          { id: 'A-POST-01-10', name: '客户原因/进水损坏：支付服务费', level: 'prereq', channel: '仅Service邮箱', prereq: '需人工确认客户原因致损',
+            scenario: '客户明确说明产品进水/摔落等非标准保修问题',
+            content: "Hello [Customer Name],\n\nThank you for sharing the details with us. Based on the information provided, the product appears to have been exposed to water, so it may not be eligible for a standard warranty replacement.\n\nHowever, we would still like to help as a one-time goodwill solution. We can provide a replacement handpiece for a [CONFIRM:服务费金额] shipping/service fee.\n\nTo proceed, please use the official MelodySusie payment link below:\nhttps://www.melodysusie.com/products/shipping-fee\n\nPlease make sure the payment page URL begins with https://www.melodysusie.com/.\n\nAfter completing the payment, please reply with a screenshot of the payment confirmation page or order confirmation email, your full shipping address, and your phone number. For security, please cover or hide any sensitive payment details in the screenshot.\n\nOnce we receive the confirmation, we will arrange the replacement shipment.\n\nBest regards,\nMelodySusie Support Team",
+            params: [
+              {name:'[Customer Name]', type:'占位符', desc:'中性称呼'},
+              {name:'[CONFIRM:服务费金额]', type:'运营确认', desc:'需确认具体金额（原文$20）'},
+            ]},
+          { id: 'A-POST-01-11', name: '超保修：只提供折扣码（后台专用）', level: 'prereq', channel: '仅Amazon后台', prereq: '需人工确认超12月',
+            scenario: '订单超过保修期，品牌不补发，仅提供优惠券',
+            content: "Hello [Customer Name],\n\nThank you for reaching out to us about your MelodySusie product. After checking the order details, we found that the purchase is outside our 12-month warranty period. Because of this, it is not eligible for a standard warranty replacement or refund.\n\nHowever, we still value your experience and would like to offer a [CONFIRM:折扣额度] discount coupon toward a compatible replacement or a new MelodySusie product. This discount can be combined with eligible Amazon promotions, if applicable.\n\nPlease let us know if you would like to use this option, and we will send the coupon code to you.\n\nBest regards,\nMelodySusie Support Team",
+            params: [
+              {name:'[Customer Name]', type:'占位符', desc:'中性称呼'},
+              {name:'[CONFIRM:折扣额度]', type:'运营确认', desc:'需确认折扣比例（原文10%/20%/30%）'},
+            ]},
+          { id: 'A-POST-01-12', name: '视频没收到/打不开/无权限', level: 'ready', channel: '全部', prereq: '客户称已发证据',
+            scenario: '客户说已发视频，但客服未收到或无法打开',
+            content: "Hello [Customer Name],\n\nThank you for your message. We are sorry, but it looks like we did not receive the video or we are unable to open the link you shared. Could you please resend the video as an email attachment, or update the sharing permission so we can access it?\n\nIf the file is too large, you may also send a few clear photos showing the issue.\n\nOnce we receive the video/photos, we will check your case promptly.\n\nBest regards,\nMelodySusie Support Team",
+            params: [{name:'[Customer Name]', type:'占位符', desc:'中性称呼'}] },
+          { id: 'A-POST-01-13', name: '打磨机发烫但未造成伤害', level: 'cond', channel: '全部', prereq: '无伤害、无冒烟、无烧焦/电气异味',
+            scenario: '客户反馈机器发热/发烫，但未提到伤害',
+            content: "Hello [Customer Name],\n\nThank you for contacting us. Some warmth during use can be normal depending on the speed setting, usage time, and grinding load. However, if the device feels unusually hot, emits any odor or smoke, or causes discomfort, please stop using it immediately.\n\nTo help us check this further, could you please send a short video showing the issue, along with the speed setting, approximate usage time, and whether the device was charging or unplugged during use?\n\nOnce we receive the information, we will check it and provide the appropriate support.\n\nBest regards,\nMelodySusie Support Team",
+            params: [{name:'[Customer Name]', type:'占位符', desc:'中性称呼'}] },
+          { id: 'A-POST-01-14', name: '打磨笔噪音变大', level: 'cond', channel: '全部', prereq: '无',
+            scenario: '客户反馈使用后噪音变大、转动不顺',
+            content: "Hello [Customer Name],\n\nThank you for letting us know. A louder noise can be caused by several factors, such as dust buildup, normal wear over time, or impact during use or storage. We are unable to determine the exact cause remotely, but we would be happy to check it further.\n\nCould you please send us a short video of the handpiece running at low, medium, and high speed? Please also let us know approximately how long the product has been used.\n\nOnce we check the video and order information, we will provide the most suitable solution.\n\nBest regards,\nMelodySusie Support Team",
+            params: [{name:'[Customer Name]', type:'占位符', desc:'中性称呼'}] },
+          { id: 'A-POST-01-15', name: '屏幕黑点不影响正常使用', level: 'cond', channel: '全部', prereq: '仅外观问题且功能正常',
+            scenario: '显示屏有黑点，但功能正常',
+            content: "Hello [Customer Name],\n\nThank you for sharing this with us. We are sorry for the inconvenience.\n\nCould you please confirm whether the black spot affects the speed display or the normal use of the machine? If possible, please send a clear photo of the screen while the device is turned on.\n\nIf the machine works normally and the issue is only cosmetic, we can offer a partial refund. If the display or function is affected, we will check the case further and provide the appropriate support.\n\nBest regards,\nMelodySusie Support Team",
+            params: [
+              {name:'[Customer Name]', type:'占位符', desc:'中性称呼'},
+              {name:'[CONFIRM:退款比例]', type:'运营确认', desc:'需确认部分退款比例（原文partial refund）'},
+            ]},
+          { id: 'A-POST-01-16', name: '非MelodySusie产品/其他品牌', level: 'cond', channel: '全部', prereq: '确认非本品牌产品（需人工核验）',
+            scenario: '客户误把其他品牌产品当作MelodySusie售后',
+            content: "Hello [Customer Name],\n\nThank you for sharing the video with us. After checking the product shown in the video, it appears that the item may not be a MelodySusie product. There may have been a small mix-up with the brand name.\n\nWe recommend checking the order details or product packaging to confirm the correct brand/seller so they can provide the right support. If you have another MelodySusie order you would like us to check, please send the order details and we will be happy to help.\n\nBest regards,\nMelodySusie Support Team",
+            params: [{name:'[Customer Name]', type:'占位符', desc:'中性称呼'}] },
+          { id: 'A-POST-01-17', name: '告知顾客无需退还故障产品', level: 'prereq', channel: '全部', prereq: '需人工确认补发决定已作出',
+            scenario: '普通功能故障且无需回收',
+            content: "Hello [Customer Name],\n\nThere is no need to return the defective item for this case. You may keep it or dispose of it according to your local disposal guidelines.\n\nWe hope the replacement product provides a better experience. If you have any further questions, please contact us at once.\n\nBest regards,\nMelodySusie Support Team",
+            params: [{name:'[Customer Name]', type:'占位符', desc:'中性称呼'}] },
+          { id: 'A-POST-01-18', name: 'PC760G磨头不兼容/无替换磨头', level: 'cond', channel: '全部', prereq: '型号=PC760G',
+            scenario: '客户询问PC760G是否兼容3/32 bit或普通砂圈',
+            content: "Hello [Customer Name],\n\nThank you for your message. The PC760G is designed to work with its included sanding heads and is not compatible with standard 3/32\" drill bits or regular sanding bands.\n\nAt the moment, separate replacement sanding heads for PC760G are not available. If the included sanding head is damaged or no longer effective, we can offer you a [CONFIRM:折扣额度] discount coupon toward a new PC760G purchase as a goodwill support option. Please let us know if you would like to use this discount, and we will send the coupon code to you.\n\nBest regards,\nMelodySusie Support Team",
+            params: [
+              {name:'[Customer Name]', type:'占位符', desc:'中性称呼'},
+              {name:'[CONFIRM:折扣额度]', type:'运营确认', desc:'需确认折扣比例（原文20%）'},
+            ]},
+          { id: 'A-POST-01-19', name: '甲油胶无法固化', level: 'cond', channel: '全部', prereq: '无',
+            scenario: '客户反馈gel polish不干/不固化',
+            content: "Hello [Customer Name],\n\nThank you for contacting us. We are sorry to hear that the gel polish is not curing as expected.\n\nCuring results can vary depending on the lamp type, wattage, application thickness, and curing time. To help improve the result, please try applying a thinner layer and curing it under a compatible UV/LED lamp for the recommended time. If needed, you may cure for an additional cycle.\n\nIf the issue continues, could you please send us the product name/batch information, the lamp model you used, and a photo or video showing the result after curing? We will check it and provide further support.\n\nBest regards,\nMelodySusie Support Team",
+            params: [{name:'[Customer Name]', type:'占位符', desc:'中性称呼'}] },
+          { id: 'A-POST-01-20', name: '刷子毛脱落', level: 'cond', channel: '全部', prereq: '无',
+            scenario: '客户反馈笔刷毛脱落',
+            content: "Hello [Customer Name],\n\nThank you for reaching out. We are sorry to hear about the issue with the brush bristles.\n\nTo help protect the bristles, we recommend cleaning the brush gently with brush cleaner or nail polish remover and avoiding long soaking times, hot water, or direct sunlight after cleaning.\n\nIf the bristles started falling out shortly after you received the product, please send us a photo of the brush and your order information. We will check the case and provide the appropriate support.\n\nBest regards,\nMelodySusie Support Team",
+            params: [{name:'[Customer Name]', type:'占位符', desc:'中性称呼'}] },
+          { id: 'A-POST-01-21', name: '甲油胶颜色不同/色差', level: 'cond', channel: '全部', prereq: '无',
+            scenario: '客户反馈实物颜色与图片不同',
+            content: "Hello [Customer Name],\n\nThank you for sharing your feedback. We understand that color accuracy is important, and we are sorry that the shade did not meet your expectations.\n\nPlease note that gel polish colors may appear slightly different due to screen settings, lighting, nail base color, and the number of coats applied.\n\nIf the color difference seems significant, please send us a photo of the bottle label and the color applied on the nail or swatch under natural light. We will check it and do our best to help.\n\nBest regards,\nMelodySusie Support Team",
+            params: [{name:'[Customer Name]', type:'占位符', desc:'中性称呼'}] },
+          { id: 'A-POST-01-22', name: '超保修协商部分退款（超6月保修期）', level: 'prereq', channel: '全部', prereq: '需人工确认超6月保修期',
+            scenario: '产品超过6个月保修期，协商部分退款方案',
+            content: "Hello,\n\nThank you for reaching out to us, and I'm truly sorry to hear that your item is no longer turning on. I completely understand how frustrating this must be, and I appreciate you giving us the opportunity to help.\n\nAfter checking your purchase details, I see that your product is just beyond the 6-month warranty period. Under our standard policy, this means a refund or replacement is not available.\n\nHowever, we would like to offer you a special solution. Although the usual registration window for the additional 6-month warranty has passed, as a gesture of goodwill, if you register your product on our official website now, we will activate the extended warranty and immediately arrange warranty service for your item. Once you complete the registration, our team will quickly process the service to get your tool back in working order.\n\nWe hope this shows our commitment to your satisfaction. Please visit our website to complete the registration, and let us know once you have done so. We will take care of the rest.\n\nWe sincerely apologize for any inconvenience caused, and we truly appreciate your understanding. If you have any further questions, please don't hesitate to reach out.\n\nBest regards,\nMelodySusie Support Team",
+            params: [] },
+          { id: 'A-POST-01-23', name: '超保修协商部分退款（超12月保修期）', level: 'prereq', channel: '全部', prereq: '需人工确认超12月保修期',
+            scenario: '产品超过12个月保修期，协商部分退款方案',
+            content: "Hello,\n\nThank you for reaching out to us, and I'm truly sorry to hear that your product is no longer turning on. I completely understand how frustrating this must be.\n\nAfter checking your purchase details, I see that the product is just beyond the 12-month warranty period, which typically means a refund or replacement is not available under standard policy. However, because your satisfaction and trust mean a great deal to us, we would like to offer you a partial refund of [CONFIRM:退款比例] of the purchase price as a gesture of goodwill.\n\nWe hope this solution brings you some relief, and we sincerely apologize for any inconvenience caused. We know how important your tools are to your nail care routine, and we're committed to supporting you as best we can.\n\nPlease let us know if this works for you, or if you have any further questions. We truly appreciate your understanding and are here to help.\n\nBest regards,\nMelodySusie Support Team",
+            params: [
+              {name:'[CONFIRM:退款比例]', type:'运营确认', desc:'需确认退款比例（原文30%）'},
+            ]},
+          { id: 'A-POST-01-24', name: '配件有瑕疵：补发或退款', level: 'prereq', channel: '全部', prereq: '需人工确认配件瑕疵',
+            scenario: '配件有瑕疵但不影响核心功能',
+            content: "Hello,\n\nThank you for reaching out to us. We sincerely apologize for the inconvenience caused by our product. While this issue does not affect its core functionality, we value your experience greatly and would like to make it right for you.\n\nTo express our sincere apology, we are pleased to offer you the following options:\n\n- Refund: We can process a [CONFIRM:退款金额] refund for you.\n- Replacement: We can send you a replacement.\n\nWhichever option you prefer, we hope it reflects our commitment to your satisfaction. Please kindly reply to this email with your choice, and we will take care of the rest promptly.\n\nThank you for your understanding and patience.\n\nBest regards,\nMelodySusie Support Team",
+            params: [
+              {name:'[CONFIRM:退款金额]', type:'运营确认', desc:'需确认退款金额（原文$5）'},
+            ]},
+          { id: 'A-POST-01-25', name: '订单作为礼物收到没有订单号', level: 'prereq', channel: '仅Service邮箱', prereq: '无订单号（礼物）',
+            scenario: '收件人无Amazon订单号（礼物订单）',
+            content: "Hello,\n\nIf you don't have an Amazon order number, we can still assist you with the following options:\n\nOption 1: Replacement Handpiece\nWe can offer you a replacement handpiece for a nominal shipping fee of [CONFIRM:运费金额]. To proceed, please visit the link below to pay the shipping fee:\nhttps://www.melodysusie.com/products/shipping-fee\nAt the provided URL, simply adjust the quantity to reflect the fee. Once the payment is complete, please send us your shipping address along with a screenshot of the payment confirmation. We will then arrange for the replacement handpiece to be dispatched to you without delay.\n\nOption 2: [CONFIRM:折扣额度] Discount Coupon\nIf you are interested in purchasing the same model, we are pleased to offer you a discount coupon for your next purchase. This coupon can be combined with all other promotions on Amazon. Please let us know if you would like to take advantage of this offer, and we will send the discount coupon to you right away.\n\nWe appreciate your understanding and look forward to resolving this matter for you.\n\nBest regards,\nMelodySusie Support Team",
+            params: [
+              {name:'[CONFIRM:运费金额]', type:'运营确认', desc:'需确认运费金额（原文$15）'},
+              {name:'[CONFIRM:折扣额度]', type:'运营确认', desc:'需确认折扣比例（原文10%）'},
+            ]},
+        ],
+        'post-02': [
+          { id: 'A-POST-02-01', name: '客户说收到二手/被用过产品', level: 'cond', channel: '全部', prereq: '无',
+            scenario: '客户认为产品不是全新、被使用过',
+            content: "Hello [Customer Name],\n\nThank you for bringing this to our attention. We are sorry to hear about your concern regarding the condition of the product you received.\n\nTo help us check this properly, could you please send a few clear photos or a short video showing the product condition, packaging, and any accessories included?\n\nOnce we receive the information, our team will check the case and provide the appropriate solution, such as a replacement or refund support if needed.\n\nBest regards,\nMelodySusie Support Team",
+            params: [{name:'[Customer Name]', type:'占位符', desc:'中性称呼'}] },
+          { id: 'A-POST-02-02', name: '缺件：MM400D没有砂圈/配件', level: 'prereq', channel: '全部', prereq: '需人工确认缺件',
+            scenario: '客户反馈包装缺少砂圈/配件',
+            content: "Hello [Customer Name],\n\nThank you for bringing this to our attention. We are sorry that your package may not have been complete.\n\nThe package should include:\n- Nail drill × 1\n- Nail drill bits × 8 pcs\n- 180-grit sanding bands × 50 pcs\n\nCould you please confirm which item is missing?\n\nOnce confirmed, please send us your full shipping address and phone number, and we will arrange the missing item to be resent.\n\nBest regards,\nMelodySusie Support Team",
+            params: [{name:'[Customer Name]', type:'占位符', desc:'中性称呼'}] },
+        ],
+        'post-03': [
+          { id: 'A-POST-03-01', name: '客户自行退款后仍想补发', level: 'prereq', channel: '全部', prereq: '需人工确认平台已退款',
+            scenario: '客户已经申请/收到全额退款，品牌不能再免费补发',
+            content: "Hello [Customer Name],\n\nThank you for contacting us. I'm sorry to hear about the issue with your product.\n\nAfter checking the order information, it appears that a full refund has already been requested/processed for this order. Because of this, we are unable to provide a replacement under the same order.\n\nPlease let us know if you have any other questions.\n\nBest regards,\nMelodySusie Support Team",
+            params: [{name:'[Customer Name]', type:'占位符', desc:'中性称呼'}] },
+          { id: 'A-POST-03-02', name: '超30天想退货退款，提供50%退款', level: 'prereq', channel: '全部', prereq: '需人工核验下单日期+超30天',
+            scenario: '超过平台退货期，但品牌愿意部分退款且无需退回',
+            content: "Hello [Customer Name],\n\nThank you for reaching out. I'm sorry for the inconvenience this has caused.\n\nAfter checking the order information, we found that the order was placed more than 30 days ago and is outside the standard return window. However, as a goodwill solution, we can offer a [CONFIRM:退款比例] refund, and you do not need to return the machine or the replacement item.\n\nPlease let us know if this solution works for you, and we will proceed with the refund.\n\nBest regards,\nMelodySusie Support Team",
+            params: [
+              {name:'[Customer Name]', type:'占位符', desc:'中性称呼'},
+              {name:'[CONFIRM:退款比例]', type:'运营确认', desc:'需确认退款比例（原文50%）'},
+            ]},
+          { id: 'A-POST-03-03', name: '退款信息通知', level: 'prereq', channel: '全部', prereq: '需人工确认退款已实际发起',
+            scenario: '退款已处理，通知客户',
+            content: "Hello,\n\nI hope this message finds you well.\n\nIn line with your request, I have arranged for a full refund to be issued to you. Please notice your payment account, as the refunded amount will be returned via the original payment method you used. Depending on your bank or payment provider, it may take 3-5 business days for the transaction to reflect in your account.\n\nShould you have any questions or concerns regarding the refund process, or if there is anything else I can assist you with in the future, please do not hesitate to reach out. Our commitment to providing excellent customer service remains steadfast, and we are here to support you every step of the way.\n\nWe appreciate your understanding and hope to have the opportunity to serve you better in the future.\n\nBest regards,\nMelodySusie Support Team",
+            params: [] },
+          { id: 'A-POST-03-04', name: '客户想换产品，但我们提供退款', level: 'prereq', channel: '全部', prereq: '需人工确认退款决定已作出',
+            scenario: '客户想换不同产品，但Amazon系统限制无法直接换货',
+            content: "Hello [Customer Name],\n\nI sincerely apologize for the malfunction you have experienced with our product. We deeply regret any frustration or inconvenience this may have caused and truly appreciate your patience as we work to resolve the matter.\n\nUnfortunately, due to limitations within Amazon's system, we are unable to arrange a direct replacement for a different product through their platform. However, as per your request, we would be pleased to offer you a full refund. Once the refund has been processed, you are welcome to select another product from the MelodySusie store that better meets your needs.\n\nWe hope this solution is acceptable to you. Please do not hesitate to reach out if you have any questions or require further assistance — we are here to support you every step of the way.\n\nThank you for giving us the opportunity to make things right.\n\nBest regards,\nMelodySusie Support Team",
+            params: [{name:'[Customer Name]', type:'占位符', desc:'中性称呼'}] },
+          { id: 'A-POST-03-05', name: '联系Amazon客服（退货退款）', level: 'cond', channel: '全部（仅Amazon订单）', prereq: '购买渠道=Amazon',
+            scenario: '退货退款需引导客户联系Amazon客服',
+            content: "Hello,\n\nWe sincerely apologize for the inconvenience you've experienced.\n\nAfter checking, we confirmed that your order was placed less than 30 days ago. Since it falls within the return window, you can contact Amazon customer service directly to initiate a return and request a refund.\n\nIf you need any further assistance, please don't hesitate to let us know. We're here to help.\n\nBest regards,\nMelodySusie Support Team",
+            params: [] },
+        ],
+        'post-04': [
+          { id: 'A-POST-04-01', name: '物流显示Delivered但客户未收到', level: 'cond', channel: '全部（仅Amazon订单）', prereq: '购买渠道=Amazon',
+            scenario: '补发或订单物流显示签收/送达，但客户反馈未收到',
+            content: "Hello [Customer Name],\n\nThank you for contacting us. We understand how frustrating it can be when a package is marked as delivered but cannot be found.\n\nAfter checking the tracking information, the package appears to have been marked as delivered by the carrier. We recommend checking with household members, neighbors, the front desk, mailbox area, or any safe delivery location nearby.\n\nSince this shipment was fulfilled by Amazon, Amazon Customer Support has the most complete access to the delivery details and can help investigate the delivery location or assist with a claim if needed.\n\nPlease let us know if Amazon is unable to assist, and we will do our best to support you further.\n\nBest regards,\nMelodySusie Support Team",
+            params: [{name:'[Customer Name]', type:'占位符', desc:'中性称呼'}] },
+        ],
+        'post-05': [
+          { id: 'A-POST-05-01', name: '联系Amazon客服（询问物流）', level: 'cond', channel: '全部（仅Amazon订单）', prereq: '购买渠道=Amazon',
+            scenario: '物流咨询需引导客户联系Amazon客服',
+            content: "Hello,\n\nWe have checked your order and can confirm that it is currently being expedited. Please note that this item is being delivered by Amazon Logistics. For further assistance, we recommend reaching out to Amazon Customer Service directly, as they will be best able to support you.\n\nIf you have any additional questions, please let us know. We're here to help.\n\nBest regards,\nMelodySusie Support Team",
+            params: [] },
+        ],
+        'post-06': [
+          { id: 'A-POST-06-01', name: '安全/烫伤首封（客户只要求退款）', level: 'prereq', channel: '全部', prereq: '安全事件（仅人工使用）',
+            scenario: '客户反馈烫伤/安全体验，但当前只要求退款',
+            content: "Hello [Customer Name],\n\nThank you for reaching out and sharing your experience with us. We are sorry to hear about what happened and hope you are feeling better.\n\nPlease stop using the product immediately.\n\nSince you requested a refund, we can help arrange a full refund for your order. The refund will be returned to your original payment method, and depending on your bank or payment provider, it may take a few business days to appear in your account.\n\nIf you would prefer a goodwill replacement or another support option instead of a refund, please let us know and we will be happy to assist.\n\nWe take customer feedback seriously and will share your report with our internal team for check. If you would like us to further check the product issue, you may also send photos/videos of the product and order details, but no additional information is required for us to proceed with your refund request.\n\nThank you for giving us the opportunity to assist you.\n\nBest regards,\nMelodySusie Support Team",
+            params: [{name:'[Customer Name]', type:'占位符', desc:'中性称呼'}] },
+          { id: 'A-POST-06-02', name: '安全/烫伤需进一步验证', level: 'prereq', channel: '全部', prereq: '安全事件（仅人工使用）',
+            scenario: '客户要求解释原因、索赔、补偿，或问题严重',
+            content: "Hello [Customer Name],\n\nThank you for sharing the additional information with us. We are sorry to hear about your experience and hope you are recovering well.\n\nPlease stop using the product immediately and keep the product, charger, accessories, and packaging in their current condition. Our team may need these items for further check.\n\nTo help us check the matter carefully, could you please provide the following information if available?\n\n1. Your order number or order screenshot;\n2. Photos or videos of the product, charger, accessories, and packaging;\n3. A brief description of how the product was being used when the issue occurred;\n4. Approximate usage time, speed setting, and whether the product was charging or unplugged;\n5. Whether medical attention was needed.\n\nAs a goodwill gesture while the check is ongoing, we can help arrange a refund and/or replacement support option. This support does not determine the cause of the issue, but we want to assist you while we check the matter.\n\nThank you for your cooperation.\n\nBest regards,\nMelodySusie Support Team",
+            params: [{name:'[Customer Name]', type:'占位符', desc:'中性称呼'}] },
+        ],
+        'post-07': [
+          { id: 'A-POST-07-01', name: '非亚马逊平台购买/需要确认渠道', level: 'cond', channel: '全部（站内不得提其他平台）', prereq: '无',
+            scenario: '客户非Amazon购买，或购买渠道不明确',
+            content: "Hello [Customer Name],\n\nThank you for sharing the video. Based on what we can see, the handpiece may not be working as expected.\n\nTo confirm the correct support channel, could you please let us know where the product was purchased, such as our official website, Amazon, Walmart, or another retailer? If you have an order number or order screenshot, please send it to us as well.\n\nIf the order was placed through our official MelodySusie website, we can check it directly. If it was purchased through another retailer, we may need the order details to confirm the available support options.\n\nIf the product is outside the applicable warranty period, we can still offer a discount toward a compatible replacement handpiece.\n\nBest regards,\nMelodySusie Support Team",
+            params: [{name:'[Customer Name]', type:'占位符', desc:'中性称呼'}] },
+        ],
+      },
+      common: [
+        { id: 'A-G1', name: '礼貌回复：确认已收到证据', level: 'g', channel: '通用', prereq: '客户已发送视频/照片',
+          scenario: '客户发来了证据，需要礼貌确认收到并告知后续',
+          content: "Hello [Customer Name],\n\nThank you for reaching out. We've received your message and the attachments.\n\nWe will review the information along with your order details and get back to you with the next steps.\n\nWe appreciate your patience.\n\nBest regards,\nMelodySusie Support Team",
+          params: [{name:'[Customer Name]', type:'占位符', desc:'中性称呼'}] },
+        { id: 'A-G2', name: '礼貌收尾：确认问题已解决', level: 'g', channel: '通用', prereq: '问题已解决',
+          scenario: '客户反馈问题已解决，或对回复表示感谢',
+          content: "Hello [Customer Name],\n\nYou're welcome, and thank you for the update. We're glad to know everything is working well now.\n\nIf you have any other questions, please feel free to contact us. We're always here to help.\n\nBest regards,\nMelodySusie Support Team",
+          params: [] },
+        { id: 'A-G3', name: '退款请求：告知审核中', level: 'g', channel: '通用', prereq: '客户明确表示希望退款',
+          scenario: '客户要求退款/退货退款，需要先核实再回复',
+          content: "Hello [Customer Name],\n\nThank you for your message. We understand your request and will review the order details together with the issue you described.\n\nOnce we have checked everything, we'll get back to you with the result of the review.\n\nWe appreciate your patience while we process this.\n\nBest regards,\nMelodySusie Support Team",
+          params: [{name:'[Customer Name]', type:'占位符', desc:'中性称呼'}] },
+        { id: 'A-G4', name: '礼貌回复：感谢反馈', level: 'g', channel: '通用', prereq: '收到客户反馈/建议',
+          scenario: '客户提供产品使用反馈或建议，不一定是故障',
+          content: "Hello [Customer Name],\n\nThank you for sharing your experience with us. Your feedback is very important and helps us improve our products.\n\nWe appreciate you taking the time to let us know how the product is working for you. If you ever have any questions or need support in the future, please don't hesitate to reach out.\n\nBest regards,\nMelodySusie Support Team",
+          params: [] },
+      ],
+    },
+    website: {
+      pre: [
+        { id: 'W-PRE-01', name: '延保注册引导', level: 'ready', channel: '官网', prereq: '无',
+          scenario: '客户询问如何延保',
+          content: "Hello,\n\nThank you for reaching out. Please click the following link to claim your free extended warranty:\nhttps://www.melodysusie.com/pages/extend-warranty\n\n1. Send an extended warranty request with your order via the form. Please enter your order ID.\n2. We will have your order recorded in our system.\n\nIf you require our assistance, please feel free to contact us.\n\nBest regards,\nMelodySusie Customer Service Team",
+          params: [] },
+        { id: 'W-PRE-02', name: '产品参数查询回复', level: 'ready', channel: '官网', prereq: '无',
+          scenario: '客户询问产品参数',
+          content: "Hello,\n\nThank you for your inquiry! The {产品型号} nail drill features a torque of {扭矩} (gf.cm) and a speed range of {转速范围}. It is suitable for {适用人群}.\n\nIf you need more details about other models, please let us know.\n\nBest regards,\nMelodySusie Customer Service Team",
+          params: [
+            {name:'{产品型号}', type:'AI填充', desc:'从产品数据库获取'},
+            {name:'{扭矩}', type:'AI填充', desc:'从产品数据库获取'},
+            {name:'{转速范围}', type:'AI填充', desc:'从产品数据库获取'},
+            {name:'{适用人群}', type:'AI填充', desc:'从产品数据库获取'},
+          ]},
+        { id: 'W-PRE-03', name: '产品推荐引导对比页', level: 'ready', channel: '官网', prereq: '无',
+          scenario: '客户求推荐产品',
+          content: "Hello,\n\nThank you for reaching out! Since you're just starting out, it's important to have a drill that's easy to use yet powerful enough for tasks like removing top coat and gently working on cuticles without cutting.\n\nWe recommend checking out our drill comparison page, where you can see the features of different models side by side and find the one that best fits your needs:\nhttps://www.melodysusie.com/pages/compare?ref=naviMenu\n\nIf you have any questions about a specific model or need guidance on getting started, feel free to reply — we're happy to assist.\n\nBest regards,\nMelodySusie Customer Service Team",
+          params: [] },
+        { id: 'W-PRE-04', name: '物流配送可用性确认', level: 'ready', channel: '官网', prereq: '无',
+          scenario: '客户询问是否发货到某国家',
+          content: "Hello,\n\nThank you for reaching out! Yes, we do ship to {客户询问的国家}. To make it easy, we offer reliable international shipping and you can shop directly from our website: https://www.melodysusie.com\n\nIf you need help choosing or want a recommendation for first-time use, just let us know — we're happy to assist.\n\nBest regards,\nMelodySusie Customer Service Team",
+          params: [{name:'{客户询问的国家}', type:'AI填充', desc:'从客户来信提取'}] },
+        { id: 'W-PRE-05', name: '物流费用查询', level: 'ready', channel: '官网', prereq: '无',
+          scenario: '客户询问运费',
+          content: "Hello,\n\nThank you for reaching out. Please kindly refer to our shipping policy for detailed shipping fees: https://www.melodysusie.com/pages/shipping-warranty\n\nFree shipping is available for orders over $129.99 for US delivery. Shipping fees vary by destination.\n\nShould you need any additional information or support, please feel free to reach out at any time.\n\nBest regards,\nMelodySusie Customer Service Team",
+          params: [] },
+        { id: 'W-PRE-06', name: '税费/关税说明', level: 'ready', channel: '官网', prereq: '无',
+          scenario: '客户询问税费',
+          content: "Hello,\n\nThank you for your inquiry. Taxes and import duties vary depending on your country's regulations. Customers are responsible for any customs fees or import taxes. We recommend checking with your local customs office to confirm any applicable charges.\n\nPlease refer to our shipping policy for more details: https://www.melodysusie.com/pages/shipping-warranty\n\nFor all international shipments (outside the contiguous United States), any taxes or duties are the responsibility of the buyer. Shipments from our warehouses are delivered duty unpaid. The final cost does not include import duties or sales taxes.\n\nWe hope this helps clarify. If you have further questions, please don't hesitate to reach out.\n\nBest regards,\nMelodySusie Customer Service Team",
+          params: [] },
+        { id: 'W-PRE-07', name: '物流运输时效', level: 'ready', channel: '官网', prereq: '无',
+          scenario: '客户问运输时间',
+          content: "Hello,\n\nThank you for reaching out!\n\nFor orders shipped to Canada, the estimated delivery time is 7–15 business days.\n\nFor your reference:\n- United States: 6–12 business days\n- Canada: 7–15 business days\n- Germany, France, Italy, Spain, Australia, United Kingdom: 7–15 business days\n- Other countries: 10–15 business days\n\nYou can find more details in our Shipping Policy here: https://www.melodysusie.com/pages/shipping-warranty\n\nWe hope this information is helpful. Please feel free to let us know if you have any other questions.\n\nBest regards,\nMelodySusie Customer Service Team",
+          params: [] },
+      ],
+      mid: [
+        { id: 'W-MID-01', name: '已发货无法改单+提供单号', level: 'prereq', channel: '官网', prereq: '订单已发货',
+          scenario: '客户想取消/改单但已发货',
+          content: "Hello [Customer Name],\n\nThank you for shopping with MelodySusie. We sincerely apologize for any inconvenience caused.\n\nWe've checked your order and, unfortunately, it had already been processed and shipped before we received your request. As a result, we're unable to stop the shipment at this stage.\n\nPlease find your tracking details below for reference:\n- Item: {产品名}\n- Ship Date: {发货日期}\n- Estimated Delivery: {预计送达日期}\n- Tracking Number: {物流单号}\n- Carrier: {承运商}\n- Tracking Link: {追踪链接}\n- Status: {物流状态}\n\nMay we know if you can try to accept this item and wait for it? This is also our hot selling product and loved by many professionals and beginners alike. We truly hope you'll enjoy it as well.\n\nHowever, if you still prefer to return it after delivery, please feel free to contact us and we will gladly assist you with the next steps.\n\nThank you for your understanding. Should you need any further assistance, please don't hesitate to reach out — we're always here to help.\n\nBest regards,\nMelodySusie Customer Service Team",
+          params: [
+            {name:'[Customer Name]', type:'占位符', desc:'中性称呼'},
+            {name:'{产品名}', type:'AI填充', desc:'从订单数据获取'},
+            {name:'{发货日期}', type:'AI填充', desc:'从物流数据获取'},
+            {name:'{预计送达日期}', type:'AI填充', desc:'从物流数据获取'},
+            {name:'{物流单号}', type:'AI填充', desc:'从物流数据获取'},
+            {name:'{承运商}', type:'AI填充', desc:'从物流数据获取'},
+            {name:'{追踪链接}', type:'AI填充', desc:'从物流数据获取'},
+            {name:'{物流状态}', type:'AI填充', desc:'从物流数据获取'},
+          ]},
+        { id: 'W-MID-02', name: '未发货取消：询问原因挽留', level: 'ready', channel: '官网', prereq: '订单未发货',
+          scenario: '客户想取消未发货订单，先询问原因挽留',
+          content: "Hello [Customer Name],\n\nWe've received your request to cancel order {订单号}.\n\nBefore processing the cancellation, we'd love to understand if there's anything we can do to help. If your decision is related to pricing, product question, shipping concern, please feel free to let us know — we may be able to offer a better solution or adjust the order for you.\n\nYour satisfaction truly matters to us, and we'd be happy to assist in any way possible.\n\nPlease let us know how you'd like to proceed.\n\nBest regards,\nMelodySusie Customer Service Team",
+          params: [
+            {name:'[Customer Name]', type:'占位符', desc:'中性称呼'},
+            {name:'{订单号}', type:'AI填充', desc:'从订单数据获取'},
+          ]},
+        { id: 'W-MID-03', name: '未发货确认取消', level: 'prereq', channel: '官网', prereq: '需人工确认取消操作已执行',
+          scenario: '客户坚持取消，确认取消并说明退款时效',
+          content: "Hello [Customer Name],\n\nThank you for your message, please don't worry, we will cancel your order {订单号} as you requested.\n\nIf you paid with your PayPal, please allow up to 48 hours for the transaction to appear on your PayPal account. If you paid with your card, please allow up to 7-14 business days for the bank to update the charge on your bank statement.\n\nSorry for the inconvenience caused and we appreciate your understanding.\n\nPlease feel free to contact us if you need further help.\n\nBest regards,\nMelodySusie Customer Service Team",
+          params: [
+            {name:'[Customer Name]', type:'占位符', desc:'中性称呼'},
+            {name:'{订单号}', type:'AI填充', desc:'从订单数据获取'},
+          ]},
+        { id: 'W-MID-04', name: '部分取消退款', level: 'prereq', channel: '官网', prereq: '需人工确认部分取消已执行',
+          scenario: '客户想取消订单中部分产品',
+          content: "Hello [Customer Name],\n\nThank you for your order!\n\nAs requested, we will cancel the item {产品名} and issue a refund of [CONFIRM:退款金额].\n\nIf you paid via PayPal, please allow up to 48 hours for the refund to appear in your PayPal account. If payment was made by credit or debit card, kindly allow 7–14 business days for your bank to process and reflect the refund on your statement.\n\nThe remaining items in your order will be shipped to your provided address as scheduled.\n\nIf you need any further assistance, please don't hesitate to reach out — we're always happy to help.\n\nBest regards,\nMelodySusie Customer Service Team",
+          params: [
+            {name:'[Customer Name]', type:'占位符', desc:'中性称呼'},
+            {name:'{产品名}', type:'AI填充', desc:'从订单数据获取'},
+            {name:'[CONFIRM:退款金额]', type:'运营确认', desc:'需确认退款金额'},
+          ]},
+        { id: 'W-MID-05', name: '改地址索要信息', level: 'ready', channel: '官网', prereq: '订单未发货',
+          scenario: '客户想修改收货地址',
+          content: "Hello [Customer Name],\n\nThank you for shopping with MelodySusie!\n\nTo update your shipping address, could you please provide the correct details in the format below? Once received, we will manually update the information for you as soon as possible.\n\nName:\nAddress Line 1:\nAddress Line 2 (if applicable):\nCity:\nState/Province:\nCountry:\nPostal Code:\nMobile Phone Number:\n\nWe appreciate your prompt reply, as it will help us process and ship your order without delay.\n\nIf you have any questions, please feel free to let us know — we're happy to assist!\n\nBest regards,\nMelodySusie Customer Service Team",
+          params: [{name:'[Customer Name]', type:'占位符', desc:'中性称呼'}] },
+        { id: 'W-MID-06', name: '换产品/颜色确认', level: 'ready', channel: '官网', prereq: '订单未发货',
+          scenario: '客户想换产品或颜色',
+          content: "Hello,\n\nThank you for your order and for reaching out!\n\nTo proceed with your exchange request, please kindly let us know the item(s) you would like to receive instead. Once we have the details, we'll be happy to assist you with the next steps.\n\nIf you need any recommendations or have questions about specific products, feel free to let us know — we're here to help.\n\nBest regards,\nMelodySusie Customer Service Team",
+          params: [] },
+        { id: 'W-MID-07', name: '加产品Draft order', level: 'ready', channel: '官网', prereq: '订单未发货',
+          scenario: '客户想加产品到已有订单',
+          content: "Hello,\n\nThank you for reaching out!\n\nWe've prepared a new order for you. You can complete it using the following link:\n{Draft Order链接}\n\nOnce completed, we will ship this new order along with your original order.\n\nIf you have any questions or need further assistance, please don't hesitate to contact us at any time.\n\nBest regards,\nMelodySusie Customer Service Team",
+          params: [{name:'{Draft Order链接}', type:'AI填充', desc:'从订单系统获取'}] },
+        { id: 'W-MID-08', name: '退折扣处理', level: 'prereq', channel: '官网', prereq: '需人工确认折扣退款已执行',
+          scenario: '客户未使用折扣码',
+          content: "Hello,\n\nThank you for your order!\n\nGood news — your order qualifies for a [CONFIRM:折扣额度] discount with code {折扣码}. We have processed a refund of [CONFIRM:退款金额] for you.\n\nIf you paid via PayPal, please allow up to 48 hours for the refund to appear in your account. If you paid with a card, it may take 7–14 business days for the refund to reflect on your bank statement.\n\nIf you have any questions or need assistance, please don't hesitate to reach out. We're always happy to help!\n\nBest regards,\nMelodySusie Customer Service Team",
+          params: [
+            {name:'[CONFIRM:折扣额度]', type:'运营确认', desc:'需确认折扣比例'},
+            {name:'{折扣码}', type:'AI填充', desc:'从订单数据获取'},
+            {name:'[CONFIRM:退款金额]', type:'运营确认', desc:'需确认退款金额'},
+          ]},
+        { id: 'W-MID-09', name: '整单物流信息回复', level: 'ready', channel: '官网', prereq: '已核实物流单号',
+          scenario: '客户询问物流单号',
+          content: "Hello,\n\nThanks for reaching out!\n\nPlease don't worry, your order is shipped out via multiple packages. Here is the tracking info for your reference:\n\n# PACKAGE 1: {产品名} × {数量}\nShip date: {发货日期}\nCarrier Estimated Delivery Date: {预计送达日期}\nCarrier: {承运商}\nCarrier Tracking Number: {物流单号}\nTracking Link: {追踪链接}\nStatus: {物流状态}\n\n# PACKAGE 2: {产品名2} × {数量2}\n[同上格式]\n\nShould you need any additional information or support, please feel free to reach out at any time.\n\nBest regards,\nMelodySusie Customer Service Team",
+          params: [
+            {name:'{产品名}', type:'AI填充', desc:'从订单数据获取'},
+            {name:'{数量}', type:'AI填充', desc:'从订单数据获取'},
+            {name:'{发货日期}', type:'AI填充', desc:'从物流数据获取'},
+            {name:'{预计送达日期}', type:'AI填充', desc:'从物流数据获取'},
+            {name:'{承运商}', type:'AI填充', desc:'从物流数据获取'},
+            {name:'{物流单号}', type:'AI填充', desc:'从物流数据获取'},
+            {name:'{追踪链接}', type:'AI填充', desc:'从物流数据获取'},
+            {name:'{物流状态}', type:'AI填充', desc:'从物流数据获取'},
+          ]},
+        { id: 'W-MID-10', name: '部分产品物流信息回复', level: 'ready', channel: '官网', prereq: '已核实部分物流单号',
+          scenario: '客户只收到部分包裹',
+          content: "Hello,\n\nThanks for reaching out!\n\nPlease don't worry, another package is still in transit:\n\n# PACKAGE 2: {产品名} × {数量}\nTracking link: {追踪链接}\nStatus: {物流状态}\n\nShould you have any questions or need assistance, feel free to reach out to us.\n\nBest regards,\nMelodySusie Customer Service Team",
+          params: [
+            {name:'{产品名}', type:'AI填充', desc:'从订单数据获取'},
+            {name:'{数量}', type:'AI填充', desc:'从订单数据获取'},
+            {name:'{追踪链接}', type:'AI填充', desc:'从物流数据获取'},
+            {name:'{物流状态}', type:'AI填充', desc:'从物流数据获取'},
+          ]},
+      ],
+      post: {
+        'post-01': [
+          { id: 'W-POST-01', name: '产品售后：索证（回复一）', level: 'ready', channel: '官网', prereq: '无',
+            scenario: '客户反馈产品故障，需索要订单号和视频证据',
+            content: "Hello,\n\nThank you for shopping with MelodySusie. We're sorry to hear that you've experienced an issue with your order.\n\nTo better understand the situation and assist you as quickly as possible, could you please share your order number along with a short video showing the issue? This will help us evaluate the problem accurately and provide the most suitable solution for you.\n\nWe're committed to making sure you have a positive experience with our products, and we'll do our best to resolve this for you promptly.\n\nBest regards,\nMelodySusie Customer Service Team",
+            params: [] },
+          { id: 'W-POST-01-02', name: '产品售后：确认后重发（回复二）', level: 'prereq', channel: '官网', prereq: '需人工确认问题并决定重发',
+            scenario: '确认产品问题后，提供重发方案并确认地址',
+            content: "Hello,\n\nThank you for getting in touch and for taking the time to send us a detailed video of the issue you experienced with our product.\n\nAfter reviewing the video, we were able to identify that the problem is with the {故障部件}. We'll be arranging for a replacement to be sent your way. To make sure we send it to the correct address, could you please confirm the shipping details below?\n\n{收件人姓名}\n{地址}\n{电话}\n\nThank you for your patience and understanding as we work to resolve this issue. We truly value your business and want to make sure you have a positive experience with our products and customer service.\n\nIf you have any further questions or concerns, please don't hesitate to reach out to us. We're always here to help.\n\nBest regards,\nMelodySusie Customer Service Team",
+            params: [
+              {name:'{故障部件}', type:'AI填充', desc:'根据已核实部件填写'},
+              {name:'{收件人姓名}', type:'AI填充', desc:'从地址数据获取'},
+              {name:'{地址}', type:'AI填充', desc:'从地址数据获取'},
+              {name:'{电话}', type:'AI填充', desc:'从地址数据获取'},
+            ]},
+        ],
+        'post-02': [
+          { id: 'W-POST-02', name: '破损/发错货：索证+重发', level: 'prereq', channel: '官网', prereq: '需人工确认问题',
+            scenario: '客户反馈收到破损/错误/二手产品',
+            content: "Hello,\n\nWe're very sorry to hear about your experience, and we sincerely apologize for the inconvenience and frustration this has caused you.\n\nWe take these matters seriously — receiving a used or defective item is absolutely not the standard we uphold at MelodySusie. Could you please kindly send us a photo of the items you have received, along with the packing list and shipping label? We are currently investigating this with our quality control and fulfillment team to determine how this occurred.\n\nIn the meantime, we'd like to resolve this for you as quickly as possible. We can offer you a new replacement of the item, shipped at no cost to you. Please kindly confirm the following shipping address before shipment:\n\n{收件人姓名}\n{地址}\n{电话}\n\nWe truly value your trust and appreciate your patience as we work to make this right.\n\nBest regards,\nMelodySusie Customer Service Team",
+            params: [
+              {name:'{收件人姓名}', type:'AI填充', desc:'从地址数据获取'},
+              {name:'{地址}', type:'AI填充', desc:'从地址数据获取'},
+              {name:'{电话}', type:'AI填充', desc:'从地址数据获取'},
+            ]},
+        ],
+        'post-03': [
+          { id: 'W-POST-03', name: '退货退款：询问原因挽留（回复一）', level: 'ready', channel: '官网', prereq: '无',
+            scenario: '客户提出退货退款，未说明原因',
+            content: "Hello,\n\nThank you for contacting us regarding your request to return order {订单号}.\n\nWe respect your decision and are ready to assist you with the return process. However, before we proceed, we would appreciate the opportunity to understand the reason for your request. Your feedback is very important to us and allows us to review whether there may be a suitable solution, such as product support, an exchange, or another option that may better meet your expectations.\n\nPlease feel free to share any details you're comfortable providing. We will then handle your request promptly and in accordance with our return policy.\n\nWe look forward to your response.\n\nBest regards,\nMelodySusie Customer Service Team",
+            params: [{name:'{订单号}', type:'AI填充', desc:'从订单数据获取'}] },
+          { id: 'W-POST-03-02', name: '退货退款：退货政策+小礼品挽留（回复二）', level: 'prereq', channel: '官网', prereq: '需人工确认客户坚持退货',
+            scenario: '客户坚持要退，发退货政策并送小礼品挽留',
+            content: "Hello,\n\nThank you for shopping with MelodySusie. We sincerely apologize for any inconvenience this situation may have caused.\n\nYou are certainly welcome to return your item for a refund. However, please kindly note that for returns not related to product quality issues, the original shipping fee and return shipping costs are non-refundable. You may review our full Shipping & Warranty Policy here: https://www.melodysusie.com/pages/shipping-warranty\n\nTo proceed, please ensure the item is in good condition and returned in its original packaging so that we can process your return smoothly. When you're ready, kindly send us photos of the product along with the packaging, and we will provide you with the return label and next steps.\n\nThat said, your satisfaction is very important to us. Before moving forward with the return, we'd like to offer an alternative solution: we can send you a gift at no additional cost, which would allow you to keep your order while avoiding the time and expense of a return. Please let us know if you would prefer this option.\n\nWe truly appreciate your understanding and look forward to your reply.\n\nBest regards,\nMelodySusie Customer Service Team",
+            params: [] },
+        ],
+        'post-04': [
+          { id: 'W-POST-04-01', name: '妥投未收到：有妥投照片', level: 'prereq', channel: '官网', prereq: '需人工确认有妥投照片',
+            scenario: '物流有妥投照片，直接发客户',
+            content: "Hello [Customer Name],\n\nThank you for reaching out!\n\nPlease see the proof of delivery details below. Your order was shipped in one package:\n\nTracking link: {追踪链接}\nStatus: {物流状态}\n\nShipping Address:\n{收件人姓名}\n{地址}\n{电话}\n\nThe proof of delivery confirms it was delivered to the same address listed above.\n\nIf you need any further assistance or have questions, please don't hesitate to contact us anytime.\n\nBest regards,\nMelodySusie Customer Service Team",
+            params: [
+              {name:'[Customer Name]', type:'占位符', desc:'中性称呼'},
+              {name:'{追踪链接}', type:'AI填充', desc:'从物流数据获取'},
+              {name:'{物流状态}', type:'AI填充', desc:'从物流数据获取'},
+              {name:'{收件人姓名}', type:'AI填充', desc:'从地址数据获取'},
+              {name:'{地址}', type:'AI填充', desc:'从地址数据获取'},
+              {name:'{电话}', type:'AI填充', desc:'从地址数据获取'},
+            ]},
+          { id: 'W-POST-04-02', name: '妥投未收到：无妥投照片引导自查', level: 'ready', channel: '官网', prereq: '无妥投照片',
+            scenario: '无妥投照片，让客户自查',
+            content: "Hello,\n\nThanks for shopping with MelodySusie!\n\nWe understand your concern about not receiving your package, and we appreciate your patience while we look into this matter for you.\n\nHere is the shipping information for your reference:\n\n#1: {产品名} × {数量}\nShip date: {发货日期}\nTracking Number: {物流单号}\nCarrier: {承运商}\nTracking Link: {追踪链接}\nStatus: {物流状态}\n\nAccording to the tracking details, the package has been marked as delivered. We kindly suggest trying the following steps to help locate it:\n\n1. Check your mailbox, porch, back door, behind plants, or with household members, neighbors, or your leasing/receiving office if applicable.\n2. Contact your local post office or nearby delivery location to see if it was left there for safekeeping.\n3. Review any available security or doorbell camera footage to confirm whether someone may have received it on your behalf.\n4. We also recommend contacting the carrier directly with your tracking number so they can help investigate the delivery location.\n\nWe understand how important your order is to you, and we want to assure you that we are in frequent contact with our logistics partner to keep them updated about the parcel situation.\n\nIf you have not received your package, please do not hesitate to contact us for assistance.\n\nBest regards,\nMelodySusie Customer Service Team",
+            params: [
+              {name:'{产品名}', type:'AI填充', desc:'从订单数据获取'},
+              {name:'{数量}', type:'AI填充', desc:'从订单数据获取'},
+              {name:'{发货日期}', type:'AI填充', desc:'从物流数据获取'},
+              {name:'{物流单号}', type:'AI填充', desc:'从物流数据获取'},
+              {name:'{承运商}', type:'AI填充', desc:'从物流数据获取'},
+              {name:'{追踪链接}', type:'AI填充', desc:'从物流数据获取'},
+              {name:'{物流状态}', type:'AI填充', desc:'从物流数据获取'},
+            ]},
+          { id: 'W-POST-04-03', name: '妥投未收到：三次确认后带签名重发', level: 'prereq', channel: '官网', prereq: '需人工确认客户三次未找到',
+            scenario: '客户三次确认未找到包裹，带签名重发',
+            content: "Hello,\n\nWe hope you're doing well, and we sincerely appreciate your patience and understanding regarding your recent order.\n\nWe understand that you experienced an issue with the delivery, and we truly apologize for any inconvenience this may have caused. While lost packages are not covered under our warranty policy, we want to ensure you have a positive experience with us. As a courtesy, we have submitted a request to our shipping team to arrange a replacement shipment for you as soon as possible.\n\nThe replacement package will include:\n#1: {产品名}\n\nTo ensure successful delivery, please kindly confirm that the shipping details below are correct:\n\nShipping Address\n{收件人姓名}\n{地址}\n{电话}\n\nAdditionally, could you please confirm whether you will be available to sign for the package upon delivery?\n\nWe look forward to your confirmation so we can proceed promptly.\n\nBest regards,\nMelodySusie Customer Service Team",
+            params: [
+              {name:'{产品名}', type:'AI填充', desc:'从订单数据获取'},
+              {name:'{收件人姓名}', type:'AI填充', desc:'从地址数据获取'},
+              {name:'{地址}', type:'AI填充', desc:'从地址数据获取'},
+              {name:'{电话}', type:'AI填充', desc:'从地址数据获取'},
+            ]},
+        ],
+        'post-05': [
+          { id: 'W-POST-05', name: '物流延迟/退回：确认地址重发', level: 'prereq', channel: '官网', prereq: '需人工确认物流问题',
+            scenario: '物流异常，确认地址后重发',
+            content: "Hello,\n\nThank you for reaching out, and we sincerely apologize for the delay in your delivery.\n\nAfter checking, it appears your order was not successfully delivered. To ensure we can send a replacement promptly, could you please confirm that the shipping address below is correct:\n\n{收件人姓名}\n{地址}\n{电话}\n\nOnce we have your confirmation, we'll arrange for a new replacement to be shipped right away.\n\nIf you need any further assistance, please don't hesitate to contact us — we're always happy to help.\n\nBest regards,\nMelodySusie Customer Service Team",
+            params: [
+              {name:'{收件人姓名}', type:'AI填充', desc:'从地址数据获取'},
+              {name:'{地址}', type:'AI填充', desc:'从地址数据获取'},
+              {name:'{电话}', type:'AI填充', desc:'从地址数据获取'},
+            ]},
+        ],
+      },
+      common: [
+        { id: 'W-G1', name: '礼貌回复：确认已收到证据', level: 'g', channel: '通用', prereq: '客户已发送视频/照片',
+          scenario: '客户发来了证据，需要礼貌确认收到并告知后续',
+          content: "Hello [Customer Name],\n\nThank you for reaching out. We've received your message and the attachments.\n\nWe will review the information along with your order details and get back to you with the next steps.\n\nWe appreciate your patience.\n\nBest regards,\nMelodySusie Customer Service Team",
+          params: [{name:'[Customer Name]', type:'占位符', desc:'中性称呼'}] },
+        { id: 'W-G2', name: '礼貌收尾：确认问题已解决', level: 'g', channel: '通用', prereq: '问题已解决',
+          scenario: '客户反馈问题已解决，或对回复表示感谢',
+          content: "Hello [Customer Name],\n\nYou're welcome, and thank you for the update. We're glad to know everything is working well now.\n\nIf you have any other questions, please feel free to contact us. We're always here to help.\n\nBest regards,\nMelodySusie Customer Service Team",
+          params: [] },
+        { id: 'W-G3', name: '退款请求：告知审核中', level: 'g', channel: '通用', prereq: '客户明确表示希望退款',
+          scenario: '客户要求退款/退货退款，需要先核实再回复',
+          content: "Hello [Customer Name],\n\nThank you for your message. We understand your request and will review the order details together with the issue you described.\n\nOnce we have checked everything, we'll get back to you with the result of the review.\n\nWe appreciate your patience while we process this.\n\nBest regards,\nMelodySusie Customer Service Team",
+          params: [{name:'[Customer Name]', type:'占位符', desc:'中性称呼'}] },
+        { id: 'W-G4', name: '礼貌回复：感谢反馈', level: 'g', channel: '通用', prereq: '收到客户反馈/建议',
+          scenario: '客户提供产品使用反馈或建议，不一定是故障',
+          content: "Hello [Customer Name],\n\nThank you for sharing your experience with us. Your feedback is very important and helps us improve our products.\n\nWe appreciate you taking the time to let us know how the product is working for you. If you ever have any questions or need support in the future, please don't hesitate to reach out.\n\nBest regards,\nMelodySusie Customer Service Team",
+          params: [] },
+      ],
+    },
   };
 
-  let currentCat = 'post';
-  let currentSubcat = 'post01';
+  // 售后子分类的中文标签（用于左栏显示）
+  const postLabels = {
+    amazon: {
+      'post-01': 'POST-01 产品售后问题',
+      'post-02': 'POST-02 破损/发错货/用过的',
+      'post-03': 'POST-03 退货退款',
+      'post-04': 'POST-04 妥投未收到',
+      'post-05': 'POST-05 物流延迟',
+      'post-06': 'POST-06 安全事件',
+      'post-07': 'POST-07 渠道确认',
+    },
+    website: {
+      'post-01': 'W-POST-01 产品售后问题',
+      'post-02': 'W-POST-02 破损/发错货/用过的',
+      'post-03': 'W-POST-03 退货退款',
+      'post-04': 'W-POST-04 妥投未收到(3变体)',
+      'post-05': 'W-POST-05 物流异常',
+    },
+  };
+
+  // 模板状态
+  let currentPlatform = 'amazon';
+  let currentStage = 'common';    // common / pre / mid / post
   let selectedTemplate = null;
   let showMyTicketsOnly = true;
 
@@ -1469,59 +1926,126 @@
   }
 
   // ========== 模板选择器 ==========
-  /** 切换模板选择弹窗的显示/隐藏 */
+  /** 切换模板选择弹窗的显示/隐藏；打开时初始化左栏 */
   function toggleTemplatePicker(triggerEl) {
     const overlay = document.getElementById('tplModalOverlay');
     overlay.classList.toggle('show');
     if (overlay.classList.contains('show')) {
+      // 重置搜索框
+      document.getElementById('templateSearch').value = '';
+      renderLeftColumn();
       renderTemplateList();
+      renderTemplateDetail();
+      // 初始化底部选中信息
+      const templates = getCurrentTemplates();
+      if (templates.length === 1) {
+        document.getElementById('tplSelectedInfo').textContent = `已选择：${templates[0].id} ${templates[0].name}`;
+      } else {
+        document.getElementById('tplSelectedInfo').textContent = '未选择模板';
+      }
     }
   }
 
-  /** 左栏分类点击，切换激活状态并渲染中栏模板列表 */
-  function selectCat(cat) {
-    currentCat = cat;
-    document.querySelectorAll('.tpl-cat-item').forEach(el => el.classList.remove('active'));
-    event.currentTarget.classList.add('active');
-    if (cat === 'post') {
-      // 切到售后时，默认高亮第一个子分类
-      currentSubcat = 'post01';
-      document.querySelectorAll('.tpl-subcat-item').forEach(el => el.classList.remove('active'));
-      document.querySelector('.tpl-subcat-item').classList.add('active');
-    } else {
-      // 切到其他分类时，清除子分类高亮，避免一二级同时选中
-      document.querySelectorAll('.tpl-subcat-item').forEach(el => el.classList.remove('active'));
-    }
-    selectedTemplate = null;
-    renderTemplateList();
-    renderTemplateDetail();
+  /** 计算指定平台的话术总数（通用+售前+售中+售后全部条目） */
+  function platformTemplateCount(key) {
+    const d = templateData[key];
+    if (!d) return 0;
+    const postAll = d.post ? Object.values(d.post).reduce((sum, arr) => sum.concat(arr), []) : [];
+    return (d.common || []).length + (d.pre || []).length + (d.mid || []).length + postAll.length;
   }
 
-  /** 左栏子分类点击 */
-  function selectSubcat(e, subcat) {
-    e.stopPropagation();
-    // 子分类点击时自动选中父级 POST
-    currentCat = 'post';
-    currentSubcat = subcat;
-    document.querySelectorAll('.tpl-cat-item').forEach(el => el.classList.remove('active'));
-    const postItem = document.querySelector('.tpl-cat-item[onclick*="post"]');
-    if (postItem) postItem.classList.add('active');
-    document.querySelectorAll('.tpl-subcat-item').forEach(el => el.classList.remove('active'));
-    e.currentTarget.classList.add('active');
+  /** 初始化平台 tab 上的话术总数徽章，避免硬编码数字与左侧明细对不上 */
+  function updatePlatformCounts() {
+    document.querySelectorAll('.tpl-platform-tab').forEach(tab => {
+      const key = tab.dataset.platform;
+      const countEl = tab.querySelector('.tpl-platform-count');
+      if (countEl && templateData[key]) {
+        countEl.textContent = platformTemplateCount(key) + '条';
+      }
+    });
+  }
+
+  /** 平台切换：重置到 common 阶段 */
+  function selectPlatform(platform) {
+    currentPlatform = platform;
+    currentStage = 'common';
     selectedTemplate = null;
+    // 切换平台 tab 高亮
+    document.querySelectorAll('.tpl-platform-tab').forEach(el => el.classList.remove('active'));
+    const tab = document.querySelector(`.tpl-platform-tab[data-platform="${platform}"]`);
+    if (tab) tab.classList.add('active');
+    // 清空搜索
+    document.getElementById('templateSearch').value = '';
+
+    renderLeftColumn();
     renderTemplateList();
     renderTemplateDetail();
+    document.getElementById('tplSelectedInfo').textContent = '未选择模板';
+  }
+
+  /** 渲染左栏一级分类（通用/售前/售中/售后） */
+  function renderLeftColumn() {
+    const catEl = document.getElementById('tplColCat');
+    const data = templateData[currentPlatform];
+
+    const flattenPost = () => {
+      if (!data.post) return [];
+      return Object.values(data.post).reduce((sum, arr) => sum.concat(arr), []);
+    };
+
+    const stages = [
+      { key: 'common', name: '通用回复', items: data.common || [] },
+      { key: 'pre', name: '售前 PRE', items: data.pre || [] },
+      { key: 'mid', name: '售中 MID', items: data.mid || [] },
+      { key: 'post', name: '售后 POST', items: flattenPost() },
+    ];
+
+    let html = '';
+    stages.forEach(stage => {
+      const count = stage.items.length;
+      const isActive = currentStage === stage.key;
+      html += `<div class="tpl-stage-item ${isActive ? 'active' : ''}" onclick="selectStage('${stage.key}')">
+        ${stage.name} <span class="cat-count">${count}</span>
+      </div>`;
+    });
+
+    catEl.innerHTML = html;
+  }
+
+  /** 点击一级分类切换阶段 */
+  function selectStage(stage) {
+    currentStage = stage;
+    selectedTemplate = null;
+
+    renderLeftColumn();
+    renderTemplateList();
+    renderTemplateDetail();
+    document.getElementById('tplSelectedInfo').textContent = '未选择模板';
+  }
+
+  /** 根据当前平台/阶段，获取模板数组 */
+  function getCurrentTemplates() {
+    const data = templateData[currentPlatform];
+    if (!data) return [];
+    if (currentStage === 'common') return data.common || [];
+    if (currentStage === 'pre') return data.pre || [];
+    if (currentStage === 'mid') return data.mid || [];
+    if (currentStage === 'post') {
+      if (!data.post) return [];
+      return Object.values(data.post).reduce((sum, arr) => sum.concat(arr), []);
+    }
+    return [];
   }
 
   /** 渲染中栏模板列表 */
   function renderTemplateList() {
     const listEl = document.getElementById('tplColList');
-    let templates = [];
+    const templates = getCurrentTemplates();
 
-    if (currentCat === 'g') templates = templateData.g;
-    else if (currentCat === 'pre') templates = templateData.pre;
-    else if (currentCat === 'mid') templates = templateData.mid;
-    else if (currentCat === 'post') templates = templateData[currentSubcat] || [];
+    if (templates.length === 0) {
+      listEl.innerHTML = '<div style="padding:20px;color:#9ca3af;text-align:center;font-size:13px;">当前阶段暂无模板</div>';
+      return;
+    }
 
     const levelBadge = {
       g: { cls: 'badge-g', text: '通用' },
@@ -1535,8 +2059,8 @@
         <div class="tpl-id">${t.id}</div>
         <div class="tpl-name">${t.name}</div>
         <div class="tpl-badges">
-          <span class="tpl-badge ${levelBadge[t.level].cls}">${levelBadge[t.level].text}</span>
-          ${t.channel !== '通用' ? `<span class="tpl-badge badge-${t.channel === 'Amazon' ? 'amazon' : 'official'}">${t.channel}</span>` : ''}
+          <span class="tpl-badge ${(levelBadge[t.level] || levelBadge.ready).cls}">${(levelBadge[t.level] || levelBadge.ready).text}</span>
+          ${t.channel ? `<span class="tpl-badge badge-official">${t.channel}</span>` : ''}
         </div>
       </div>
     `).join('');
@@ -1544,23 +2068,17 @@
 
   /** 选中模板卡片，渲染右栏详情 */
   function selectTemplateCard(id, index) {
-    selectedTemplate = id;
-    let templates = [];
-    if (currentCat === 'g') templates = templateData.g;
-    else if (currentCat === 'pre') templates = templateData.pre;
-    else if (currentCat === 'mid') templates = templateData.mid;
-    else if (currentCat === 'post') templates = templateData[currentSubcat] || [];
+    const templates = getCurrentTemplates();
     const tpl = templates[index];
     if (!tpl) return;
 
+    selectedTemplate = id;
     renderTemplateList();
     renderTemplateDetail(tpl);
-
-    // 更新底部选中信息
     document.getElementById('tplSelectedInfo').textContent = `已选择：${tpl.id} ${tpl.name}`;
   }
 
-  /** 渲染右栏模板详情 */
+  /** 渲染右栏模板详情：包含参数高亮与参数说明表 */
   function renderTemplateDetail(tpl) {
     const detailEl = document.getElementById('tplColDetail');
     if (!tpl) {
@@ -1575,25 +2093,88 @@
       prereq: { cls: 'badge-prereq', text: '前置条件' },
     };
 
+    // 渲染带参数高亮的正文
+    const highlightedContent = renderHighlightedContent(tpl.content);
+    // 渲染参数说明表
+    const paramsTableHtml = renderParamsTable(tpl.params || []);
+
     detailEl.innerHTML = `
       <div class="tpl-detail-id">${tpl.id}</div>
       <div class="tpl-detail-name">${tpl.name}</div>
       <div class="tpl-detail-meta">
-        <span class="tpl-badge ${levelBadge[tpl.level].cls}">${levelBadge[tpl.level].text}</span>
-        <span class="tpl-badge badge-${tpl.channel === 'Amazon' ? 'amazon' : 'official'}">${tpl.channel}</span>
+        <span class="tpl-badge ${(levelBadge[tpl.level] || levelBadge.ready).cls}">${(levelBadge[tpl.level] || levelBadge.ready).text}</span>
+        ${tpl.channel ? `<span class="tpl-badge badge-official">${tpl.channel}</span>` : ''}
       </div>
+      ${tpl.scenario ? `
+      <div class="tpl-detail-section">
+        <h5>使用场景</h5>
+        <div class="tpl-detail-content">${tpl.scenario}</div>
+      </div>
+      ` : ''}
       <div class="tpl-detail-section">
         <h5>前置条件</h5>
         <div class="tpl-detail-content">${tpl.prereq}</div>
       </div>
       <div class="tpl-detail-section">
         <h5>模板正文</h5>
-        <div class="tpl-detail-content">${tpl.content}</div>
+        <div class="tpl-detail-content" style="white-space:normal;">${highlightedContent}</div>
       </div>
+      ${paramsTableHtml ? `
+      <div class="tpl-detail-section">
+        <h5>参数说明</h5>
+        ${paramsTableHtml}
+      </div>
+      ` : ''}
     `;
   }
 
-  /** 搜索过滤模板列表 */
+  /** 高亮模板正文中的 {AI填充参数} 和 [CONFIRM:运营确认参数] */
+  function renderHighlightedContent(content) {
+    // 先转义 HTML 特殊字符
+    let html = content.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    // 高亮 [CONFIRM:xxx]
+    html = html.replace(/\[CONFIRM:[^\]]+\]/g, m => `<span class="param-confirm">${m}</span>`);
+    // 高亮 {参数名}
+    html = html.replace(/\{[^}]+\}/g, m => `<span class="param-auto">${m}</span>`);
+    // 将 \n 转为 <br>
+    html = html.replace(/\n/g, '<br>');
+    return html;
+  }
+
+  /** 渲染参数说明表：列出参数名、类型、说明 */
+  function renderParamsTable(params) {
+    if (!params || params.length === 0) return '';
+
+    const rows = params.map(p => {
+      let cellClass = 'param-cell-placeholder';
+      if (p.type === 'AI填充') cellClass = 'param-cell-auto';
+      else if (p.type === '运营确认') cellClass = 'param-cell-confirm';
+      return `
+        <tr>
+          <td class="${cellClass}">${p.name}</td>
+          <td>${p.type}</td>
+          <td>${p.desc}</td>
+        </tr>
+      `;
+    }).join('');
+
+    return `
+      <table class="tpl-params-table">
+        <thead>
+          <tr>
+            <th>参数</th>
+            <th>类型</th>
+            <th>说明</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${rows}
+        </tbody>
+      </table>
+    `;
+  }
+
+  /** 搜索过滤模板列表（按模板 ID 或名称匹配） */
   function filterTemplates() {
     const keyword = document.getElementById('templateSearch').value.toLowerCase();
     const items = document.querySelectorAll('.tpl-list-item');
@@ -1609,12 +2190,8 @@
       alert('请先选择一个模板');
       return;
     }
-    // 查找当前选中模板的完整内容
-    let templates = [];
-    if (currentCat === 'g') templates = templateData.g;
-    else if (currentCat === 'pre') templates = templateData.pre;
-    else if (currentCat === 'mid') templates = templateData.mid;
-    else if (currentCat === 'post') templates = templateData[currentSubcat] || [];
+    // 从当前选中项中查找模板
+    const templates = getCurrentTemplates();
     const tpl = templates.find(t => t.id === selectedTemplate);
     if (tpl) {
       const editor = document.getElementById('replyEditor');
@@ -1818,6 +2395,7 @@
   }
 
   // ========== 初始化 ==========
+  updatePlatformCounts();
   renderTickets();
   renderCurrentOrders();
   renderAllOrders();
