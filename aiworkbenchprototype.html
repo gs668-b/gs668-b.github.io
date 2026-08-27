@@ -454,18 +454,20 @@
   .order-tab.active { background: #2563eb; color: #fff; }
 
   /* 订单卡片 */
-  .order-card { border: 1px solid #e5e7eb; border-radius: 8px; margin-bottom: 8px; overflow: hidden; }
+  .order-card { border: 1px solid #e5e7eb; border-radius: 8px; margin-bottom: 8px; overflow: hidden; position: relative; }
   .order-card-header {
-    display: flex; justify-content: space-between; align-items: center;
-    padding: 10px 12px; cursor: pointer; background: #f9fafb;
+    display: flex; flex-direction: column; gap: 4px;
+    padding: 10px 22px 10px 12px; cursor: pointer; background: #f9fafb;
+    position: relative;
   }
   .order-card-header:hover { background: #f3f4f6; }
+  .order-card-header .header-row { display: flex; justify-content: space-between; align-items: center; }
   .order-card-header .order-no { font-size: 12px; font-weight: 500; display: flex; align-items: center; gap: 6px; }
   .order-card-header .order-date { font-size: 11px; color: #9ca3af; }
   .order-card-header .order-amount { font-size: 12px; font-weight: 600; }
   .order-card-header .order-status { font-size: 11px; }
-  .order-card-header .expand-arrow { font-size: 11px; color: #6b7280; transition: transform 0.2s; }
-  .order-card.expanded .expand-arrow { transform: rotate(90deg); }
+  .order-card-header .expand-arrow { color: #6b7280; transition: transform 0.2s; position: absolute; right: 8px; top: 50%; transform: translateY(-50%); }
+  .order-card.expanded .expand-arrow { transform: translateY(-50%) rotate(180deg); }
   .order-card-detail { display: none; padding: 10px 12px; border-top: 1px solid #f3f4f6; background: #fff; }
   .order-card.expanded .order-card-detail { display: block; }
   .order-detail-row { display: flex; font-size: 11.5px; padding: 3px 0; gap: 6px; align-items: center; }
@@ -863,37 +865,65 @@
               <span>🤖 AI 摘要</span>
               <button class="tool-btn primary" style="height:22px;padding:0 10px;font-size:11px;">标注</button>
             </div>
-            <div class="ai-summary-tags">
-              <span class="tag tag-pending">待确认</span>
-              <span class="tag tag-post">售后-质量瑕疵</span>
-            </div>
             <div class="ai-summary-item">
               <div class="label">人工标记状态</div>
               <div>未标记</div>
             </div>
             <div class="ai-summary-item">
               <div class="label">标记后新邮件</div>
-              <div><span class="tag tag-new">无新邮件</span></div>
+              <div><span class="tag" style="background:#f3f4f6;color:#6b7280;">无新邮件</span></div>
             </div>
             <div class="ai-summary-item">
               <div class="label">对话摘要</div>
-              <div>客户反映美甲灯使用时有灼烧感，客服解释后同意更换。客户接受替代型号P-ART01G，客服已安排发货。客户再次询问旧灯是否需要退回，并提及手指仍有疼痛。</div>
+              <div>客户反馈指甲钻故障，客服同意保修换新，客户提供地址后，客服确认已安排寄出替换品并承诺后续提供物流单号。</div>
             </div>
             <div class="ai-summary-item">
               <div class="label">业务分类</div>
-              <div>售后 > 质量瑕疵 > 质量问题</div>
+              <div>售后 &gt; 质量瑕疵 &gt; 质量问题</div>
             </div>
             <div class="ai-summary-item">
               <div class="label">工单分类</div>
-              <div><span class="tag tag-post">高风险</span></div>
+              <div>正常买家业务工单</div>
             </div>
             <div class="ai-summary-item">
               <div class="label">整体情绪强度</div>
-              <div><span style="display:inline-block;width:60px;height:6px;background:#fef3c7;border-radius:3px;vertical-align:middle;margin-right:6px;"></span>负面</div>
+              <div><span style="display:inline-block;width:60px;height:6px;background:#d1d5db;border-radius:3px;vertical-align:middle;margin-right:6px;"></span>中性</div>
             </div>
             <div class="ai-summary-item">
               <div class="label">情绪趋势</div>
-              <div class="text-sm text-gray">（图表占位）</div>
+              <div>稳定正面或中性</div>
+            </div>
+            <div class="ai-summary-item">
+              <div class="label">风险预警</div>
+              <div><span style="color:#10b981;font-weight:500;">低风险</span></div>
+            </div>
+            <div class="ai-summary-item">
+              <div class="label">风险分析原因</div>
+              <div>客户感谢并配合提供地址，情绪中性，无负面内容。</div>
+            </div>
+            <div class="ai-summary-item">
+              <div class="label">SLA 优先级</div>
+              <div><span style="background:#dbeafe;color:#2563eb;padding:1px 6px;border-radius:4px;font-size:11px;font-weight:500;">SLA4</span></div>
+            </div>
+            <div class="ai-summary-item">
+              <div class="label">诉求性质</div>
+              <div>良性咨询</div>
+            </div>
+            <div class="ai-summary-item">
+              <div class="label">首次响应截止时间</div>
+              <div>2026-08-24 11:00</div>
+            </div>
+            <div class="ai-summary-item">
+              <div class="label">解决截止时间</div>
+              <div>2026-08-29 03:00</div>
+            </div>
+            <div class="ai-summary-item">
+              <div class="label">归因责任端</div>
+              <div>产品端问题</div>
+            </div>
+            <div class="ai-summary-item">
+              <div class="label">归因根因说明</div>
+              <div>客户投诉指甲钻存在电量显示异常、运转无力及异响等故障，属于产品质量问题，触发售后换货。</div>
             </div>
           </div>
 
@@ -1659,23 +1689,27 @@
   /** 渲染订单卡片（header + detail） */
   function renderOrderCard(order, isCurrentTab) {
     const expanded = isCurrentTab ? 'expanded' : '';
+    const idPrefix = isCurrentTab ? 'cur' : 'all';
+    const cardId = `orderCard_${idPrefix}_${order.id}`;
     const setBtn = !isCurrentTab && !order.isCurrent
       ? `<div class="set-current-btn"><button class="tool-btn primary" style="height:24px;padding:0 10px;font-size:11px;" onclick="setAsCurrentOrder('${order.id}')">设为当前售后订单</button></div>`
       : (!isCurrentTab && order.isCurrent ? '<div style="margin-top:6px;font-size:11px;color:#10b981;font-weight:500;">✓ 已设为当前售后订单</div>' : '');
 
     return `
-      <div class="order-card ${expanded}" id="orderCard_${order.id}" onclick="toggleOrderCard('${order.id}')">
+      <div class="order-card ${expanded}" id="${cardId}" onclick="toggleOrderCard('${cardId}')">
         <div class="order-card-header">
-          <div class="order-no">
-            #${order.id}
-            <span class="copy-icon" onclick="event.stopPropagation(); copyText('${order.id}', this)" title="复制订单号">📋</span>
-          </div>
-          <div class="order-date">${order.date}</div>
-          <div style="text-align:right;">
+          <div class="header-row">
+            <div class="order-no">
+              #${order.id}
+              <span class="copy-icon" onclick="event.stopPropagation(); copyText('${order.id}', this)" title="复制订单号">📋</span>
+            </div>
             <span class="order-amount">${order.amount}</span>
+          </div>
+          <div class="header-row">
+            <span class="order-date">${order.date}</span>
             <span class="order-status" style="color:${order.statusColor};">${order.status}</span>
           </div>
-          <span class="expand-arrow">▶</span>
+          <svg class="expand-arrow" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
         </div>
         <div class="order-card-detail" onclick="event.stopPropagation()">
           ${renderOrderDetail(order)}
@@ -1708,8 +1742,8 @@
   }
 
   /** 展开/折叠订单卡片 */
-  function toggleOrderCard(orderId) {
-    const card = document.getElementById('orderCard_' + orderId);
+  function toggleOrderCard(cardId) {
+    const card = document.getElementById(cardId);
     if (card) card.classList.toggle('expanded');
   }
 
