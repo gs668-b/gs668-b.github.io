@@ -183,8 +183,14 @@
     width: 24px; height: 24px; border-radius: 4px; border: none; background: transparent; color: #6b7280;
   }
   .email-header .subject .edit-btn:hover { background: #f3f4f6; }
-  .email-header .meta-row { display: flex; gap: 8px; margin-bottom: 6px; }
   .email-header .from-info { display: flex; align-items: center; gap: 10px; font-size: 12px; color: #6b7280; }
+  .email-header .from-info .header-right {
+    margin-left: auto; display: flex; align-items: center; gap: 8px;
+  }
+  .email-header .header-right .edit-btn {
+    width: 24px; height: 24px; border-radius: 4px; border: none; background: transparent; color: #6b7280;
+  }
+  .email-header .header-right .edit-btn:hover { background: #f3f4f6; }
   .email-header .from-avatar {
     width: 32px; height: 32px; border-radius: 50%; background: #9ca3af; color: #fff;
     display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 12px;
@@ -644,20 +650,20 @@
         <div class="email-header">
           <div class="subject">
             <span>Fw: Problem with lamp, etc.</span>
-            <button class="edit-btn" title="编辑主题">✏️</button>
-          </div>
-          <div class="meta-row">
-            <div class="channel-tags">
-              <span class="channel-tag channel-regular">普通邮件</span>
-              <span class="channel-tag channel-confirm">待确认</span>
-              <span class="channel-tag channel-quality">售后-质量瑕疵</span>
-            </div>
           </div>
           <div class="from-info">
             <div class="from-avatar">G</div>
             <div>
               <div><strong>gtny29@gmail.com</strong></div>
               <div class="text-sm text-gray">amazon | service.pro@melodysusie.com</div>
+            </div>
+            <div class="header-right">
+              <div class="channel-tags">
+                <span class="channel-tag channel-regular">普通邮件</span>
+                <span class="channel-tag channel-confirm">待确认</span>
+                <span class="channel-tag channel-quality">售后-质量瑕疵</span>
+              </div>
+              <button class="edit-btn" title="编辑标签">✏️</button>
             </div>
           </div>
         </div>
@@ -826,11 +832,13 @@
         <div class="right-panel-content">
           <!-- Tab 1: AI 摘要 -->
           <div class="right-panel-page active" id="page-summary">
-            <div class="right-page-title">🤖 AI 摘要</div>
+            <div class="right-page-title" style="display:flex;align-items:center;justify-content:space-between;">
+              <span>🤖 AI 摘要</span>
+              <button class="tool-btn primary" style="height:22px;padding:0 10px;font-size:11px;">标注</button>
+            </div>
             <div class="ai-summary-tags">
               <span class="tag tag-pending">待确认</span>
               <span class="tag tag-post">售后-质量瑕疵</span>
-              <button class="tool-btn secondary" style="height:22px;padding:0 8px;font-size:11px;">标注</button>
             </div>
             <div class="ai-summary-item">
               <div class="label">人工标记状态</div>
