@@ -486,6 +486,50 @@ tr:hover { background: #f9fafb; }
 }
 .upload-box .icon { font-size: 32px; margin-bottom: 8px; }
 
+/* 滑块样式 */
+.slider-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.slider-row input[type="range"] {
+  flex: 1;
+  height: 6px;
+  -webkit-appearance: none;
+  appearance: none;
+  background: #e5e7eb;
+  border-radius: 3px;
+  outline: none;
+}
+.slider-row input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #10b981;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.slider-row input[type="range"]::-webkit-slider-thumb:hover {
+  transform: scale(1.1);
+}
+.slider-row input[type="range"]::-moz-range-thumb {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #10b981;
+  cursor: pointer;
+  border: none;
+}
+.slider-value {
+  min-width: 52px;
+  text-align: right;
+  font-size: 13px;
+  color: #374151;
+  font-weight: 600;
+}
+
 /* 评论列表（评论管理弹窗） */
 .comment-item {
   padding: 12px;
@@ -836,6 +880,14 @@ tr:hover { background: #f9fafb; }
             </select>
           </div>
           <div class="filter-item">
+            <label>是否置顶：</label>
+            <select>
+              <option>是否置顶</option>
+              <option>是</option>
+              <option>否</option>
+            </select>
+          </div>
+          <div class="filter-item">
             <label>用户类型标签：</label>
             <select>
               <option>标签类型</option>
@@ -872,6 +924,7 @@ tr:hover { background: #f9fafb; }
                 <th>用户类型标签</th>
                 <th>发布时间</th>
                 <th>审核状态</th>
+                <th>是否置顶</th>
                 <th>点赞</th>
                 <th>评论</th>
                 <th>浏览量</th>
@@ -924,45 +977,52 @@ tr:hover { background: #f9fafb; }
 
 <!-- ===== 弹窗：活动介绍区域配置 ===== -->
 <div class="modal-overlay" id="intro-modal">
-  <div class="modal" style="width:680px;">
+  <div class="modal" style="width:560px;">
     <div class="modal-header">
       <h3>活动介绍区域配置</h3>
       <span class="modal-close" onclick="closeModal('intro-modal')">×</span>
     </div>
     <div class="modal-body">
       <div class="form-item">
-        <label>活动标题</label>
-        <input type="text" value="MelodySusie Mailbox" placeholder="请输入标题">
-      </div>
-      <div class="form-item">
-        <label>活动副标题 / Slogan</label>
-        <input type="text" value="Your Voice. Our Next Improvement and Innovation." placeholder="请输入副标题">
-      </div>
-      <div class="form-item">
-        <label>活动介绍内容（富文本）</label>
-        <div class="rich-editor">
-          <div class="rich-editor-toolbar">
-            <button title="加粗"><b>B</b></button>
-            <button title="斜体"><i>I</i></button>
-            <button title="插入图片">🖼</button>
-            <button title="插入链接">🔗</button>
-            <button title="列表">≡</button>
-            <button title="对齐左">⬅</button>
-            <button title="对齐中">⬌</button>
-            <button title="对齐右">➡</button>
-          </div>
-          <div class="rich-editor-content" contenteditable="true">
-            <p>Have a question or suggestion about MelodySusie?</p>
-            <p>Leave it under this post, and we're here to answer and listen.</p>
-            <p><b>✨ What can you post here?</b></p>
-            <ul>
-              <li>Product Question - 产品相关问题</li>
-              <li>Product Feedback - 产品使用反馈</li>
-              <li>New Idea - 想要的产品 / 创新点子</li>
-            </ul>
-          </div>
+        <label>背景图片</label>
+        <div class="upload-box" onclick="alert('选择背景图片文件')">
+          <div class="icon">📷</div>
+          <div>点击或拖拽上传背景图片</div>
+          <div class="form-tip">建议尺寸：1200×400px，支持 jpg/png，大小不超过 2MB</div>
         </div>
-        <div class="form-tip">支持图文混排，前端展示效果参考帖子详情页样式</div>
+      </div>
+      <div class="form-item">
+        <label>标题文字</label>
+        <input type="text" value="MelodySusie Mailbox" placeholder="请输入标题文字">
+        <div class="form-tip">显示在背景图上的主标题</div>
+      </div>
+      <div class="form-item">
+        <label>标题字号</label>
+        <div class="slider-row">
+          <input type="range" id="titleFontSize" min="12" max="64" value="32" oninput="updateFontSize('title')">
+          <span class="slider-value" id="titleFontSizeValue">32px</span>
+        </div>
+        <div class="form-tip">范围：12px ~ 64px</div>
+      </div>
+      <div class="form-item">
+        <label>描述文字</label>
+        <textarea placeholder="请输入描述文字">Your Voice. Our Next Improvement and Innovation.</textarea>
+        <div class="form-tip">显示在标题下方的描述文字，支持换行</div>
+      </div>
+      <div class="form-item">
+        <label>描述文字字号</label>
+        <div class="slider-row">
+          <input type="range" id="descFontSize" min="12" max="32" value="16" oninput="updateFontSize('desc')">
+          <span class="slider-value" id="descFontSizeValue">16px</span>
+        </div>
+        <div class="form-tip">范围：12px ~ 32px</div>
+      </div>
+      <div class="form-item">
+        <label>文字颜色</label>
+        <div style="display:flex;gap:12px;align-items:center;">
+          <input type="color" value="#ffffff" style="width:40px;height:32px;border:1px solid #d1d5db;border-radius:4px;cursor:pointer;padding:2px;">
+          <span style="font-size:13px;color:#6b7280;">标题和描述文字统一使用此颜色</span>
+        </div>
       </div>
     </div>
     <div class="modal-footer">
@@ -1067,13 +1127,13 @@ const normalPosts = [
 
 // ===== 数据：留言箱帖子 =====
 const mailboxPosts = [
-  { title: 'Will you release a cordless nail drill?', category: 'New Idea', status: 'Answered', user: 'nailartlover', userType: 'MelodySusie Member', time: '2026-09-07 14:22:08', status_audit: '审核通过', like: 5, comment: 3, view: 42 },
-  { title: 'How to use the nail lamp properly?', category: 'Product Question', status: 'Answered', user: 'Breezy does nails', userType: 'MelodySusie Member', time: '2026-09-06 09:15:44', status_audit: '审核通过', like: 8, comment: 6, view: 128 },
-  { title: 'The new gel polish color collection is amazing!', category: 'Product Feedback', status: 'Under Review', user: 'JESMANAILS', userType: 'MelodySusie Member', time: '2026-09-05 20:33:17', status_audit: '审核通过', like: 12, comment: 4, view: 87 },
-  { title: 'Could we have more beginner tutorials?', category: 'Content Request', status: 'Wait to be Reviewed', user: 'newnailtech', userType: 'MelodySusie Member', time: '2026-09-05 11:08:52', status_audit: '审核通过', like: 6, comment: 2, view: 54 },
-  { title: 'Reward points expire too fast', category: 'Reward Club', status: 'Under Review', user: 'shopaholic99', userType: 'MelodySusie Member', time: '2026-09-04 16:47:30', status_audit: '审核通过', like: 3, comment: 5, view: 63 },
-  { title: 'Idea: Smart nail dryer with app control', category: 'New Idea', status: 'Wait to be Reviewed', user: 'innovator_mom', userType: 'MelodySusie Member', time: '2026-09-04 08:22:11', status_audit: '审核通过', like: 15, comment: 8, view: 156 },
-  { title: 'Shipping took longer than expected', category: 'Product Feedback', status: 'Answered', user: 'nailsbyaraxo', userType: 'MelodySusie Member', time: '2026-09-03 19:05:42', status_audit: '审核通过', like: 2, comment: 3, view: 41 },
+  { title: 'Will you release a cordless nail drill?', category: 'New Idea', status: 'Answered', user: 'nailartlover', userType: 'MelodySusie Member', time: '2026-09-07 14:22:08', status_audit: '审核通过', top: '是', like: 5, comment: 3, view: 42 },
+  { title: 'How to use the nail lamp properly?', category: 'Product Question', status: 'Answered', user: 'Breezy does nails', userType: 'MelodySusie Member', time: '2026-09-06 09:15:44', status_audit: '审核通过', top: '否', like: 8, comment: 6, view: 128 },
+  { title: 'The new gel polish color collection is amazing!', category: 'Product Feedback', status: 'Under Review', user: 'JESMANAILS', userType: 'MelodySusie Member', time: '2026-09-05 20:33:17', status_audit: '审核通过', top: '否', like: 12, comment: 4, view: 87 },
+  { title: 'Could we have more beginner tutorials?', category: 'Content Request', status: 'Wait to be Reviewed', user: 'newnailtech', userType: 'MelodySusie Member', time: '2026-09-05 11:08:52', status_audit: '审核通过', top: '否', like: 6, comment: 2, view: 54 },
+  { title: 'Reward points expire too fast', category: 'Reward Club', status: 'Under Review', user: 'shopaholic99', userType: 'MelodySusie Member', time: '2026-09-04 16:47:30', status_audit: '审核通过', top: '否', like: 3, comment: 5, view: 63 },
+  { title: 'Idea: Smart nail dryer with app control', category: 'New Idea', status: 'Wait to be Reviewed', user: 'innovator_mom', userType: 'MelodySusie Member', time: '2026-09-04 08:22:11', status_audit: '审核通过', top: '否', like: 15, comment: 8, view: 156 },
+  { title: 'Shipping took longer than expected', category: 'Product Feedback', status: 'Answered', user: 'nailsbyaraxo', userType: 'MelodySusie Member', time: '2026-09-03 19:05:42', status_audit: '审核通过', top: '否', like: 2, comment: 3, view: 41 },
 ];
 
 // 评论数据（模拟）
@@ -1157,11 +1217,13 @@ function renderMailboxPosts() {
       <td>${getUserTypeTag(p.userType)}</td>
       <td>${p.time}</td>
       <td><span class="tag tag-green">${p.status_audit}</span></td>
+      <td>${p.top}</td>
       <td>${p.like}</td>
       <td>${p.comment}</td>
       <td>${p.view}</td>
       <td>
         <div class="action-links">
+          ${p.top === '否' ? '<a onclick="toggleMailboxTop(' + i + ')">置顶</a>' : '<a onclick="toggleMailboxTop(' + i + ')">取消置顶</a>'}
           <a onclick="openCategoryModal(${i})">修改 Category</a>
           <a onclick="openStatusModal(${i})">修改 Status</a>
           <a onclick="openCommentModal(${i})">评论管理</a>
@@ -1233,6 +1295,23 @@ function openCommentModal(index) {
     </div>
   `).join('');
   openModal('comment-modal');
+}
+
+// ===== 字号滑块实时更新 =====
+function updateFontSize(type) {
+  if (type === 'title') {
+    const val = document.getElementById('titleFontSize').value;
+    document.getElementById('titleFontSizeValue').textContent = val + 'px';
+  } else if (type === 'desc') {
+    const val = document.getElementById('descFontSize').value;
+    document.getElementById('descFontSizeValue').textContent = val + 'px';
+  }
+}
+
+// ===== 留言箱帖子置顶/取消置顶 =====
+function toggleMailboxTop(index) {
+  mailboxPosts[index].top = mailboxPosts[index].top === '是' ? '否' : '是';
+  renderMailboxPosts();
 }
 
 // ===== 初始化 =====
