@@ -486,50 +486,6 @@ tr:hover { background: #f9fafb; }
 }
 .upload-box .icon { font-size: 32px; margin-bottom: 8px; }
 
-/* 滑块样式 */
-.slider-row {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-.slider-row input[type="range"] {
-  flex: 1;
-  height: 6px;
-  -webkit-appearance: none;
-  appearance: none;
-  background: #e5e7eb;
-  border-radius: 3px;
-  outline: none;
-}
-.slider-row input[type="range"]::-webkit-slider-thumb {
-  -webkit-appearance: none;
-  appearance: none;
-  width: 18px;
-  height: 18px;
-  border-radius: 50%;
-  background: #10b981;
-  cursor: pointer;
-  transition: all 0.2s;
-}
-.slider-row input[type="range"]::-webkit-slider-thumb:hover {
-  transform: scale(1.1);
-}
-.slider-row input[type="range"]::-moz-range-thumb {
-  width: 18px;
-  height: 18px;
-  border-radius: 50%;
-  background: #10b981;
-  cursor: pointer;
-  border: none;
-}
-.slider-value {
-  min-width: 52px;
-  text-align: right;
-  font-size: 13px;
-  color: #374151;
-  font-weight: 600;
-}
-
 /* 评论列表（评论管理弹窗） */
 .comment-item {
   padding: 12px;
@@ -977,52 +933,32 @@ tr:hover { background: #f9fafb; }
 
 <!-- ===== 弹窗：活动介绍区域配置 ===== -->
 <div class="modal-overlay" id="intro-modal">
-  <div class="modal" style="width:560px;">
+  <div class="modal" style="width:680px;">
     <div class="modal-header">
       <h3>活动介绍区域配置</h3>
       <span class="modal-close" onclick="closeModal('intro-modal')">×</span>
     </div>
     <div class="modal-body">
       <div class="form-item">
-        <label>背景图片</label>
-        <div class="upload-box" onclick="alert('选择背景图片文件')">
-          <div class="icon">📷</div>
-          <div>点击或拖拽上传背景图片</div>
-          <div class="form-tip">建议尺寸：1200×400px，支持 jpg/png，大小不超过 2MB</div>
+        <label>左侧图片</label>
+        <div class="upload-box" onclick="alert('选择左侧图片文件')">
+          <div class="icon">�</div>
+          <div>点击或拖拽上传左侧图片</div>
+          <div class="form-tip">建议尺寸：400×300px，支持 jpg/png，大小不超过 2MB</div>
         </div>
       </div>
       <div class="form-item">
-        <label>标题文字</label>
-        <input type="text" value="MelodySusie Mailbox" placeholder="请输入标题文字">
-        <div class="form-tip">显示在背景图上的主标题</div>
+        <label>标题</label>
+        <input type="text" value="MelodySusie Mailbox" placeholder="请输入标题">
       </div>
       <div class="form-item">
-        <label>标题字号</label>
-        <div class="slider-row">
-          <input type="range" id="titleFontSize" min="12" max="64" value="32" oninput="updateFontSize('title')">
-          <span class="slider-value" id="titleFontSizeValue">32px</span>
-        </div>
-        <div class="form-tip">范围：12px ~ 64px</div>
+        <label>副标题</label>
+        <input type="text" value="Your Voice. Our Next Improvement and Innovation." placeholder="请输入副标题">
       </div>
       <div class="form-item">
-        <label>描述文字</label>
-        <textarea placeholder="请输入描述文字">Your Voice. Our Next Improvement and Innovation.</textarea>
-        <div class="form-tip">显示在标题下方的描述文字，支持换行</div>
-      </div>
-      <div class="form-item">
-        <label>描述文字字号</label>
-        <div class="slider-row">
-          <input type="range" id="descFontSize" min="12" max="32" value="16" oninput="updateFontSize('desc')">
-          <span class="slider-value" id="descFontSizeValue">16px</span>
-        </div>
-        <div class="form-tip">范围：12px ~ 32px</div>
-      </div>
-      <div class="form-item">
-        <label>文字颜色</label>
-        <div style="display:flex;gap:12px;align-items:center;">
-          <input type="color" value="#ffffff" style="width:40px;height:32px;border:1px solid #d1d5db;border-radius:4px;cursor:pointer;padding:2px;">
-          <span style="font-size:13px;color:#6b7280;">标题和描述文字统一使用此颜色</span>
-        </div>
+        <label>文本</label>
+        <textarea placeholder="请输入文本内容" style="height:100px;">Have a question or suggestion about MelodySusie?
+Leave it under this post, and we're here to answer and listen.</textarea>
       </div>
     </div>
     <div class="modal-footer">
@@ -1295,17 +1231,6 @@ function openCommentModal(index) {
     </div>
   `).join('');
   openModal('comment-modal');
-}
-
-// ===== 字号滑块实时更新 =====
-function updateFontSize(type) {
-  if (type === 'title') {
-    const val = document.getElementById('titleFontSize').value;
-    document.getElementById('titleFontSizeValue').textContent = val + 'px';
-  } else if (type === 'desc') {
-    const val = document.getElementById('descFontSize').value;
-    document.getElementById('descFontSizeValue').textContent = val + 'px';
-  }
 }
 
 // ===== 留言箱帖子置顶/取消置顶 =====
