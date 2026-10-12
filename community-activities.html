@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Shopify官网 · 共创项目活动列表页原型</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family: Inter, -apple-system, 'Segoe UI', sans-serif; background:#fff; color:#2D3748; }
+  a { text-decoration:none; color:inherit; }
+  /* 顶部导航 */
+  .header { position:sticky; top:0; z-index:50; background:#fff; border-bottom:1px solid #EDF2F7; }
+  .nav { max-width:1200px; margin:0 auto; display:flex; align-items:center; justify-content:space-between; padding:0 24px; height:64px; }
+  .logo { font-size:20px; font-weight:700; letter-spacing:.5px; }
+  .logo span { color:#41B983; }
+  .nav-links { display:flex; gap:28px; font-size:14px; color:#4A5568; }
+  .nav-links a:hover, .nav-links .active { color:#41B983; }
+  .nav-links .active { font-weight:600; }
+  .nav-icons { display:flex; gap:16px; font-size:16px; color:#4A5568; }
+  /* Hero */
+  .hero { position:relative; color:#fff; height:400px; overflow:hidden; }
+  .hero img { width:100%; height:100%; object-fit:cover; }
+  .hero-mask { position:absolute; inset:0; background:linear-gradient(90deg, rgba(20,30,40,.75) 0%, rgba(20,30,40,.4) 55%, rgba(20,30,40,.05) 100%); }
+  .hero-body { position:absolute; inset:0; max-width:1200px; margin:0 auto; padding:0 24px; display:flex; flex-direction:column; justify-content:center; gap:12px; }
+  .hero-tag { display:inline-block; width:fit-content; background:rgba(255,255,255,.18); border:1px solid rgba(255,255,255,.4); border-radius:20px; padding:4px 14px; font-size:12px; }
+  .hero h1 { font-size:38px; font-weight:700; line-height:1.2; max-width:600px; }
+  .hero p { font-size:16px; max-width:540px; color:rgba(255,255,255,.9); }
+  .btn { display:inline-flex; align-items:center; justify-content:center; border-radius:8px; padding:11px 26px; font-size:15px; font-weight:600; cursor:pointer; border:none; }
+  .btn-green { background:#41B983; color:#fff; box-shadow:0 4px 12px rgba(65,185,131,.35); }
+  .btn-green:hover { background:#38A169; }
+  .btn-outline { background:#fff; color:#2B6CB0; border:1px solid #2B6CB0; }
+  .btn-outline:hover { background:#F7FAFC; }
+  .btn-sm { padding:7px 16px; font-size:13px; }
+  /* 内容 */
+  .main { max-width:1200px; margin:0 auto; padding:48px 24px; }
+  .sec-head { display:flex; align-items:center; justify-content:space-between; margin-bottom:20px; }
+  .sec-head h2 { font-size:22px; font-weight:700; }
+  .sec-head .more { font-size:13px; color:#2B6CB0; }
+  .cats { display:flex; gap:10px; margin-bottom:28px; flex-wrap:wrap; }
+  .cat { border:1px solid #E2E8F0; border-radius:20px; padding:7px 18px; font-size:13px; color:#4A5568; cursor:pointer; }
+  .cat.on { background:#41B983; border-color:#41B983; color:#fff; font-weight:600; }
+  /* 活动卡片 */
+  .card-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:24px; }
+  .act-card { border:1px solid #E2E8F0; border-radius:14px; overflow:hidden; background:#fff; box-shadow:0 4px 16px rgba(0,0,0,.05); transition:transform .15s; }
+  .act-card:hover { transform:translateY(-4px); box-shadow:0 12px 28px rgba(0,0,0,.1); }
+  .act-cover { position:relative; height:180px; }
+  .act-cover img { width:100%; height:100%; object-fit:cover; }
+  .act-status { position:absolute; top:12px; left:12px; border-radius:16px; padding:4px 12px; font-size:12px; font-weight:600; color:#fff; }
+  .st-open { background:#41B983; }
+  .st-soon { background:#ED8936; }
+  .st-end { background:#718096; }
+  .act-body { padding:18px; }
+  .act-name { font-size:17px; font-weight:700; margin-bottom:6px; }
+  .act-meta { display:flex; flex-wrap:wrap; gap:12px; font-size:12px; color:#718096; margin-bottom:12px; }
+  .act-desc { font-size:13px; color:#4A5568; line-height:1.6; margin-bottom:16px; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
+  .act-foot { display:flex; align-items:center; justify-content:space-between; border-top:1px solid #EDF2F7; padding-top:14px; }
+  .act-quota { font-size:12px; color:#718096; }
+  .act-quota b { color:#41B983; }
+  /* 流程 */
+  .process { display:grid; grid-template-columns:repeat(5,1fr); gap:12px; margin-top:8px; }
+  .p-step { text-align:center; background:#FAFBFD; border:1px solid #EDF2F7; border-radius:12px; padding:20px 12px; }
+  .p-step .num { width:36px; height:36px; margin:0 auto 10px; border-radius:50%; background:#41B983; color:#fff; display:flex; align-items:center; justify-content:center; font-weight:700; }
+  .p-step .t { font-size:13px; font-weight:600; }
+  .p-step .d { font-size:12px; color:#718096; margin-top:6px; }
+  /* 品牌价值 */
+  .value { background:linear-gradient(135deg,#F0FFF4,#E6FFFA); border:1px solid #C6F6D5; border-radius:16px; padding:32px; margin-top:48px; text-align:center; }
+  .value h3 { font-size:22px; font-weight:700; color:#276749; margin-bottom:10px; }
+  .value p { color:#4A5568; font-size:14px; max-width:640px; margin:0 auto; line-height:1.7; }
+  .value .slogan { font-style:italic; color:#41B983; font-size:15px; margin-top:12px; }
+  /* 页脚 */
+  .footer { background:#001529; color:rgba(255,255,255,.7); padding:40px 24px; margin-top:48px; }
+  .footer-inner { max-width:1200px; margin:0 auto; display:flex; justify-content:space-between; font-size:13px; }
+  @media (max-width:900px){ .card-grid{ grid-template-columns:1fr; } .process{ grid-template-columns:repeat(2,1fr); } }
+</style>
+</head>
+<body>
+
+<header class="header">
+  <div class="nav">
+    <div class="logo">Melody<span>Susie</span></div>
+    <nav class="nav-links">
+      <a href="#">首页</a><a href="#">产品</a><a href="#">社区</a>
+      <a href="#" class="active">共创项目</a><a href="#">联系我们</a>
+    </nav>
+    <div class="nav-icons">🔍 <span title="账户">👤</span> <span title="购物车">🛒</span></div>
+  </div>
+</header>
+
+<section class="hero">
+  <img src="https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=creative%20nail%20art%20products%20collection%20flat%20lay%20on%20soft%20pastel%20background%2C%20beauty%20tools%20gel%20polish%20and%20accessories%2C%20warm%20inviting%20e-commerce%20banner%20photography">
+  <div class="hero-mask"></div>
+  <div class="hero-body">
+    <span class="hero-tag">MelodySusie Innovation Lab</span>
+    <h1>Your Voice Shapes What We Create Next.</h1>
+    <p>与我们一起共同创新、创作新产品。参与新品体验、分享你的想法，你的声音将影响我们的下一代产品。</p>
+    <div style="display:flex;gap:12px;margin-top:8px">
+      <a class="btn btn-green" href="#activities">浏览活动</a>
+      <a class="btn" style="background:transparent;color:#fff;border:1px solid rgba(255,255,255,.6)" href="#process">了解流程</a>
+    </div>
+  </div>
+</section>
+
+<main class="main">
+  <!-- 分类 -->
+  <div class="cats">
+    <span class="cat on">全部</span>
+    <span class="cat">新品体验</span>
+    <span class="cat">创意分享</span>
+    <span class="cat">售后反馈</span>
+    <span class="cat">采访邀请</span>
+  </div>
+
+  <!-- 活动列表 -->
+  <div class="sec-head" id="activities">
+    <h2>进行中的活动</h2>
+    <span class="more">查看全部 →</span>
+  </div>
+  <div class="card-grid">
+
+    <div class="act-card">
+      <div class="act-cover">
+        <img src="https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=white%20UV%20nail%20dryer%20lamp%20product%20photography%20soft%20pink%20background%20e-commerce">
+        <span class="act-status st-open">报名中</span>
+      </div>
+      <div class="act-body">
+        <div class="act-name">新品防黑手烤灯 P-Plus29A 体验官招募</div>
+        <div class="act-meta"><span>📅 10.15 – 10.31</span><span>🧪 工具线</span><span>🗂 涉密需 NDA</span></div>
+        <div class="act-desc">抢先体验全新防黑手烤灯，提交反馈即可保留产品，优秀反馈者最高获得 $40 实物奖励。</div>
+        <div class="act-foot">
+          <span class="act-quota">名额 <b>10</b> 人</span>
+          <a class="btn btn-green btn-sm" href="https://gs668-b.github.io/community-activity-detail.html">查看详情</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="act-card">
+      <div class="act-cover">
+        <img src="https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=nail%20art%20decorative%20accessories%20like%20charms%20and%20stickers%20product%20photo%20pastel%20background">
+        <span class="act-status st-soon">即将开始</span>
+      </div>
+      <div class="act-body">
+        <div class="act-name">美甲装饰配件新品体验（第二轮）</div>
+        <div class="act-meta"><span>📅 11.05 开启</span><span>🧪 配件线</span><span>🗂 不涉密</span></div>
+        <div class="act-desc">筛选核心用户抢先体验美甲贴纸、装饰配件等新品，反馈参与即有 20% Coupon + 500 积分。</div>
+        <div class="act-foot">
+          <span class="act-quota">名额 <b>20</b> 人</span>
+          <a class="btn btn-outline btn-sm" href="#" onclick="alert('[原型演示] 即将开始，暂不可报名')">敬请期待</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="act-card">
+      <div class="act-cover">
+        <img src="https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=nail%20drill%20bit%20manicure%20tool%20product%20photography%20minimal%20background">
+        <span class="act-status st-end">已结束</span>
+      </div>
+      <div class="act-body">
+        <div class="act-name">打磨头体验官项目（第一期）</div>
+        <div class="act-meta"><span>📅 08.01 – 08.20</span><span>🧪 工具线</span><span>✅ 已结束</span></div>
+        <div class="act-desc">不同技术水平用户对打磨头的真实体验反馈，已完成招募与反馈收集。</div>
+        <div class="act-foot">
+          <span class="act-quota">已结束</span>
+          <a class="btn btn-outline btn-sm" href="#" onclick="alert('[原型演示] 活动已结束')">查看回顾</a>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- 流程 -->
+  <div class="sec-head" id="process" style="margin-top:48px"><h2>参与流程</h2></div>
+  <div class="process">
+    <div class="p-step"><div class="num">1</div><div class="t">报名申请</div><div class="d">选择活动，完善信息并填写问卷</div></div>
+    <div class="p-step"><div class="num">2</div><div class="t">筛选确认</div><div class="d">运营审核报名，邮件通知结果</div></div>
+    <div class="p-step"><div class="num">3</div><div class="t">寄送样品</div><div class="d">确认地址，样品寄出并跟踪</div></div>
+    <div class="p-step"><div class="num">4</div><div class="t">体验反馈</div><div class="d">体验 7 天，提交问卷/图文/视频</div></div>
+    <div class="p-step"><div class="num">5</div><div class="t">奖励复盘</div><div class="d">获得积分与奖励，进入下轮</div></div>
+  </div>
+
+  <!-- 品牌价值 -->
+  <div class="value">
+    <h3>MelodySusie Innovation Lab</h3>
+    <p>这是一个让不同项目根据产品、问题与需求找到最合适用户的共创平台。你的参与将直接进入产品研发与优化流程。</p>
+    <div class="slogan">"Your Voice Shapes What We Create Next."</div>
+  </div>
+</main>
+
+<footer class="footer">
+  <div class="footer-inner">
+    <div>© 2026 MelodySusie. Discover Your Perfect Nail Solution.</div>
+    <div>Try It, Nail It — 鼓励尝试，尝试即成功</div>
+  </div>
+</footer>
+
+<script>
+  document.querySelectorAll('.cat').forEach(c => c.addEventListener('click', () => {
+    document.querySelectorAll('.cat').forEach(x => x.classList.remove('on'));
+    c.classList.add('on');
+  }));
+</script>
+</body>
+</html>

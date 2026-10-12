@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Shopify官网 · 新品体验报名页原型</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family: Inter, -apple-system, 'Segoe UI', sans-serif; background:#fff; color:#2D3748; }
+  a { text-decoration:none; color:inherit; }
+  /* ===== 顶部导航 ===== */
+  .header { position:sticky; top:0; z-index:50; background:#fff; border-bottom:1px solid #EDF2F7; }
+  .nav { max-width:1200px; margin:0 auto; display:flex; align-items:center; justify-content:space-between; padding:0 24px; height:64px; }
+  .logo { font-size:20px; font-weight:700; letter-spacing:.5px; color:#2D3748; }
+  .logo span { color:#41B983; }
+  .nav-links { display:flex; gap:28px; font-size:14px; color:#4A5568; }
+  .nav-links a:hover { color:#41B983; }
+  .nav-links .active { color:#41B983; font-weight:600; }
+  .nav-icons { display:flex; gap:16px; font-size:16px; color:#4A5568; }
+  /* ===== Hero ===== */
+  .hero { position:relative; color:#fff; height:420px; overflow:hidden; }
+  .hero img { width:100%; height:100%; object-fit:cover; }
+  .hero-mask { position:absolute; inset:0; background:linear-gradient(90deg, rgba(20,30,40,.72) 0%, rgba(20,30,40,.35) 55%, rgba(20,30,40,.05) 100%); }
+  .hero-body { position:absolute; inset:0; max-width:1200px; margin:0 auto; padding:0 24px; display:flex; flex-direction:column; justify-content:center; gap:12px; }
+  .hero-tag { display:inline-block; width:fit-content; background:rgba(255,255,255,.18); border:1px solid rgba(255,255,255,.4); border-radius:20px; padding:4px 14px; font-size:12px; }
+  .hero h1 { font-size:40px; font-weight:700; line-height:1.2; max-width:560px; }
+  .hero p { font-size:16px; max-width:520px; color:rgba(255,255,255,.9); }
+  .hero .cta { margin-top:10px; display:flex; gap:12px; align-items:center; }
+  .btn { display:inline-flex; align-items:center; justify-content:center; border-radius:8px; padding:12px 28px; font-size:15px; font-weight:600; cursor:pointer; border:none; }
+  .btn-green { background:#41B983; color:#fff; box-shadow:0 4px 12px rgba(65,185,131,.35); }
+  .btn-green:hover { background:#38A169; }
+  .btn-ghost { background:transparent; color:#fff; border:1px solid rgba(255,255,255,.6); }
+  .btn-ghost:hover { background:rgba(255,255,255,.12); }
+  /* ===== 活动信息条 ===== */
+  .info-bar { max-width:1200px; margin:-40px auto 0; position:relative; z-index:10; background:#fff; border-radius:12px; box-shadow:0 8px 30px rgba(0,0,0,.08); padding:20px 32px; display:grid; grid-template-columns:repeat(4,1fr); gap:16px; }
+  .info-item .k { font-size:12px; color:#718096; margin-bottom:4px; }
+  .info-item .v { font-size:16px; font-weight:600; color:#2D3748; }
+  /* ===== 主体 ===== */
+  .main { max-width:1200px; margin:0 auto; padding:48px 24px; display:grid; grid-template-columns:1.1fr .9fr; gap:40px; align-items:start; }
+  .section-title { font-size:22px; font-weight:700; margin-bottom:16px; }
+  .desc { color:#4A5568; line-height:1.7; font-size:14px; }
+  .reward { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin:20px 0; }
+  .reward-card { border:1px solid #EDF2F7; border-radius:10px; padding:14px; background:#FAFBFD; }
+  .reward-card .t { font-size:13px; font-weight:600; color:#41B983; margin-bottom:6px; }
+  .reward-card .d { font-size:12px; color:#4A5568; line-height:1.5; }
+  .steps { display:flex; gap:8px; margin:20px 0; }
+  .step { flex:1; text-align:center; position:relative; }
+  .step .num { width:32px; height:32px; border-radius:50%; background:#41B983; color:#fff; display:inline-flex; align-items:center; justify-content:center; font-weight:600; font-size:14px; }
+  .step .txt { font-size:12px; color:#4A5568; margin-top:6px; }
+  .notice { background:#FFF8F0; border:1px solid #FEEBCB; border-radius:10px; padding:14px 16px; font-size:13px; color:#7B4A12; line-height:1.6; }
+  .notice b { color:#C05621; }
+  /* ===== 报名卡片 ===== */
+  .signup { background:#fff; border:1px solid #E2E8F0; border-radius:14px; box-shadow:0 10px 36px rgba(0,0,0,.08); padding:28px; position:sticky; top:88px; }
+  .signup h3 { font-size:18px; font-weight:700; margin-bottom:4px; }
+  .signup .sub { font-size:12px; color:#718096; margin-bottom:20px; }
+  .logged-in { display:flex; align-items:center; gap:8px; background:#F0FFF4; border:1px solid #C6F6D5; color:#276749; border-radius:8px; padding:8px 12px; font-size:13px; margin-bottom:16px; }
+  .field { margin-bottom:14px; }
+  .field label { display:block; font-size:13px; font-weight:500; margin-bottom:6px; }
+  .field .req { color:#E53E3E; }
+  .input, .select, .textarea { width:100%; border:1px solid #E2E8F0; border-radius:8px; padding:10px 12px; font-size:14px; outline:none; color:#2D3748; }
+  .input:focus, .select:focus, .textarea:focus { border-color:#41B983; box-shadow:0 0 0 3px rgba(65,185,131,.15); }
+  .radio-group { display:flex; flex-wrap:wrap; gap:8px; }
+  .radio { border:1px solid #E2E8F0; border-radius:20px; padding:6px 14px; font-size:13px; cursor:pointer; color:#4A5568; }
+  .radio.on { background:#41B983; border-color:#41B983; color:#fff; }
+  .q-title { font-size:13px; font-weight:600; color:#2D3748; margin-bottom:6px; }
+  .nda { display:flex; gap:8px; align-items:flex-start; font-size:13px; color:#4A5568; background:#F7FAFC; border:1px solid #E2E8F0; border-radius:8px; padding:10px 12px; }
+  .nda input { margin-top:2px; accent-color:#41B983; }
+  .nda a { color:#2B6CB0; }
+  .submit { width:100%; margin-top:8px; }
+  .form-tip { font-size:12px; color:#718096; text-align:center; margin-top:10px; }
+  /* ===== 成功提示 ===== */
+  .toast { position:fixed; top:20px; left:50%; transform:translateX(-50%); background:#276749; color:#fff; padding:14px 28px; border-radius:10px; font-size:14px; box-shadow:0 10px 30px rgba(0,0,0,.2); display:none; z-index:100; }
+  /* ===== 页脚 ===== */
+  .footer { background:#001529; color:rgba(255,255,255,.7); padding:40px 24px; margin-top:48px; }
+  .footer-inner { max-width:1200px; margin:0 auto; display:flex; justify-content:space-between; font-size:13px; }
+  @media (max-width:900px){ .main{ grid-template-columns:1fr; } .signup{ position:static; } .info-bar{ grid-template-columns:repeat(2,1fr); } .reward{ grid-template-columns:1fr; } }
+</style>
+</head>
+<body>
+
+<!-- 顶部导航 -->
+<header class="header">
+  <div class="nav">
+    <div class="logo">Melody<span>Susie</span></div>
+    <nav class="nav-links">
+      <a href="#">首页</a>
+      <a href="#">产品</a>
+      <a href="#">社区</a>
+      <a href="https://gs668-b.github.io/community-activities.html" class="active">共创项目</a>
+      <a href="#">联系我们</a>
+    </nav>
+    <div class="nav-icons">🔍 <span title="账户">👤</span> <span title="购物车">🛒</span></div>
+  </div>
+</header>
+
+<!-- Hero -->
+<section class="hero">
+  <img src="https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=professional%20e-commerce%20hero%20photography%20of%20a%20modern%20white%20UV%20nail%20dryer%20lamp%20with%20soft%20pink%20pastel%20background%2C%20beauty%20product%20with%20soft%20lighting%2C%20minimalist%20composition" alt="P-Plus29A 烤灯产品图">
+  <div class="hero-mask"></div>
+  <div class="hero-body">
+    <span class="hero-tag">MelodySusie Innovation Lab · 新品体验项目</span>
+    <h1>新品防黑手烤灯 P-Plus29A 体验官招募</h1>
+    <p>Let Your Voices Shape Next Nail Solutions. 抢先体验新品，你的反馈将影响我们的下一代产品。</p>
+    <div class="cta">
+      <a class="btn btn-green" href="#signup">立即报名</a>
+      <a class="btn btn-ghost" href="#about">了解活动</a>
+      <a class="btn btn-ghost" href="https://gs668-b.github.io/community-activity-detail.html">← 返回活动详情</a>
+    </div>
+  </div>
+</section>
+
+<!-- 活动信息条 -->
+<div class="info-bar">
+  <div class="info-item"><div class="k">报名时间</div><div class="v">10.15 – 10.31</div></div>
+  <div class="info-item"><div class="k">体验名额</div><div class="v">10 人（分 2 期）</div></div>
+  <div class="info-item"><div class="k">体验周期</div><div class="v">最短 7 天</div></div>
+  <div class="info-item"><div class="k">报名要求</div><div class="v">登录 + 完善个人信息</div></div>
+</div>
+
+<!-- 主体 -->
+<main class="main">
+
+  <!-- 左：活动介绍 -->
+  <div>
+    <h2 class="section-title" id="about">关于本活动</h2>
+    <p class="desc">
+      我们正在寻找 10 位体验官，抢先测试全新防黑手烤灯 <b>P-Plus29A</b>。在体验期内正常使用产品并提交反馈，
+      你将免费保留产品，并获得积分与专属礼遇。优秀的反馈者还有机会受邀参加深度访谈，赢取最高 $100 的 Gift Card。
+    </p>
+
+    <h3 style="font-size:16px;font-weight:600;margin-top:24px">参与奖励</h3>
+    <div class="reward">
+      <div class="reward-card"><div class="t">参与奖</div><div class="d">20% Coupon + 500 积分 + 产品保留</div></div>
+      <div class="reward-card"><div class="t">优质反馈奖</div><div class="d">1000 积分 + $20 实物 + 产品保留（限 10 人）</div></div>
+      <div class="reward-card"><div class="t">深度访谈奖</div><div class="d">1500 积分 + $40 实物 + 产品保留</div></div>
+    </div>
+
+    <h3 style="font-size:16px;font-weight:600;margin-top:24px">参与流程</h3>
+    <div class="steps">
+      <div class="step"><div class="num">1</div><div class="txt">报名申请</div></div>
+      <div class="step"><div class="num">2</div><div class="txt">运营筛选</div></div>
+      <div class="step"><div class="num">3</div><div class="txt">寄送样品</div></div>
+      <div class="step"><div class="num">4</div><div class="txt">体验反馈</div></div>
+      <div class="step"><div class="num">5</div><div class="txt">奖励复盘</div></div>
+    </div>
+
+    <h3 style="font-size:16px;font-weight:600;margin-top:24px">报名须知</h3>
+    <div class="notice">
+      <b>注意：</b>本次为涉密新品（工具线）体验，报名需签署保密协议（NDA），未签署不可提交报名。
+      产品计划在体验期后回收，运费由品牌承担；如输出有价值的反馈，可免费保留产品。
+      如我方未收到回应或反馈，将采取必要措施，并将该用户排除出所有品牌相关合作与体验活动。
+    </div>
+  </div>
+
+  <!-- 右：报名卡片 -->
+  <div class="signup" id="signup">
+    <h3>报名申请</h3>
+    <div class="sub">填写报名表，通过筛选后我们将通过邮件与您联系</div>
+    <div class="logged-in">✅ 已登录：sarah.chen@example.com（个人信息完整度 100%）</div>
+
+    <div class="field">
+      <label><span class="req">*</span> 姓名</label>
+      <input class="input" id="name" value="Sarah Chen">
+    </div>
+    <div class="field">
+      <label><span class="req">*</span> 邮箱</label>
+      <input class="input" id="email" value="sarah.chen@example.com">
+    </div>
+    <div class="field">
+      <label><span class="req">*</span> 您的美甲水平（Skill Level）</label>
+      <div class="radio-group">
+        <span class="radio on">Beginner</span>
+        <span class="radio">Advanced</span>
+        <span class="radio">DIY Nail Artist</span>
+        <span class="radio">Licensed Nail Tech</span>
+        <span class="radio">Professional Nail Tech</span>
+      </div>
+    </div>
+
+    <div style="margin:18px 0 4px;padding-top:14px;border-top:1px dashed #E2E8F0">
+      <div class="q-title"><span class="req">*</span> 1. 您每周使用烤灯的频率？</div>
+      <select class="select">
+        <option>每天使用</option>
+        <option>每周 3-5 次</option>
+        <option>每周 1-2 次</option>
+        <option>偶尔使用</option>
+      </select>
+    </div>
+    <div style="margin:14px 0 4px">
+      <div class="q-title"><span class="req">*</span> 2. 您在使用烤灯时最困扰的问题是什么？（有助于我们筛选匹配的体验官）</div>
+      <textarea class="textarea" rows="3" placeholder="例如：手部被照黑、固化时间过长、操作不便……"></textarea>
+    </div>
+
+    <div class="nda" style="margin-top:16px">
+      <input type="checkbox" id="ndaCheck">
+      <label for="ndaCheck">我已阅读并同意 <a href="#" onclick="event.preventDefault();alert('[原型演示] 打开《保密协议》PDF')">《保密协议（NDA）》</a>，遵守保密条款。<span class="req">（必签）</span></label>
+    </div>
+
+    <button class="btn btn-green submit" onclick="submit()">提交报名</button>
+    <div class="form-tip">提交后 7 个工作日内收到确认邮件；筛选结果将通过邮件通知</div>
+  </div>
+
+</main>
+
+<!-- 页脚 -->
+<footer class="footer">
+  <div class="footer-inner">
+    <div>© 2026 MelodySusie. Discover Your Perfect Nail Solution.</div>
+    <div>Try It, Nail It — 鼓励尝试，尝试即成功</div>
+  </div>
+</footer>
+
+<div class="toast" id="toast">🎉 报名已提交！筛选结果将发送至您的邮箱。</div>
+
+<script>
+  // 单选标签切换
+  document.querySelectorAll('.radio').forEach(r => r.addEventListener('click', () => {
+    r.parentElement.querySelectorAll('.radio').forEach(x => x.classList.remove('on'));
+    r.classList.add('on');
+  }));
+  function submit(){
+    const name = document.getElementById('name').value.trim();
+    const email = document.getElementById('email').value.trim();
+    const nda = document.getElementById('ndaCheck').checked;
+    if(!name || !email){ alert('[原型演示] 请填写姓名和邮箱'); return; }
+    if(!nda){ alert('[原型演示] 请先勾选同意《保密协议（NDA）》'); return; }
+    const t = document.getElementById('toast');
+    t.style.display = 'block';
+    setTimeout(() => { t.style.display = 'none'; }, 3200);
+  }
+</script>
+</body>
+</html>

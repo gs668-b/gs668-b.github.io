@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Shopify官网 · 活动详情页原型</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family: Inter, -apple-system, 'Segoe UI', sans-serif; background:#fff; color:#2D3748; }
+  a { text-decoration:none; color:inherit; }
+  .header { position:sticky; top:0; z-index:50; background:#fff; border-bottom:1px solid #EDF2F7; }
+  .nav { max-width:1200px; margin:0 auto; display:flex; align-items:center; justify-content:space-between; padding:0 24px; height:64px; }
+  .logo { font-size:20px; font-weight:700; }
+  .logo span { color:#41B983; }
+  .nav-links { display:flex; gap:28px; font-size:14px; color:#4A5568; }
+  .nav-links a:hover, .nav-links .active { color:#41B983; }
+  .nav-links .active { font-weight:600; }
+  .nav-icons { display:flex; gap:16px; font-size:16px; color:#4A5568; }
+  .crumb { max-width:1200px; margin:24px auto -8px; padding:0 24px; font-size:13px; color:#718096; }
+  .crumb a:hover { color:#41B983; }
+  .crumb b { color:#2D3748; }
+  .main { max-width:1200px; margin:0 auto; padding:32px 24px 0; }
+  /* 头部信息 */
+  .detail-head { display:grid; grid-template-columns:1.1fr .9fr; gap:40px; align-items:center; padding-bottom:40px; }
+  .detail-head img { width:100%; border-radius:16px; box-shadow:0 12px 32px rgba(0,0,0,.12); }
+  .dh-tag { display:inline-block; background:#41B983; color:#fff; border-radius:16px; padding:4px 14px; font-size:12px; font-weight:600; margin-bottom:12px; }
+  .dh-title { font-size:30px; font-weight:700; line-height:1.25; margin-bottom:12px; }
+  .dh-desc { color:#4A5568; font-size:14px; line-height:1.7; margin-bottom:20px; }
+  .dh-meta { display:grid; grid-template-columns:repeat(2,1fr); gap:10px; font-size:13px; color:#4A5568; margin-bottom:20px; }
+  .dh-meta div { background:#FAFBFD; border:1px solid #EDF2F7; border-radius:8px; padding:10px 12px; }
+  .dh-meta b { color:#2D3748; display:block; font-size:15px; margin-top:2px; }
+  .btn { display:inline-flex; align-items:center; justify-content:center; border-radius:8px; padding:12px 30px; font-size:15px; font-weight:600; cursor:pointer; border:none; }
+  .btn-green { background:#41B983; color:#fff; box-shadow:0 4px 12px rgba(65,185,131,.35); }
+  .btn-green:hover { background:#38A169; }
+  /* 内容布局 */
+  .grid { display:grid; grid-template-columns:1.1fr .9fr; gap:40px; padding:40px 0; border-top:1px solid #EDF2F7; }
+  .sec-title { font-size:20px; font-weight:700; margin-bottom:16px; display:flex; align-items:center; gap:8px; }
+  .sec-title::before { content:''; width:4px; height:20px; background:#41B983; border-radius:2px; }
+  .desc { color:#4A5568; line-height:1.8; font-size:14px; }
+  .desc b { color:#2D3748; }
+  .reward { display:grid; grid-template-columns:1fr; gap:12px; margin-top:12px; }
+  .reward-card { border:1px solid #EDF2F7; border-radius:10px; padding:16px; background:#FAFBFD; display:flex; justify-content:space-between; align-items:center; }
+  .reward-card .t { font-size:14px; font-weight:600; color:#41B983; margin-bottom:4px; }
+  .reward-card .d { font-size:13px; color:#4A5568; }
+  .reward-card .lv { font-size:12px; color:#718096; white-space:nowrap; }
+  .steps { display:flex; gap:8px; margin-top:8px; }
+  .step { flex:1; text-align:center; }
+  .step .num { width:34px; height:34px; border-radius:50%; background:#41B983; color:#fff; display:inline-flex; align-items:center; justify-content:center; font-weight:600; }
+  .step .txt { font-size:12px; color:#4A5568; margin-top:6px; }
+  .notice { background:#FFF8F0; border:1px solid #FEEBCB; border-radius:10px; padding:16px; font-size:13px; color:#7B4A12; line-height:1.7; }
+  .notice b { color:#C05621; }
+  /* 右侧报名卡 */
+  .signup-card { background:#fff; border:1px solid #E2E8F0; border-radius:14px; box-shadow:0 10px 36px rgba(0,0,0,.08); padding:28px; position:sticky; top:88px; height:fit-content; }
+  .signup-card h3 { font-size:18px; font-weight:700; margin-bottom:6px; }
+  .signup-card .sub { font-size:12px; color:#718096; margin-bottom:20px; }
+  .su-item { display:flex; justify-content:space-between; font-size:13px; padding:10px 0; border-bottom:1px dashed #EDF2F7; color:#4A5568; }
+  .su-item b { color:#2D3748; }
+  .quota-bar { margin:16px 0 4px; }
+  .quota-bar .lbl { display:flex; justify-content:space-between; font-size:13px; margin-bottom:6px; color:#4A5568; }
+  .bar { height:8px; background:#EDF2F7; border-radius:4px; overflow:hidden; }
+  .bar i { display:block; height:100%; width:42%; background:#41B983; border-radius:4px; }
+  .signup-card .btn { width:100%; margin-top:16px; }
+  .login-tip { font-size:12px; color:#718096; text-align:center; margin-top:10px; }
+  .footer { background:#001529; color:rgba(255,255,255,.7); padding:40px 24px; margin-top:48px; }
+  .footer-inner { max-width:1200px; margin:0 auto; display:flex; justify-content:space-between; font-size:13px; }
+  @media (max-width:900px){ .detail-head,.grid{ grid-template-columns:1fr; } .signup-card{ position:static; } }
+</style>
+</head>
+<body>
+
+<header class="header">
+  <div class="nav">
+    <div class="logo">Melody<span>Susie</span></div>
+    <nav class="nav-links">
+      <a href="#">首页</a><a href="#">产品</a><a href="#">社区</a>
+      <a href="https://gs668-b.github.io/community-activities.html">共创项目</a><a href="#">联系我们</a>
+    </nav>
+    <div class="nav-icons">🔍 <span>👤</span> <span>🛒</span></div>
+  </div>
+</header>
+
+<div class="crumb">
+  <a href="https://gs668-b.github.io/community-activities.html">共创项目</a> / <b>新品防黑手烤灯 P-Plus29A 体验官招募</b>
+</div>
+
+<main class="main">
+  <!-- 头部 -->
+  <div class="detail-head">
+    <div>
+      <span class="dh-tag">报名中 · 新品体验 · 工具线</span>
+      <h1 class="dh-title">新品防黑手烤灯 P-Plus29A 体验官招募</h1>
+      <p class="dh-desc">
+        你是否已经体验过 UV 防黑手烤灯？我们正在寻找 10 位体验官抢先测试全新 P-Plus29A。
+        在体验期内正常使用并提交反馈，即可免费保留产品，并获得积分与专属礼遇。
+      </p>
+      <div class="dh-meta">
+        <div>📅 报名时间<b>2026.10.15 – 10.31</b></div>
+        <div>🧪 体验周期<b>最短 7 天</b></div>
+        <div>👥 招募名额<b>10 人（分 2 期）</b></div>
+        <div>📋 报名要求<b>登录 + 完善个人信息</b></div>
+      </div>
+      <a class="btn btn-green" href="https://gs668-b.github.io/community-signup.html">立即报名</a>
+    </div>
+    <img src="https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=modern%20white%20UV%20nail%20dryer%20lamp%20product%20photography%20soft%20pink%20pastel%20background%20elegant%20composition" alt="P-Plus29A">
+  </div>
+
+  <div class="grid">
+    <!-- 左：介绍 -->
+    <div>
+      <div class="sec-title">关于本活动</div>
+      <p class="desc">
+        本次体验项目聚焦<b>美甲工具类新品</b>，在正式上线前收集真实使用反馈与优化建议。
+        体验官将覆盖不同技能水平用户，你的反馈将直接进入产品优化与上线决策流程。<br><br>
+        参与形式：品牌方寄送样品 → 体验期至少 <b>7 天</b> → 提交反馈（必填问卷 + 可选图文/视频）。
+        反馈质量优秀的用户将优先受邀参与后续深度访谈与新品体验。
+      </p>
+
+      <div class="sec-title" style="margin-top:28px">参与奖励</div>
+      <div class="reward">
+        <div class="reward-card">
+          <div><div class="t">参与奖</div><div class="d">完成体验问卷即可获得</div></div>
+          <span class="lv">20% Coupon + 500 积分 + 产品保留</span>
+        </div>
+        <div class="reward-card">
+          <div><div class="t">优质反馈奖</div><div class="d">高质量问卷 + 额外图文/视频输出</div></div>
+          <span class="lv">1000 积分 + $20 实物 + 产品保留</span>
+        </div>
+        <div class="reward-card">
+          <div><div class="t">深度访谈奖</div><div class="d">受邀参加深度访谈并输出有价值洞察</div></div>
+          <span class="lv">1500 积分 + $40 实物 + 产品保留</span>
+        </div>
+      </div>
+
+      <div class="sec-title" style="margin-top:28px">参与流程</div>
+      <div class="steps">
+        <div class="step"><div class="num">1</div><div class="txt">报名申请</div></div>
+        <div class="step"><div class="num">2</div><div class="txt">筛选通知</div></div>
+        <div class="step"><div class="num">3</div><div class="txt">寄送样品</div></div>
+        <div class="step"><div class="num">4</div><div class="txt">体验反馈</div></div>
+        <div class="step"><div class="num">5</div><div class="txt">奖励复盘</div></div>
+      </div>
+
+      <div class="sec-title" style="margin-top:28px">报名须知</div>
+      <div class="notice">
+        <b>涉密新品提示：</b>本活动为工具线涉密新品，报名需签署《保密协议（NDA）》，未签署不可提交报名。
+        <br>产品计划在体验期后回收（运费由品牌承担）；如输出有价值的反馈，可免费保留产品。
+        <br>如我方未收到回应或反馈，将采取必要措施，并将该用户排除出所有品牌相关合作与体验活动。
+      </div>
+    </div>
+
+    <!-- 右：报名概览 -->
+    <aside class="signup-card">
+      <h3>报名概览</h3>
+      <div class="sub">新品防黑手烤灯 P-Plus29A 体验官招募</div>
+      <div class="su-item">活动状态 <b style="color:#41B983">报名中</b></div>
+      <div class="su-item">报名截止 <b>2026.10.31 23:59</b></div>
+      <div class="su-item">体验周期 <b>到货后 7 天</b></div>
+      <div class="su-item">涉密等级 <b>工具线 · 需签 NDA</b></div>
+      <div class="quota-bar">
+        <div class="lbl"><span>已报名 14 人</span><span>目标 10 人</span></div>
+        <div class="bar"><i></i></div>
+      </div>
+      <a class="btn btn-green" href="https://gs668-b.github.io/community-signup.html">立即报名</a>
+      <div class="login-tip">提交后 7 个工作日内收到确认邮件；筛选结果将通过邮件通知</div>
+    </aside>
+  </div>
+</main>
+
+<footer class="footer">
+  <div class="footer-inner">
+    <div>© 2026 MelodySusie. Discover Your Perfect Nail Solution.</div>
+    <div>Try It, Nail It — 鼓励尝试，尝试即成功</div>
+  </div>
+</footer>
+</body>
+</html>
