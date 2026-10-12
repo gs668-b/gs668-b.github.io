@@ -156,8 +156,8 @@
       <div class="f-item"><label>Skill Level</label>
         <select class="select"><option>全部</option><option>Beginner</option><option>Advanced</option><option>DIY Nail Artist</option><option>Licensed Nail Tech</option><option>Professional Nail Tech</option></select>
       </div>
-      <div class="f-item"><label>用户池</label>
-        <select class="select"><option>全部</option><option>普通用户池</option><option>特邀用户池</option></select>
+      <div class="f-item"><label>用户来源</label>
+        <select class="select"><option>全部</option><option>主动报名用户</option><option>特邀用户</option></select>
       </div>
       <div class="f-item"><label>状态</label>
         <select class="select"><option>全部</option><option>已提交</option><option>入选</option><option>落选</option><option>已确认</option></select>
@@ -180,7 +180,7 @@
     <table>
       <thead>
         <tr>
-          <th style="width:36px"></th><th>用户</th><th>Skill Level</th><th>用户池</th><th>问卷提交</th><th>状态</th><th>操作</th>
+          <th style="width:36px"></th><th>用户</th><th>Skill Level</th><th>用户来源</th><th>问卷提交</th><th>状态</th><th>操作</th>
         </tr>
       </thead>
       <tbody id="tbody">
@@ -197,7 +197,7 @@
           <td><input type="checkbox" onchange="countSel()"></td>
           <td><b>emma.liu</b><br><span style="color:#718096;font-size:12px">emma.liu@example.com</span></td>
           <td>Beginner</td>
-          <td><span class="tag t-gray">普通</span></td>
+          <td><span class="tag t-gray">主动报名</span></td>
           <td>10.19 09:10</td>
           <td><span class="tag t-gray">已提交</span></td>
           <td><div class="ops"><button class="btn btn-link" onclick="openDetail(1)">查看详情</button><button class="btn btn-link" onclick="markOne(1,true)">入选</button></div></td>
@@ -215,7 +215,7 @@
           <td><input type="checkbox" onchange="countSel()"></td>
           <td><b>leo.zhao</b><br><span style="color:#718096;font-size:12px">leo.zhao@example.com</span></td>
           <td>Licensed Nail Tech</td>
-          <td><span class="tag t-gray">普通</span></td>
+          <td><span class="tag t-gray">主动报名</span></td>
           <td>10.20 11:47</td>
           <td><span class="tag t-red">落选</span></td>
           <td><div class="ops"><button class="btn btn-link" onclick="openDetail(3)">查看详情</button></div></td>
@@ -244,7 +244,7 @@
         <div><div class="k">用户名</div><div class="v" id="dName">sarah.chen</div></div>
         <div><div class="k">邮箱</div><div class="v">sarah.chen@example.com</div></div>
         <div><div class="k">Skill Level</div><div class="v">Advanced</div></div>
-        <div><div class="k">用户池</div><div class="v"><span class="tag t-blue">特邀用户池</span></div></div>
+        <div><div class="k">用户来源</div><div class="v"><span class="tag t-blue">特邀用户</span></div></div>
         <div><div class="k">报名时间</div><div class="v">2026.10.18 14:32</div></div>
         <div><div class="k">当前状态</div><div class="v"><span class="tag t-gray">已提交</span></div></div>
         <div><div class="k">个人信息完整度</div><div class="v">100%</div></div>

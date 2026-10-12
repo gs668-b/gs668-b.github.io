@@ -127,10 +127,17 @@
         <input class="input" placeholder="例如：新品防黑手烤灯 P-Plus29A 体验官招募" value="新品防黑手烤灯 P-Plus29A 体验官招募">
       </div>
       <div class="form-item">
-        <label class="label"><span class="star">*</span>活动类型</label>
+        <label class="label"><span class="star">*</span>子项目类型</label>
         <select class="select">
-          <option>新品体验-工具</option>
-          <option>新品体验-配件</option>
+          <option>创新想法分享</option>
+          <option>产品体验感分享</option>
+        </select>
+      </div>
+      <div class="form-item">
+        <label class="label"><span class="star">*</span>产品品类</label>
+        <select class="select">
+          <option>美甲工具</option>
+          <option>美甲配件</option>
           <option>其它</option>
         </select>
       </div>
@@ -189,7 +196,6 @@
         <select class="select">
           <option>新品体验报名问卷 - P-Plus29A（v2）</option>
           <option>新品体验报名问卷 - 打磨头配件（v1）</option>
-          <option>售后反馈问卷模板</option>
         </select>
         <div style="display:flex;gap:8px;margin-top:8px">
           <button class="btn btn-secondary" style="padding:6px 12px;font-size:13px" onclick="alert('原型演示：跳转 OL 问卷管理进行预览/编辑')">预览问卷</button>
@@ -197,7 +203,7 @@
         </div>
       </div>
       <div class="form-item">
-        <label class="label">保密协议（NDA） <span class="hint" id="ndaHint">工具线必填 / 配件线选填</span></label>
+        <label class="label">保密协议（NDA） <span class="hint" id="ndaHint">美甲工具必填 / 美甲配件选填</span></label>
         <div class="upload-box" onclick="uploadNda()">+ 上传保密协议 PDF</div>
         <div class="uploaded" id="ndaFile">
           <span class="fname">MelodySusie_NDA_v1.0.pdf</span>
