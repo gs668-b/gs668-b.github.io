@@ -87,6 +87,14 @@
   .qa .a { font-size:13px; color:#4A5568; line-height:1.6; }
   .score { display:inline-flex; align-items:center; gap:6px; margin-top:12px; font-size:13px; color:#4A5568; }
   .score b { color:#ED8936; font-size:18px; }
+  /* 邀请用户弹窗 */
+  .invite-row { display:flex; gap:10px; }
+  .invite-row .input { flex:1; }
+  .verify-box { margin-top:14px; border-radius:8px; padding:14px 16px; font-size:13px; line-height:1.7; display:none; }
+  .verify-ok { background:#F0FFF4; border:1px solid #C6F6D5; color:#276749; }
+  .verify-ok b { color:#2D3748; }
+  .verify-fail { background:#FFF5F5; border:1px solid #FED7D7; color:#C53030; }
+  .verify-tip { color:#718096; font-size:12px; margin-top:10px; }
   .copyright { text-align:center; color:#718096; font-size:12px; padding-top:24px; }
 </style>
 </head>
@@ -140,11 +148,13 @@
         <div>目标人数<b>10 人</b></div>
         <div>已报名<b>14 人</b></div>
         <div>入选<b style="color:#41B983">6 人</b></div>
+        <div>待确认（特邀）<b style="color:#DD6B20">2 人</b></div>
         <div>状态<span class="tag t-green" style="margin-left:6px">报名中</span></div>
       </div>
       <div class="right">
+        <button class="btn btn-blue" onclick="openInvite()">＋ 邀请用户</button>
         <button class="btn btn-warn" onclick="alert('[原型演示] 截止报名并进入筛选')">截止报名</button>
-        <button class="btn btn-green" onclick="alert('[原型演示] 已锁定入选名单并发送通知邮件')">锁定入选名单</button>
+        <button class="btn btn-green" onclick="alert('[原型演示] 已确认名单：系统自动发送入选通知与落选通知')">确认名单</button>
       </div>
     </div>
   </div>
@@ -160,7 +170,7 @@
         <select class="select"><option>全部</option><option>主动报名用户</option><option>特邀用户</option></select>
       </div>
       <div class="f-item"><label>状态</label>
-        <select class="select"><option>全部</option><option>已提交</option><option>入选</option><option>落选</option><option>已确认</option></select>
+        <select class="select"><option>全部</option><option>已提交</option><option>入选</option><option>待确认（特邀）</option><option>已确认（特邀）</option><option>已拒绝（特邀）</option><option>落选</option></select>
       </div>
       <div class="f-btns">
         <button class="btn btn-blue">筛选</button>
@@ -175,7 +185,6 @@
       <input type="checkbox" id="all" onchange="toggleAll(this)">
       <span>已选 <span class="sel" id="selCount">0</span> 人</span>
       <button class="btn btn-green btn-sm" style="padding:5px 14px" onclick="markSel(true)">批量入选</button>
-      <button class="btn btn-sm" style="background:#fff;color:#E53E3E;border:1px solid #E53E3E;padding:5px 14px" onclick="markSel(false)">批量落选</button>
     </div>
     <table>
       <thead>
@@ -184,14 +193,14 @@
         </tr>
       </thead>
       <tbody id="tbody">
-        <tr data-status="已提交">
+        <tr data-status="待确认">
           <td><input type="checkbox" onchange="countSel()"></td>
-          <td><b>sarah.chen</b><br><span style="color:#718096;font-size:12px">sarah.chen@example.com</span></td>
-          <td>Advanced</td>
+          <td><b>luna.zhang</b><br><span style="color:#718096;font-size:12px">luna.zhang@example.com</span></td>
+          <td>Professional Nail Tech</td>
           <td><span class="tag t-blue">特邀</span></td>
-          <td>10.18 14:32</td>
-          <td><span class="tag t-gray">已提交</span></td>
-          <td><div class="ops"><button class="btn btn-link" onclick="openDetail(0)">查看详情</button><button class="btn btn-link" onclick="markOne(0,true)">入选</button></div></td>
+          <td>—</td>
+          <td><span class="tag t-orange">待确认</span></td>
+          <td><div class="ops"><button class="btn btn-link" onclick="openDetail(0)">查看详情</button><button class="btn btn-link" onclick="reInvite(0)">重发邀请</button></div></td>
         </tr>
         <tr data-status="已提交">
           <td><input type="checkbox" onchange="countSel()"></td>
@@ -202,14 +211,14 @@
           <td><span class="tag t-gray">已提交</span></td>
           <td><div class="ops"><button class="btn btn-link" onclick="openDetail(1)">查看详情</button><button class="btn btn-link" onclick="markOne(1,true)">入选</button></div></td>
         </tr>
-        <tr data-status="入选">
+        <tr data-status="已确认">
           <td><input type="checkbox" onchange="countSel()"></td>
           <td><b>maya.wong</b><br><span style="color:#718096;font-size:12px">maya.wong@example.com</span></td>
           <td>DIY Nail Artist</td>
           <td><span class="tag t-blue">特邀</span></td>
           <td>10.17 20:05</td>
-          <td><span class="tag t-green">入选</span></td>
-          <td><div class="ops"><button class="btn btn-link" onclick="openDetail(2)">查看详情</button><button class="btn btn-link" onclick="markOne(2,false)">取消入选</button></div></td>
+          <td><span class="tag t-green">已确认</span></td>
+          <td><div class="ops"><button class="btn btn-link" onclick="openDetail(2)">查看详情</button></div></td>
         </tr>
         <tr data-status="落选">
           <td><input type="checkbox" onchange="countSel()"></td>
@@ -219,6 +228,15 @@
           <td>10.20 11:47</td>
           <td><span class="tag t-red">落选</span></td>
           <td><div class="ops"><button class="btn btn-link" onclick="openDetail(3)">查看详情</button></div></td>
+        </tr>
+        <tr data-status="待确认">
+          <td><input type="checkbox" onchange="countSel()"></td>
+          <td><b>sarah.chen</b><br><span style="color:#718096;font-size:12px">sarah.chen@example.com</span></td>
+          <td>Advanced</td>
+          <td><span class="tag t-blue">特邀</span></td>
+          <td>—</td>
+          <td><span class="tag t-orange">待确认</span></td>
+          <td><div class="ops"><button class="btn btn-link" onclick="openDetail(4)">查看详情</button><button class="btn btn-link" onclick="reInvite(4)">重发邀请</button></div></td>
         </tr>
       </tbody>
     </table>
@@ -249,6 +267,9 @@
         <div><div class="k">当前状态</div><div class="v"><span class="tag t-gray">已提交</span></div></div>
         <div><div class="k">个人信息完整度</div><div class="v">100%</div></div>
         <div><div class="k">NDA 签署</div><div class="v">已签署 10.18 14:30</div></div>
+        <div><div class="k">注册日期</div><div class="v">2023.06.20</div></div>
+        <div><div class="k">历史订单量</div><div class="v">35 单</div></div>
+        <div><div class="k">历史消费金额</div><div class="v">$1,890.20</div></div>
       </div>
       <div class="score">综合评分 <b>4.2</b> / 5 分</div>
       <div class="qa">
@@ -265,9 +286,33 @@
       </div>
     </div>
     <div class="modal-foot">
-      <button class="btn" style="background:#fff;color:#E53E3E;border:1px solid #E53E3E" onclick="alert('[原型演示] 已标记落选')">落选</button>
-      <button class="btn btn-green" onclick="alert('[原型演示] 已标记入选')">入选</button>
-      <button class="btn btn-blue" onclick="alert('[原型演示] 发送确认邮件')">发送入选确认</button>
+      <button class="btn btn-green" onclick="alert('[原型演示] 已标记入选，占用名额')">入选</button>
+      <button class="btn btn-blue" onclick="alert('[原型演示] 已重发特邀邀请邮件')">重发邀请</button>
+    </div>
+  </div>
+</div>
+
+<!-- 邀请用户弹窗（特邀） -->
+<div class="modal-mask" id="inviteModal" onclick="if(event.target===this)closeInvite()">
+  <div class="modal" style="width:520px">
+    <div class="modal-head">邀请用户（特邀） <span class="modal-close" onclick="closeInvite()">×</span></div>
+    <div class="modal-body">
+      <div class="m-note" style="font-size:13px;color:#4A5568;line-height:1.6;margin-bottom:12px">输入用户邮箱发起体验邀请，系统将校验该邮箱是否存在于用户表。</div>
+      <div class="invite-row">
+        <input class="input" id="inviteEmail" placeholder="请输入用户邮箱，例如 luna.zhang@example.com">
+        <button class="btn btn-blue" onclick="verifyEmail()">验证邮箱</button>
+      </div>
+      <div class="verify-box verify-ok" id="verifyOk">
+        ✅ 邮箱验证通过，用户存在于用户表：<br>
+        <b id="vName">—</b> · <span id="vSkill">—</span><br>
+        注册日期 <span id="vReg">—</span> · 历史订单 <span id="vOrders">—</span> 单 · 历史消费 <span id="vSpend">—</span>
+      </div>
+      <div class="verify-box verify-fail" id="verifyFail">❌ 该邮箱不存在于用户表，请确认邮箱无误后重试。</div>
+      <div class="verify-tip">提示：验证通过后，系统将向该用户发送特邀邀请邮件。邮件确认前该用户以「待确认」进入报名列表（不占名额）；用户点击邮件同意后才转为「已确认」并占用名额。</div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn" style="background:#fff;color:#2D3748;border:1px solid #E2E8F0" onclick="closeInvite()">取消</button>
+      <button class="btn btn-green" id="sendInviteBtn" disabled style="opacity:.5" onclick="sendInvite()">发送邀请</button>
     </div>
   </div>
 </div>
@@ -283,17 +328,62 @@
     document.querySelectorAll('#tbody input[type=checkbox]').forEach(c => c.checked = el.checked);
     countSel();
   }
-  function markSel(ok){ alert('[原型演示] 批量' + (ok ? '入选' : '落选') + '所选报名（' + document.getElementById('selCount').textContent + '人）'); }
-  function markOne(idx, ok){
+  function markSel(){ alert('[原型演示] 批量入选所选报名（' + document.getElementById('selCount').textContent + '人）'); }
+  function markOne(idx){
     const rows = document.querySelectorAll('#tbody tr');
     const tag = rows[idx].querySelector('.tag');
-    if(ok){ tag.className = 'tag t-green'; tag.textContent = '入选'; }
-    else { tag.className = 'tag t-red'; tag.textContent = '落选'; }
-    alert('[原型演示] 已标记' + (ok ? '入选' : '落选'));
+    tag.className = 'tag t-green'; tag.textContent = '入选';
+    alert('[原型演示] 已标记入选，占用名额');
   }
-  const detailNames = ['sarah.chen', 'emma.liu', 'maya.wong', 'leo.zhao'];
+  function reInvite(){ alert('[原型演示] 已重发特邀邀请邮件'); }
+  const detailNames = ['luna.zhang', 'emma.liu', 'maya.wong', 'leo.zhao', 'sarah.chen'];
   function openDetail(idx){ document.getElementById('dName').textContent = detailNames[idx]; document.getElementById('modal').style.display = 'flex'; }
   function closeDetail(){ document.getElementById('modal').style.display = 'none'; }
+  // ===== 邀请用户（特邀）=====
+  // 模拟用户表：用于演示邮箱存在性校验
+  const mockUsers = {
+    'luna.zhang@example.com': { name:'luna.zhang', skill:'Professional Nail Tech', reg:'2024.03.12', orders:28, spend:'$1,246.50' },
+    'ava.wang@example.com':   { name:'ava.wang',   skill:'Advanced',              reg:'2024.11.05', orders:9,  spend:'$412.00' },
+    'sarah.chen@example.com': { name:'sarah.chen', skill:'Advanced',              reg:'2023.06.20', orders:35, spend:'$1,890.20' }
+  };
+  let inviteVerified = false;
+  function openInvite(){
+    inviteVerified = false;
+    document.getElementById('verifyOk').style.display = 'none';
+    document.getElementById('verifyFail').style.display = 'none';
+    document.getElementById('sendInviteBtn').disabled = true;
+    document.getElementById('sendInviteBtn').style.opacity = '.5';
+    document.getElementById('inviteModal').style.display = 'flex';
+  }
+  function closeInvite(){ document.getElementById('inviteModal').style.display = 'none'; }
+  // 校验邮箱格式 + 是否存在于用户表
+  function verifyEmail(){
+    const email = document.getElementById('inviteEmail').value.trim();
+    const okBox = document.getElementById('verifyOk');
+    const failBox = document.getElementById('verifyFail');
+    const btn = document.getElementById('sendInviteBtn');
+    okBox.style.display = 'none'; failBox.style.display = 'none';
+    inviteVerified = false; btn.disabled = true; btn.style.opacity = '.5';
+    if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){ failBox.textContent = '❌ 邮箱格式不正确，请检查后重试。'; failBox.style.display = 'block'; return; }
+    const user = mockUsers[email];
+    if(user){
+      document.getElementById('vName').textContent = user.name;
+      document.getElementById('vSkill').textContent = user.skill;
+      document.getElementById('vReg').textContent = user.reg;
+      document.getElementById('vOrders').textContent = user.orders;
+      document.getElementById('vSpend').textContent = user.spend;
+      okBox.style.display = 'block';
+      inviteVerified = true; btn.disabled = false; btn.style.opacity = '1';
+    } else {
+      failBox.textContent = '❌ 该邮箱不存在于用户表，请确认邮箱无误后重试。';
+      failBox.style.display = 'block';
+    }
+  }
+  function sendInvite(){
+    if(!inviteVerified) return;
+    alert('[原型演示] 已向 ' + document.getElementById('inviteEmail').value.trim() + ' 发送特邀邀请邮件');
+    closeInvite();
+  }
 </script>
 </body>
 </html>

@@ -73,6 +73,15 @@
   .m-item label { font-size:13px; color:#2D3748; }
   .m-item .star { color:#E53E3E; }
   .m-item .hint { color:#718096; font-size:12px; }
+  /* 标签组（skill level 多选） */
+  .tag-group { display:flex; flex-wrap:wrap; gap:8px; }
+  .tag { border:1px solid #E2E8F0; border-radius:20px; padding:4px 14px; font-size:13px; color:#2D3748; cursor:pointer; background:#fff; }
+  .tag.on { background:#41B983; border-color:#41B983; color:#fff; }
+  /* 文本域与上传 */
+  .textarea { border:1px solid #E2E8F0; border-radius:6px; padding:10px 12px; font-size:13px; color:#2D3748; outline:none; width:100%; resize:vertical; font-family:inherit; }
+  .textarea:focus { border:2px solid #2B6CB0; }
+  .upload-box { border:1px dashed #CBD5E0; border-radius:6px; padding:16px; text-align:center; color:#718096; font-size:13px; cursor:pointer; background:#FAFBFD; }
+  .upload-box:hover { border-color:#41B983; color:#41B983; }
   .copyright { text-align:center; color:#718096; font-size:12px; padding-top:24px; }
 </style>
 </head>
@@ -129,7 +138,7 @@
         <select class="select"><option>全部</option><option>美甲工具</option><option>美甲配件</option><option>其它</option></select>
       </div>
       <div class="f-item"><label>状态</label>
-        <select class="select"><option>全部</option><option>草稿</option><option>报名中</option><option>筛选中</option><option>名单确定</option><option>进行中</option><option>已结束</option></select>
+        <select class="select"><option>全部</option><option>草稿</option><option>即将开始</option><option>报名中</option><option>筛选中</option><option>名单确定</option><option>进行中</option><option>已结束</option></select>
       </div>
       <div class="f-btns">
         <button class="btn btn-blue">筛选</button>
@@ -242,6 +251,25 @@
           <input class="input" type="datetime-local">
         </div>
         <div class="m-item full">
+          <label><span class="star">*</span> 目标 Skill Level <span class="hint">倾向的用户群，项目推荐用</span></label>
+          <div class="tag-group">
+            <span class="tag on">Beginner</span>
+            <span class="tag on">Advanced</span>
+            <span class="tag">DIY Nail Artist</span>
+            <span class="tag">Licensed Nail Tech</span>
+            <span class="tag">Professional Nail Tech</span>
+            <span class="tag">Salon Owner</span>
+          </div>
+        </div>
+        <div class="m-item full">
+          <label><span class="star">*</span> 活动介绍 <span class="hint">前台子项目页展示</span></label>
+          <textarea class="textarea" rows="3" placeholder="请输入活动介绍、激励说明、报名须知等"></textarea>
+        </div>
+        <div class="m-item full">
+          <label>活动配图 <span class="hint">OSS 上传，支持多图</span></label>
+          <div class="upload-box">+ 点击上传图片（OSS 直传）</div>
+        </div>
+        <div class="m-item full">
           <label><span class="star">*</span> 关联问卷 <span class="hint">复用 OL 调查问卷</span></label>
           <select class="select"><option>请选择报名问卷</option><option>新品体验报名问卷模板（v2）</option></select>
         </div>
@@ -261,6 +289,8 @@
 <script>
   function openModal(){ document.getElementById('modal').style.display = 'flex'; }
   function closeModal(){ document.getElementById('modal').style.display = 'none'; }
+  // 点击标签切换选中（目标 Skill Level 多选）
+  document.querySelectorAll('.tag-group .tag').forEach(t => t.addEventListener('click', () => t.classList.toggle('on')));
 </script>
 </body>
 </html>

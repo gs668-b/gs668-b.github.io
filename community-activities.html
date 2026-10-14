@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Co-creation Projects · MelodySusie</title>
+<title>MeloArt Innovation Lab · MelodySusie</title>
 <style>
   * { margin:0; padding:0; box-sizing:border-box; }
   body { font-family: Inter, -apple-system, 'Segoe UI', sans-serif; background:#fff; color:#2D3748; }
@@ -17,60 +17,82 @@
   .nav-links a:hover, .nav-links .active { color:#41B983; }
   .nav-links .active { font-weight:600; }
   .nav-icons { display:flex; gap:16px; font-size:16px; color:#4A5568; }
-  /* Hero */
-  .hero { position:relative; color:#fff; height:400px; overflow:hidden; }
+  /* Hero（模块1 页面Banner） */
+  .hero { position:relative; color:#fff; height:440px; overflow:hidden; }
   .hero img { width:100%; height:100%; object-fit:cover; }
-  .hero-mask { position:absolute; inset:0; background:linear-gradient(90deg, rgba(20,30,40,.75) 0%, rgba(20,30,40,.4) 55%, rgba(20,30,40,.05) 100%); }
+  .hero-mask { position:absolute; inset:0; background:linear-gradient(90deg, rgba(20,30,40,.78) 0%, rgba(20,30,40,.45) 55%, rgba(20,30,40,.08) 100%); }
   .hero-body { position:absolute; inset:0; max-width:1200px; margin:0 auto; padding:0 24px; display:flex; flex-direction:column; justify-content:center; gap:12px; }
   .hero-tag { display:inline-block; width:fit-content; background:rgba(255,255,255,.18); border:1px solid rgba(255,255,255,.4); border-radius:20px; padding:4px 14px; font-size:12px; }
-  .hero h1 { font-size:38px; font-weight:700; line-height:1.2; max-width:600px; }
-  .hero p { font-size:16px; max-width:540px; color:rgba(255,255,255,.9); }
+  .hero h1 { font-size:42px; font-weight:700; line-height:1.2; max-width:640px; }
+  .hero p { font-size:16px; max-width:560px; color:rgba(255,255,255,.9); line-height:1.6; }
+  .hero .script { font-style:italic; font-family: Georgia, 'Times New Roman', serif; font-size:15px; color:rgba(255,255,255,.85); }
   .btn { display:inline-flex; align-items:center; justify-content:center; border-radius:8px; padding:11px 26px; font-size:15px; font-weight:600; cursor:pointer; border:none; }
   .btn-green { background:#41B983; color:#fff; box-shadow:0 4px 12px rgba(65,185,131,.35); }
   .btn-green:hover { background:#38A169; }
   .btn-outline { background:#fff; color:#2B6CB0; border:1px solid #2B6CB0; }
   .btn-outline:hover { background:#F7FAFC; }
   .btn-sm { padding:7px 16px; font-size:13px; }
+  /* Banner 下方带标志文案条 */
+  .marks { background:#fff; border-bottom:1px solid #EDF2F7; }
+  .marks-inner { max-width:1200px; margin:0 auto; padding:16px 24px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; }
+  .mark { display:flex; align-items:center; gap:8px; font-size:13px; font-weight:600; color:#2D3748; letter-spacing:.3px; }
+  .mark .dot { width:8px; height:8px; border-radius:50%; background:#41B983; }
   /* 内容 */
   .main { max-width:1200px; margin:0 auto; padding:48px 24px; }
   .sec-head { display:flex; align-items:center; justify-content:space-between; margin-bottom:20px; }
   .sec-head h2 { font-size:22px; font-weight:700; }
-  .sec-head .more { font-size:13px; color:#2B6CB0; }
-  .cats { display:flex; gap:10px; margin-bottom:28px; flex-wrap:wrap; }
-  .cat { border:1px solid #E2E8F0; border-radius:20px; padding:7px 18px; font-size:13px; color:#4A5568; cursor:pointer; }
-  .cat.on { background:#41B983; border-color:#41B983; color:#fff; font-weight:600; }
-  /* 活动卡片 */
-  .card-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:24px; }
-  .act-card { border:1px solid #E2E8F0; border-radius:14px; overflow:hidden; background:#fff; box-shadow:0 4px 16px rgba(0,0,0,.05); transition:transform .15s; }
-  .act-card:hover { transform:translateY(-4px); box-shadow:0 12px 28px rgba(0,0,0,.1); }
-  .act-cover { position:relative; height:180px; }
-  .act-cover img { width:100%; height:100%; object-fit:cover; }
-  .act-status { position:absolute; top:12px; left:12px; border-radius:16px; padding:4px 12px; font-size:12px; font-weight:600; color:#fff; }
-  .st-open { background:#41B983; }
-  .st-soon { background:#ED8936; }
-  .st-end { background:#718096; }
-  .act-body { padding:18px; }
-  .act-name { font-size:17px; font-weight:700; margin-bottom:6px; }
-  .act-meta { display:flex; flex-wrap:wrap; gap:12px; font-size:12px; color:#718096; margin-bottom:12px; }
-  .act-desc { font-size:13px; color:#4A5568; line-height:1.6; margin-bottom:16px; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
-  .act-foot { display:flex; align-items:center; justify-content:space-between; border-top:1px solid #EDF2F7; padding-top:14px; }
-  .act-quota { font-size:12px; color:#718096; }
-  .act-quota b { color:#41B983; }
-  /* 流程 */
-  .process { display:grid; grid-template-columns:repeat(5,1fr); gap:12px; margin-top:8px; }
-  .p-step { text-align:center; background:#FAFBFD; border:1px solid #EDF2F7; border-radius:12px; padding:20px 12px; }
-  .p-step .num { width:36px; height:36px; margin:0 auto 10px; border-radius:50%; background:#41B983; color:#fff; display:flex; align-items:center; justify-content:center; font-weight:700; }
-  .p-step .t { font-size:13px; font-weight:600; }
-  .p-step .d { font-size:12px; color:#718096; margin-top:6px; }
-  /* 品牌价值 */
-  .value { background:linear-gradient(135deg,#F0FFF4,#E6FFFA); border:1px solid #C6F6D5; border-radius:16px; padding:32px; margin-top:48px; text-align:center; }
-  .value h3 { font-size:22px; font-weight:700; color:#276749; margin-bottom:10px; }
-  .value p { color:#4A5568; font-size:14px; max-width:640px; margin:0 auto; line-height:1.7; }
-  .value .slogan { font-style:italic; color:#41B983; font-size:15px; margin-top:12px; }
+  /* 品牌哲学（模块2） */
+  .philo { position:relative; border:1px solid #C6F6D5; border-radius:16px; padding:104px 32px 96px; text-align:center; overflow:hidden; background:linear-gradient(135deg,#F0FFF4,#E6FFFA); }
+  .philo .chips { position:absolute; left:0; right:0; display:flex; flex-wrap:wrap; gap:10px 14px; justify-content:center; padding:0 24px; pointer-events:none; }
+  .philo .chips.top { top:20px; }
+  .philo .chips.bottom { bottom:20px; }
+  .chip { border:1px solid rgba(65,185,131,.45); border-radius:20px; padding:4px 16px; color:#68B98D; font-weight:600; white-space:nowrap; background:rgba(255,255,255,.6); }
+  .philo .inner { position:relative; z-index:1; max-width:720px; margin:0 auto; }
+  .philo h3 { font-size:24px; font-weight:700; color:#276749; margin-bottom:16px; }
+  .philo p { color:#2D3748; font-size:15px; line-height:1.8; margin-bottom:12px; }
+  .philo .slogan { font-style:italic; font-family: Georgia, 'Times New Roman', serif; color:#41B983; font-size:17px; margin-top:16px; font-weight:600; }
+  /* 子项目陈列区（模块4） */
+  .prog-banner { position:relative; border-radius:16px; overflow:hidden; height:320px; margin-bottom:32px; box-shadow:0 10px 30px rgba(0,0,0,.1); }
+  .prog-banner img { width:100%; height:100%; object-fit:cover; }
+  .prog-banner .mask { position:absolute; inset:0; background:linear-gradient(90deg, rgba(20,30,40,.72) 0%, rgba(20,30,40,.35) 50%, rgba(20,30,40,.05) 100%); }
+  .prog-banner .txt { position:absolute; inset:0; max-width:1200px; margin:0 auto; padding:0 40px; display:flex; flex-direction:column; justify-content:center; gap:10px; color:#fff; }
+  .prog-banner h2 { font-size:30px; font-weight:700; line-height:1.3; max-width:560px; }
+  .prog-banner p { font-size:14px; max-width:480px; color:rgba(255,255,255,.88); line-height:1.6; }
+  .entries { display:grid; grid-template-columns:1fr 1fr; gap:24px; }
+  .entry { border:1px solid #E2E8F0; border-radius:14px; padding:28px; background:#fff; box-shadow:0 4px 16px rgba(0,0,0,.05); transition:transform .15s; }
+  .entry:hover { transform:translateY(-4px); box-shadow:0 12px 28px rgba(0,0,0,.1); }
+  .entry .ico { width:52px; height:52px; border-radius:12px; background:rgba(65,185,131,.12); display:flex; align-items:center; justify-content:center; font-size:24px; margin-bottom:16px; }
+  .entry .type { font-size:12px; font-weight:600; color:#41B983; letter-spacing:.5px; text-transform:uppercase; margin-bottom:6px; }
+  .entry h3 { font-size:20px; font-weight:700; margin-bottom:8px; }
+  .entry .hook { font-style:italic; font-family: Georgia, 'Times New Roman', serif; color:#41B983; font-size:15px; margin-bottom:8px; }
+  .entry p { font-size:13px; color:#4A5568; line-height:1.7; margin-bottom:18px; }
+  /* 引流横条（模块9/11/12） */
+  .promo { display:grid; grid-template-columns:1fr 1.2fr; gap:0; border-radius:16px; overflow:hidden; border:1px solid #E2E8F0; box-shadow:0 4px 16px rgba(0,0,0,.05); margin-top:48px; }
+  .promo img { width:100%; height:100%; min-height:220px; object-fit:cover; display:block; }
+  .promo .body { padding:36px 32px; display:flex; flex-direction:column; justify-content:center; gap:10px; }
+  .promo .body h3 { font-size:21px; font-weight:700; line-height:1.35; }
+  .promo .body .sub { font-size:14px; color:#4A5568; line-height:1.6; }
+  .promo .body .script { font-style:italic; font-family: Georgia, 'Times New Roman', serif; color:#41B983; font-size:15px; }
+  /* FAQ（模块10） */
+  .faq { margin-top:48px; }
+  .faq details { border:1px solid #E2E8F0; border-radius:12px; padding:0 20px; margin-bottom:12px; background:#FAFBFD; }
+  .faq summary { cursor:pointer; padding:16px 0; font-size:15px; font-weight:600; color:#2D3748; list-style:none; display:flex; justify-content:space-between; align-items:center; }
+  .faq summary::-webkit-details-marker { display:none; }
+  .faq summary::after { content:'+'; font-size:18px; color:#41B983; font-weight:600; }
+  .faq details[open] summary::after { content:'–'; }
+  .faq details p { padding:0 0 16px; font-size:13px; color:#4A5568; line-height:1.7; }
+  /* 品牌Banner（模块12） */
+  .brand { margin-top:48px; border-radius:16px; overflow:hidden; position:relative; color:#fff; text-align:center; height:260px; display:flex; align-items:center; justify-content:center; }
+  .brand img { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; }
+  .brand .mask { position:absolute; inset:0; background:rgba(10,25,20,.6); }
+  .brand .txt { position:relative; z-index:1; }
+  .brand h3 { font-size:28px; font-weight:700; letter-spacing:1px; margin-bottom:8px; }
+  .brand p { font-size:14px; color:rgba(255,255,255,.85); letter-spacing:.5px; }
+  .brand .no1 { display:inline-block; margin-bottom:10px; border:1px solid rgba(255,255,255,.5); border-radius:16px; padding:3px 14px; font-size:12px; font-weight:600; letter-spacing:1px; }
   /* 页脚 */
   .footer { background:#001529; color:rgba(255,255,255,.7); padding:40px 24px; margin-top:48px; }
   .footer-inner { max-width:1200px; margin:0 auto; display:flex; justify-content:space-between; font-size:13px; }
-  @media (max-width:900px){ .card-grid{ grid-template-columns:1fr; } .process{ grid-template-columns:repeat(2,1fr); } }
+  @media (max-width:900px){ .entries{ grid-template-columns:1fr; } .promo{ grid-template-columns:1fr; } .hero h1{ font-size:32px; } .marks-inner{ justify-content:center; } }
 </style>
 </head>
 <body>
@@ -86,100 +108,144 @@
   </div>
 </header>
 
+<!-- 模块1 页面Banner -->
 <section class="hero">
-  <img src="https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=creative%20nail%20art%20products%20collection%20flat%20lay%20on%20soft%20pastel%20background%2C%20beauty%20tools%20gel%20polish%20and%20accessories%2C%20warm%20inviting%20e-commerce%20banner%20photography">
+  <img src="https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=open%20sketchbook%20with%20hand-drawn%20nail%20art%20designs%20and%20beauty%20product%20sketches%2C%20a%20hand%20holding%20a%20nail%20brush%20doing%20manicure%2C%20pencil%20sketch%20of%20electric%20nail%20file%20tool%2C%20creative%20co-creation%20concept%2C%20soft%20warm%20tones%2C%20e-commerce%20hero%20banner%20photography">
   <div class="hero-mask"></div>
   <div class="hero-body">
-    <span class="hero-tag">MelodySusie Innovation Lab</span>
-    <h1>Your Voice Shapes What We Create Next.</h1>
-    <p>Co-create and build new products with us. Try new products, share your ideas — your voice shapes our next generation of products.</p>
+    <span class="hero-tag">MeloArt Innovation Lab</span>
+    <h1>MeloArt Innovation Lab</h1>
+    <p>Co-create with MelodySusie and turn your ideas, experiences, and stories into the next generation of nail solutions.</p>
+    <span class="script">Your ideas. Our craft. Shaping the next perfect solution together.</span>
     <div style="display:flex;gap:12px;margin-top:8px">
-      <a class="btn btn-green" href="#activities">Browse Activities</a>
-      <a class="btn" style="background:transparent;color:#fff;border:1px solid rgba(255,255,255,.6)" href="#process">How It Works</a>
+      <a class="btn btn-green" href="#programs">Join to Co-Create</a>
     </div>
   </div>
 </section>
 
+<!-- Banner 带标志文案条（横向分布） -->
+<div class="marks">
+  <div class="marks-inner">
+    <span class="mark"><span class="dot"></span>Test &amp; Collaborate</span>
+    <span class="mark"><span class="dot"></span>Create &amp; Innovate</span>
+    <span class="mark"><span class="dot"></span>Share Your Nail Story</span>
+    <span class="mark"><span class="dot"></span>Inspire &amp; Be Better</span>
+  </div>
+</div>
+
 <main class="main">
-  <!-- 分类 -->
-  <div class="cats">
-    <span class="cat on">All</span>
-    <span class="cat">New Product Experience</span>
-    <span class="cat">Innovation Idea Sharing</span>
-  </div>
 
-  <!-- 活动列表 -->
-  <div class="sec-head" id="activities">
-    <h2>Ongoing Activities</h2>
-    <span class="more">View All →</span>
-  </div>
-  <div class="card-grid">
+  <!-- 模块2 品牌哲学的阐述 -->
+  <section class="philo">
+    <div class="chips top">
+      <span class="chip">Caring</span>
+      <span class="chip">Warm</span>
+      <span class="chip">Creative</span>
+      <span class="chip">Energetic</span>
+      <span class="chip">Committed to Quality</span>
+    </div>
+    <div class="inner">
+      <h3>Our Philosophy</h3>
+      <p>MelodySusie always believe that nail tools are meant to be made for easier and more convenient manicure experience. To do that, having you be part of our product invention and production process is a must-to-do thing.</p>
+      <p>We aim to listen and grow better. So we sincerely invite you to join the MeloArt Innovation Lab. Every piece of feedback. Every nail design. Every creative product idea shared with us — they become part of how MelodySusie grows, and the future product solution.</p>
+      <div class="slogan">Try It, Nail It</div>
+    </div>
+    <div class="chips bottom">
+      <span class="chip">Try New Things</span>
+      <span class="chip">Confident</span>
+      <span class="chip">Chill</span>
+      <span class="chip">Relax</span>
+      <span class="chip">Fearless</span>
+    </div>
+  </section>
 
-    <div class="act-card">
-      <div class="act-cover">
-        <img src="https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=white%20UV%20nail%20dryer%20lamp%20product%20photography%20soft%20pink%20background%20e-commerce">
-        <span class="act-status st-open">Recruiting</span>
-      </div>
-      <div class="act-body">
-        <div class="act-name">P-Plus29A UV Nail Dryer Tester Recruitment</div>
-        <div class="act-meta"><span>📅 10.15 – 10.31</span><span>🧪 Nail Tool</span><span>🗂 NDA required</span></div>
-        <div class="act-desc">Try the brand-new skin-friendly UV nail dryer first. Submit your feedback to keep the product, and top reviewers earn up to $40 in rewards.</div>
-        <div class="act-foot">
-          <span class="act-quota">Spots <b>10</b></span>
-          <a class="btn btn-green btn-sm" href="https://gs668-b.github.io/community-activity-detail.html">View Details</a>
-        </div>
+  <!-- 模块4 子项目陈列区 -->
+  <section id="programs" style="margin-top:48px">
+    <div class="prog-banner">
+      <img src="https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=left%20side%20fine%20liner%20pen%20sketch%20of%20creative%20nail%20design%20ideas%20on%20sketchbook%20paper%2C%20right%20side%20a%20nail%20care%20product%20floating%20up%20from%20the%20sketch%20paper%20transitioning%20from%20black%20and%20white%20sketch%20to%20colorful%20realistic%20product%2C%20half-way%20transition%2C%20creative%20concept%20art%2C%20wide%20banner">
+      <div class="mask"></div>
+      <div class="txt">
+        <h2>Join, Test, Create, and Shape the Next Nail Solution Together</h2>
+        <p>Pick a program that fits you — test brand-new products before launch, or share the creative idea that could become our next product.</p>
       </div>
     </div>
 
-    <div class="act-card">
-      <div class="act-cover">
-        <img src="https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=nail%20art%20decorative%20accessories%20like%20charms%20and%20stickers%20product%20photo%20pastel%20background">
-        <span class="act-status st-soon">Coming Soon</span>
+    <div class="entries">
+      <div class="entry">
+        <div class="ico">🧪</div>
+        <div class="type">New Product Experience</div>
+        <h3>Want to Try What's Next?</h3>
+        <div class="hook">Test new products before they launch.</div>
+        <p>Get selected to try our upcoming products first. Use it in your daily manicure routine, share your real experience, and earn coupons, points and gift cards.</p>
+        <a class="btn btn-green btn-sm" href="https://gs668-b.github.io/community-activity-detail.html">Join to Test the New Products</a>
       </div>
-      <div class="act-body">
-        <div class="act-name">Nail Art Accessories — New Product Experience (Round 2)</div>
-        <div class="act-meta"><span>📅 Opens 11.05</span><span>🧪 Nail Accessories</span><span>🗂 Not confidential</span></div>
-        <div class="act-desc">Core users get to try new stickers, charms and decorative accessories first. Participation earns a 20% Coupon + 500 Points.</div>
-        <div class="act-foot">
-          <span class="act-quota">Spots <b>20</b></span>
-          <a class="btn btn-outline btn-sm" href="#" onclick="alert('[Prototype] Coming soon, registration not available yet')">Stay Tuned</a>
-        </div>
-      </div>
-    </div>
-
-    <div class="act-card">
-      <div class="act-cover">
-        <img src="https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=nail%20drill%20bit%20manicure%20tool%20product%20photography%20minimal%20background">
-        <span class="act-status st-end">Ended</span>
-      </div>
-      <div class="act-body">
-        <div class="act-name">Nail Drill Bit — New Product Experience (Round 1)</div>
-        <div class="act-meta"><span>📅 08.01 – 08.20</span><span>🧪 Nail Tool</span><span>✅ Ended</span></div>
-        <div class="act-desc">Users of different skill levels shared real feedback on nail drill bits. Recruitment and feedback collection completed.</div>
-        <div class="act-foot">
-          <span class="act-quota">Ended</span>
-          <a class="btn btn-outline btn-sm" href="#" onclick="alert('[Prototype] This activity has ended')">View Recap</a>
-        </div>
+      <div class="entry">
+        <div class="ico">💡</div>
+        <div class="type">Innovation Idea Sharing</div>
+        <h3>Have an Idea?</h3>
+        <div class="hook">Your idea could be our next product.</div>
+        <p>Tell us what's missing from your nail routine. Share your creative product ideas with us — the best ones go straight into our product development pipeline.</p>
+        <a class="btn btn-outline btn-sm" href="#" onclick="alert('[Prototype] Idea submission page coming soon')">Submit Your Creative Product Ideas</a>
       </div>
     </div>
-  </div>
+  </section>
 
-  <!-- 流程 -->
-  <div class="sec-head" id="process" style="margin-top:48px"><h2>How It Works</h2></div>
-  <div class="process">
-    <div class="p-step"><div class="num">1</div><div class="t">Apply</div><div class="d">Pick an activity, complete your info and survey</div></div>
-    <div class="p-step"><div class="num">2</div><div class="t">Selection</div><div class="d">Our team reviews applications and notifies by email</div></div>
-    <div class="p-step"><div class="num">3</div><div class="t">Sample Shipment</div><div class="d">Confirm address, ship the sample and track it</div></div>
-    <div class="p-step"><div class="num">4</div><div class="t">Review</div><div class="d">Try for 7 days, submit survey / photos / videos</div></div>
-    <div class="p-step"><div class="num">5</div><div class="t">Rewards & Recap</div><div class="d">Earn points and rewards, join the next round</div></div>
-  </div>
+  <!-- 模块9 会员积分页引流 -->
+  <section class="promo">
+    <img src="https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=loyalty%20rewards%20club%20concept%2C%20golden%20points%20and%20gift%20card%20with%20nail%20polish%20bottles%2C%20soft%20pastel%20background%2C%20e-commerce%20promotional%20banner%20photography">
+    <div class="body">
+      <h3>MelodySusie Reward Club</h3>
+      <div class="sub">Earn points, unlock exclusive perks. Complete your profile and join co-creation programs to collect rewards on every step.</div>
+      <div><a class="btn btn-green btn-sm" href="#" onclick="alert('[Prototype] Jump to Reward Club page')">Explore Rewards</a></div>
+    </div>
+  </section>
 
-  <!-- 品牌价值 -->
-  <div class="value">
-    <h3>MelodySusie Innovation Lab</h3>
-    <p>A co-creation platform that matches each project to the right users based on product, problem and need. Your participation feeds directly into product development and optimization.</p>
-    <div class="slogan">"Your Voice Shapes What We Create Next."</div>
-  </div>
+  <!-- 模块10 FAQ -->
+  <section class="faq">
+    <div class="sec-head"><h2>FAQ</h2></div>
+    <details>
+      <summary>How can I join a co-creation program?</summary>
+      <p>Pick the program that fits you above and click Join. You will need to log in and complete your profile before submitting your application.</p>
+    </details>
+    <details>
+      <summary>Do I need to pay for the product?</summary>
+      <p>No. Samples are shipped for free. Products are scheduled for return after the trial period, but if your feedback is valuable, you may keep the product for free.</p>
+    </details>
+    <details>
+      <summary>What is the NDA for?</summary>
+      <p>Some new products are confidential before launch. For those projects, you must sign a Non-Disclosure Agreement (NDA) before applying.</p>
+    </details>
+    <details>
+      <summary>How are testers selected?</summary>
+      <p>Our team reviews every application based on your profile, skill level, and survey answers, then notifies the selection results by email.</p>
+    </details>
+    <details>
+      <summary>What rewards will I get?</summary>
+      <p>Rewards vary by program: coupons, points, gift cards up to $100, and the chance to keep the product you tested.</p>
+    </details>
+  </section>
+
+  <!-- 模块11 用户关怀综合页引流Banner -->
+  <section class="promo">
+    <img src="https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=warm%20caring%20community%20of%20nail%20artists%2C%20hands%20with%20fresh%20manicure%20connecting%20together%2C%20soft%20glow%2C%20pastel%20pink%20gradient%20background%2C%20brand%20care%20program%20banner">
+    <div class="body">
+      <h3>MelodySusie Creator Care &amp; Growth Program</h3>
+      <div class="sub">Create. Connect. Grow with MelodySusie.</div>
+      <div class="script">Let's Glow Together</div>
+      <div><a class="btn btn-outline btn-sm" href="#" onclick="alert('[Prototype] Jump to Care & Growth page')">Learn More</a></div>
+    </div>
+  </section>
+
+  <!-- 模块12 品牌Banner -->
+  <section class="brand">
+    <img src="https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=elegant%20premium%20nail%20tools%20collection%20on%20dark%20green%20background%20with%20gold%20accents%2C%20trust%20and%20quality%20concept%2C%20professional%20product%20photography%2C%20wide%20banner">
+    <div class="mask"></div>
+    <div class="txt">
+      <span class="no1">NO.1</span>
+      <h3>YOU CAN ALWAYS TRUST MELODYSUSIE</h3>
+      <p>Beauty and Safety Innovatively Balanced</p>
+    </div>
+  </section>
 </main>
 
 <footer class="footer">
@@ -189,11 +255,5 @@
   </div>
 </footer>
 
-<script>
-  document.querySelectorAll('.cat').forEach(c => c.addEventListener('click', () => {
-    document.querySelectorAll('.cat').forEach(x => x.classList.remove('on'));
-    c.classList.add('on');
-  }));
-</script>
 </body>
 </html>

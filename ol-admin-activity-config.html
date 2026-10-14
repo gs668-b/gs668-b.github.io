@@ -52,12 +52,6 @@
   .uploaded { display:none; align-items:center; gap:8px; border:1px solid #E2E8F0; border-radius:6px; padding:10px 12px; margin-top:8px; font-size:13px; }
   .uploaded .fname { color:#2D3748; }
   .uploaded .ops { margin-left:auto; color:#2B6CB0; cursor:pointer; }
-  .switch-row { display:flex; align-items:center; gap:8px; }
-  .switch { width:40px; height:22px; border-radius:11px; background:#CBD5E0; position:relative; cursor:pointer; transition:background .2s; }
-  .switch.on { background:#41B983; }
-  .switch::after { content:''; position:absolute; width:18px; height:18px; border-radius:50%; background:#fff; top:2px; left:2px; transition:left .2s; }
-  .switch.on::after { left:20px; }
-  .switch-tip { font-size:13px; color:#718096; }
   .btn { display:inline-flex; align-items:center; justify-content:center; border-radius:6px; padding:10px 20px; font-size:14px; font-weight:500; cursor:pointer; border:none; text-decoration:none; }
   .btn-primary { background:#2B6CB0; color:#fff; }
   .btn-primary:hover { background:#2A5C94; }
@@ -153,8 +147,8 @@
         <label class="label"><span class="star">*</span>体验用户人数</label>
         <input class="input" type="number" value="10" placeholder="目标体验用户数">
       </div>
-      <div class="form-item">
-        <label class="label"><span class="star">*</span>目标 Skill Level</label>
+      <div class="form-item full">
+        <label class="label"><span class="star">*</span>目标 Skill Level <span class="hint">倾向的用户群，项目推荐用</span></label>
         <div class="tag-group">
           <span class="tag on">Beginner</span>
           <span class="tag on">Advanced</span>
@@ -162,13 +156,6 @@
           <span class="tag">Licensed Nail Tech</span>
           <span class="tag">Professional Nail Tech</span>
           <span class="tag">Salon Owner</span>
-        </div>
-      </div>
-      <div class="form-item full">
-        <label class="label"><span class="star">*</span>是否开放公开报名 <span class="hint">关闭则仅定向邀请</span></label>
-        <div class="switch-row">
-          <div class="switch on" onclick="this.classList.toggle('on')"></div>
-          <span class="switch-tip">开放用户公开报名</span>
         </div>
       </div>
     </div>
